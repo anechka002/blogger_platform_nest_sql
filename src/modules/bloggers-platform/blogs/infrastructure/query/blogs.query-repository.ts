@@ -17,8 +17,10 @@ export class BlogsQueryRepository {
     const filter: QueryFilter<Blog> = { deletedAt: null };
 
     if (query.searchNameTerm) {
-      filter.$or = filter.$or || [];
-      filter.$or.push({ $regex: query.searchNameTerm, $options: 'i' });
+      filter.name = {
+        $regex: query.searchNameTerm,
+        $options: 'i',
+      };
     }
 
     const blogs = await this.BlogModel.find(filter)
