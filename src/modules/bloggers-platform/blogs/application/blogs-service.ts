@@ -2,10 +2,16 @@ import { Injectable } from '@nestjs/common';
 import { CreateBlogDto, UpdateBlogDto } from '../dto/create-blog.dto';
 import { Blog } from '../domain/blog.entity';
 import { BlogsRepository } from '../infrastructure/blogs.repository';
+import { CreatePostForBlogDto } from '../dto/create-post-for-blog.dto';
+import { PostsRepository } from '../../posts/infrastructure/posts.repository';
+import { Post } from '../../posts/domain/post.entity';
 
 @Injectable()
 export class BlogsService {
-  constructor(private blogsRepository: BlogsRepository) {
+  constructor(
+    private blogsRepository: BlogsRepository,
+    private postsRepository: PostsRepository,
+  ) {
     console.log('blogsService');
   }
   async createBlog(dto: CreateBlogDto): Promise<string> {
@@ -26,5 +32,24 @@ export class BlogsService {
     const blog = await this.blogsRepository.findOrNotFoundFail(id);
     blog.makeDeleted();
     await this.blogsRepository.save(blog);
+  }
+
+  async createPostForBlog(
+    blogId: string,
+    body: CreatePostForBlogDto,
+  ): Promise<string> {
+    const blog = await this.blogsRepository.findOrNotFoundFail(blogId);
+
+    const newPost = Post.createInstancePost({
+      title: body.title,
+      shortDescription: body.shortDescription,
+      content: body.content,
+      blogId,
+      blogName: blog.name,
+    });
+
+    const savedPost = await this.postsRepository.create(newPost);
+    await this.postsRepository.save(savedPost);
+    return savedPost._id.toString();
   }
 }

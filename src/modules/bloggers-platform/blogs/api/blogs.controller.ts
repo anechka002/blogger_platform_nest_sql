@@ -17,12 +17,17 @@ import { BlogsQueryRepository } from '../infrastructure/query/blogs.query-reposi
 import { PaginationViewDto } from '../../../../core/dto/base.paginated.view-dto';
 import { GetBlogsQueryParams } from './input-dto/get-blogs-query-params.input-dto';
 import { UpdateBlogInputDto } from './input-dto/update-blog.input-dto';
+import { PostsQueryRepository } from '../../posts/infrastructure/query/posts.query-repository';
+import { GetPostsQueryParams } from '../../posts/api/input-dto/get-posts-query-params.input-dto';
+import { CreatePostForBlogDto } from '../dto/create-post-for-blog.dto';
+import { ExtendedPostViewDto } from '../../posts/api/view0dto/extended-post.view-dto';
 
 @Controller('blogs')
 export class BlogsController {
   constructor(
     private blogsService: BlogsService,
     private blogsQueryRepository: BlogsQueryRepository,
+    private postsQueryRepository: PostsQueryRepository,
   ) {
     console.log('BlogsController');
   }
@@ -61,5 +66,23 @@ export class BlogsController {
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteBlog(@Param('id') id: string): Promise<void> {
     return this.blogsService.deleteBlog(id);
+  }
+
+  @Get(':blogId/posts')
+  async getPostsForBlog(
+    @Param('blogId') blogId: string,
+    @Query() query: GetPostsQueryParams,
+  ): Promise<PaginationViewDto<ExtendedPostViewDto>> {
+    await this.blogsQueryRepository.getByIdOrNotFoundFail(blogId);
+    return this.postsQueryRepository.findPostsByBlogId(blogId, query);
+  }
+
+  @Post(':blogId/posts')
+  async createPostForBlog(
+    @Param('blogId') blogId: string,
+    @Body() body: CreatePostForBlogDto,
+  ): Promise<ExtendedPostViewDto> {
+    const postId = await this.blogsService.createPostForBlog(blogId, body);
+    return this.postsQueryRepository.getByIdOrNotFoundFail(postId);
   }
 }

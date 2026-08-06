@@ -15,6 +15,12 @@ export class Post {
   blogName: string;
   @Prop({ type: String, required: true })
   blogId: string;
+
+  @Prop({ type: Number, required: true, default: 0 })
+  likesCount: number;
+  @Prop({ type: Number, required: true, default: 0 })
+  dislikesCount: number;
+
   @Prop({ type: Date, required: true })
   createdAt: Date;
   @Prop({ type: Date, default: null })

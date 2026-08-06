@@ -11,7 +11,7 @@ export class Blog {
   description: string;
   @Prop({ type: String, required: true, minlength: 1, maxlength: 100 })
   websiteUrl: string;
-  @Prop({ type: Boolean, required: true })
+  @Prop({ type: Boolean, required: true, default: false })
   isMembership: boolean;
   @Prop({ type: Date, required: true })
   createdAt: Date;
@@ -25,7 +25,7 @@ export class Blog {
     blog.websiteUrl = dto.websiteUrl;
     blog.createdAt = new Date();
     blog.deletedAt = null;
-    blog.isMembership = true;
+    blog.isMembership = false;
 
     return blog;
   }
