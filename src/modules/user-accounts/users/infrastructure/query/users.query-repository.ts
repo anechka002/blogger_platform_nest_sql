@@ -5,7 +5,7 @@ import type { UserModelType } from '../../domain/user.entity';
 import { UserViewDto } from '../../api/view-dto/user.view-dto';
 import type { QueryFilter } from 'mongoose';
 import { GetUsersQueryParams } from '../../api/input-dto/get-users-query-params.input-dto';
-import { PaginationViewDto } from '../../../../core/dto/base.paginated.view-dto';
+import { PaginationViewDto } from '../../../../../core/dto/base.paginated.view-dto';
 
 @Injectable()
 export class UsersQueryRepository {
