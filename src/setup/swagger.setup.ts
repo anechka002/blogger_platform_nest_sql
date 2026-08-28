@@ -10,7 +10,7 @@ export function swaggerSetup(app: INestApplication) {
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup(GLOBAL_PREFIX, app, document, {
+  SwaggerModule.setup(`${GLOBAL_PREFIX}/swagger`, app, document, {
     customSiteTitle: 'Blogger Swagger',
   });
 }
