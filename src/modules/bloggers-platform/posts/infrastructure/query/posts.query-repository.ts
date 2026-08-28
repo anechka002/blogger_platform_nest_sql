@@ -5,10 +5,10 @@ import type { PostModelType } from '../../domain/post.entity';
 import { GetPostsQueryParams } from '../../api/input-dto/get-posts-query-params.input-dto';
 import { PaginationViewDto } from '../../../../../core/dto/base.paginated.view-dto';
 import { QueryFilter } from 'mongoose';
-import { LikeStatus } from '../../../comments/api/view-dto/comment.view-dto';
-import { ExtendedPostViewDto } from '../../api/view0dto/extended-post.view-dto';
+import { ExtendedPostViewDto } from '../../api/view-dto/extended-post.view-dto';
 import { PostLike } from '../../domain/post-like.entity';
 import type { PostLikeModelType } from '../../domain/post-like.entity';
+import { LikeStatus } from '../../../../../core/enum/like-status';
 
 @Injectable()
 export class PostsQueryRepository {

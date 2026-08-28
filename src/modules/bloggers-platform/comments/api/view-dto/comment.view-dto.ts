@@ -1,10 +1,40 @@
 import { CommentDocument } from '../../domain/comment.entity';
+import { ApiProperty } from '@nestjs/swagger';
+import { LikeStatus } from '../../../../../core/enum/like-status';
+
+class Info {
+  @ApiProperty()
+  userId: string;
+
+  @ApiProperty()
+  userLogin: string;
+}
+
+class LikeInfo {
+  @ApiProperty()
+  likesCount: number;
+
+  @ApiProperty()
+  dislikesCount: number;
+
+  @ApiProperty({ enum: LikeStatus })
+  myStatus: LikeStatus;
+}
 
 export class CommentViewDto {
+  @ApiProperty()
   id: string;
+
+  @ApiProperty()
   content: string;
+
+  @ApiProperty({ type: Info })
   commentatorInfo: Info;
+
+  @ApiProperty()
   createdAt: Date;
+
+  @ApiProperty({ type: LikeInfo })
   likesInfo: LikeInfo;
 
   static mapToView(
@@ -26,21 +56,4 @@ export class CommentViewDto {
 
     return dto;
   }
-}
-
-type Info = {
-  userId: string;
-  userLogin: string;
-};
-
-export type LikeInfo = {
-  likesCount: number;
-  dislikesCount: number;
-  myStatus: LikeStatus;
-};
-
-export enum LikeStatus {
-  None = 'None',
-  Like = 'Like',
-  Dislike = 'Dislike',
 }

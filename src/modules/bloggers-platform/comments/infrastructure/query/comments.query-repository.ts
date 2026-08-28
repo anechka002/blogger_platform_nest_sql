@@ -1,15 +1,13 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import {
-  CommentViewDto,
-  LikeStatus,
-} from '../../api/view-dto/comment.view-dto';
+import { CommentViewDto } from '../../api/view-dto/comment.view-dto';
 import type { CommentModelType } from '../../domain/comment.entity';
 import { Comment } from '../../domain/comment.entity';
 import { GetPostsQueryParams } from '../../../posts/api/input-dto/get-posts-query-params.input-dto';
 import { PaginationViewDto } from '../../../../../core/dto/base.paginated.view-dto';
 import { QueryFilter } from 'mongoose';
 import { Post } from '../../../posts/domain/post.entity';
+import { LikeStatus } from '../../../../../core/enum/like-status';
 
 @Injectable()
 export class CommentsQueryRepository {
