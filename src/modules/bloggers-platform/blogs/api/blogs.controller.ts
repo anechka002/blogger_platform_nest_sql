@@ -19,7 +19,7 @@ import { GetBlogsQueryParams } from './input-dto/get-blogs-query-params.input-dt
 import { UpdateBlogInputDto } from './input-dto/update-blog.input-dto';
 import { PostsQueryRepository } from '../../posts/infrastructure/query/posts.query-repository';
 import { GetPostsQueryParams } from '../../posts/api/input-dto/get-posts-query-params.input-dto';
-import { ExtendedPostViewDto } from '../../posts/api/view0dto/extended-post.view-dto';
+import { ExtendedPostViewDto } from '../../posts/api/view-dto/extended-post.view-dto';
 import { CreatePostForBlogInputDto } from './input-dto/create-post-for-blog.input-dto';
 import {
   ApiBody,
@@ -31,6 +31,7 @@ import {
   ApiParam,
 } from '@nestjs/swagger';
 import { BlogsPaginationViewDto } from './view-dto/blogs-pagination.view-dto';
+import { PostsPaginationViewDto } from '../../posts/api/view-dto/posts-pagination.view-dto';
 
 @Controller('blogs')
 export class BlogsController {
@@ -140,7 +141,7 @@ export class BlogsController {
   })
   @ApiOkResponse({
     description: 'Success',
-    type: BlogsPaginationViewDto, // TODO должен возвращать extendedLikesInfo
+    type: PostsPaginationViewDto,
   })
   @ApiNotFoundResponse({
     description: 'If specified blog is not exists',
@@ -163,7 +164,7 @@ export class BlogsController {
   })
   @ApiCreatedResponse({
     description: 'Returns the newly created post',
-    type: BlogViewDto, // TODO должен возвращать extendedLikesInfo
+    type: ExtendedPostViewDto,
   })
   @ApiNotFoundResponse({
     description: "If specified blog doesn't exists",
