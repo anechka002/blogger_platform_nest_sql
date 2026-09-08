@@ -34,7 +34,7 @@ export class BaseQueryParams {
   @IsEnum(SortDirectionEnum)
   sortDirection: SortDirectionEnum = SortDirectionEnum.Desc;
 
-  calculateSkip = () => {
+  calculateSkip(): number {
     return (this.pageNumber - 1) * this.pageSize;
-  };
+  }
 }
