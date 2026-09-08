@@ -7,6 +7,22 @@ export function swaggerSetup(app: INestApplication) {
     .setTitle('BLOGGER API')
     .addBearerAuth()
     .setVersion('1.0')
+    .addBasicAuth(
+      {
+        type: 'http',
+        scheme: 'basic',
+      },
+      'basicAuth',
+    )
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        description: 'Enter JWT Bearer token only',
+      },
+      'bearer',
+    )
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
