@@ -18,8 +18,12 @@ export class Blog {
   @Prop({ type: Date, default: null })
   deletedAt: Date | null;
 
-  static createInstanceBlog(dto: CreateBlogDomainDto): Blog {
+  static createInstanceBlog(
+    this: BlogModelType,
+    dto: CreateBlogDomainDto,
+  ): BlogDocument {
     const blog = new this();
+
     blog.name = dto.name;
     blog.description = dto.description;
     blog.websiteUrl = dto.websiteUrl;

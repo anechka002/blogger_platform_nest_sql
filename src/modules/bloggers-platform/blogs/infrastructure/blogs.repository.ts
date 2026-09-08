@@ -1,7 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Blog, BlogDocument } from '../domain/blog.entity';
 import type { BlogModelType } from '../domain/blog.entity';
+import { Blog, BlogDocument } from '../domain/blog.entity';
+import { CreateBlogDomainDto } from '../domain/dto/create-blog.domain.dto';
 
 @Injectable()
 export class BlogsRepository {
@@ -19,10 +20,12 @@ export class BlogsRepository {
     return blog;
   }
 
-  async create(blog: Blog): Promise<BlogDocument> {
-    const blogDocument = new this.BlogModel(blog);
-    await blogDocument.save();
-    return blogDocument;
+  async create(dto: CreateBlogDomainDto): Promise<BlogDocument> {
+    const blog = this.BlogModel.createInstanceBlog(dto);
+
+    await blog.save();
+
+    return blog;
   }
 
   async save(blog: BlogDocument) {

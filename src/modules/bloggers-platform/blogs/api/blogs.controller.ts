@@ -78,7 +78,6 @@ export class BlogsController {
     return this.blogsQueryRepository.findAllBlogs(query);
   }
 
-  @Post()
   @ApiOperation({
     summary: 'Create new blog',
   })
@@ -90,6 +89,7 @@ export class BlogsController {
     description: 'Returns the newly created blog',
     type: BlogViewDto,
   })
+  @Post()
   async createBlog(@Body() body: CreateBlogInputDto): Promise<BlogViewDto> {
     const blogId = await this.blogsService.createBlog(body);
     return this.blogsQueryRepository.getByIdOrNotFoundFail(blogId);

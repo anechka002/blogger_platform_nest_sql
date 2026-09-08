@@ -15,9 +15,11 @@ export class BlogsService {
     console.log('blogsService');
   }
   async createBlog(dto: CreateBlogDto): Promise<string> {
-    const { name, websiteUrl, description } = dto;
-    const blog = Blog.createInstanceBlog({ name, websiteUrl, description });
-    const savedBlog = await this.blogsRepository.create(blog);
+    const savedBlog = await this.blogsRepository.create({
+      name: dto.name,
+      websiteUrl: dto.websiteUrl,
+      description: dto.description,
+    });
     return savedBlog._id.toString();
   }
 
