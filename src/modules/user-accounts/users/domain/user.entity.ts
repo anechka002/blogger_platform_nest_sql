@@ -12,17 +12,32 @@ import { HydratedDocument, Model } from 'mongoose';
 import { CreateUserDomainDto } from './dto/create-user.domain.dto';
 import { randomUUID } from 'node:crypto';
 
+export const loginConstraints = {
+  minLength: 3,
+  maxLength: 10,
+};
+
+export const emailConstraints = {
+  minLength: 5,
+  maxLength: 200,
+  match: /^[\w.+-]+@([\w-]+\.)+[\w-]{2,}$/,
+};
+
+export const passwordConstraints = {
+  minLength: 6,
+  maxLength: 20,
+};
+
 @Schema({ timestamps: true })
 export class User {
-  @Prop({ required: true, type: String, minlength: 1, maxlength: 100 })
+  @Prop({ required: true, type: String, ...loginConstraints })
   login: string;
 
   @Prop({
     type: String,
     unique: true,
     required: true,
-    minlength: 5,
-    maxlength: 200,
+    ...emailConstraints,
   })
   email: string;
 
@@ -69,13 +84,16 @@ export class User {
     user.login = dto.login;
     user.email = dto.email;
     user.passwordHash = dto.passwordHash;
+
     user.createdAt = new Date();
     user.deletedAt = null;
+
     user.emailConfirmation = {
       confirmationCode: '',
       expirationDate: new Date(),
       isConfirmed: true,
     };
+
     user.passwordRecovery = {
       recoveryCode: null,
       expirationDate: null,
@@ -93,7 +111,10 @@ export class User {
   }
 
   // Пользователь регистрируется самостоятельно через /auth/registration
-  static createForRegistration(dto: CreateUserDomainDto): UserDocument {
+  static createForRegistration(
+    this: UserModelType,
+    dto: CreateUserDomainDto,
+  ): UserDocument {
     this.validateCreateParams(dto);
 
     const user = new this();
@@ -101,17 +122,22 @@ export class User {
     user.login = dto.login;
     user.email = dto.email;
     user.passwordHash = dto.passwordHash;
+
+    user.createdAt = new Date();
+    user.deletedAt = null;
+
     user.emailConfirmation = {
       confirmationCode: randomUUID(),
       expirationDate: addHours(new Date(), 1),
       isConfirmed: false,
     };
+
     user.passwordRecovery = {
       recoveryCode: null,
       expirationDate: null,
     };
 
-    return user as UserDocument;
+    return user;
   }
 
   confirmEmail(): void {

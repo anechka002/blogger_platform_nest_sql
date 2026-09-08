@@ -9,7 +9,7 @@ export class BcryptService {
     return bcrypt.hash(password, salt);
   }
 
-  async checkPassword(password: string, hash: string) {
+  async checkPassword({ password, hash }: { password: string; hash: string }) {
     return await bcrypt.compare(password, hash);
   }
 }
