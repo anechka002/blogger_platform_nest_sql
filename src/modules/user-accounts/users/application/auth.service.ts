@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { UserContextDto } from '../dto/user-context.dto';
+import { UserContextDto } from '../guards/dto/user-context.dto';
 import { UsersRepository } from '../infrastructure/users.repository';
 import { BcryptService } from './bcrypt.service';
 import { JwtService } from '@nestjs/jwt';
@@ -35,7 +35,15 @@ export class AuthService {
   }
 
   async login(userId: string) {
-    const accessToken = await this.jwtService.signAsync({ id: userId });
+    const accessToken = await this.jwtService.signAsync(
+      { id: userId },
+      {
+        // каким секретом подписывать JWT и потом проверять подпись;
+        secret: 'access-token-secret', // TODO
+        // сколько времени токен будет жить.
+        expiresIn: '20m',
+      },
+    );
     return { accessToken };
   }
 }

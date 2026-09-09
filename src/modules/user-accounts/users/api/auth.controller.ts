@@ -18,8 +18,8 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { MeViewDto } from './view-dto/me.view.dto';
-import { ExtractUserFromRequest } from '../decorators/param/extract-user-from-request.decorator';
-import { UserContextDto } from '../dto/user-context.dto';
+import { ExtractUserFromRequest } from '../guards/decorators/param/extract-user-from-request.decorator';
+import { UserContextDto } from '../guards/dto/user-context.dto';
 import { AuthQueryRepository } from '../infrastructure/query/auth.query-repository';
 import { JwtAuthGuard } from '../guards/bearer/jwt-auth.guard';
 import { AuthService } from '../application/auth.service';
@@ -179,7 +179,7 @@ export class AuthController {
   })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @UseGuards(JwtAuthGuard)
-  @Get()
+  @Get('me')
   async me(@ExtractUserFromRequest() user: UserContextDto): Promise<MeViewDto> {
     return this.authQueryRepository.me(user.id);
   }

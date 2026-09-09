@@ -1,8 +1,24 @@
 import { Injectable } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
+import { DomainExceptionCode } from '../../../../../core/exceptions/domain-exception-codes';
+import { DomainException } from '../../../../../core/exceptions/domain-exceptions';
 
 @Injectable()
-export class JwtAuthGuard extends AuthGuard('jwt') {}
+export class JwtAuthGuard extends AuthGuard('jwt') {
+  // Переопределяем стандартный handleRequest из AuthGuard.
+  // Вызывается автоматически после проверки JWT.
+  // Нужен, чтобы вместо стандартной ошибки выбросить свою DomainException.
+  handleRequest(err, user) {
+    if (err || !user) {
+      // здесь можно выбросить любую свою ошибку
+      throw new DomainException({
+        code: DomainExceptionCode.Unauthorized,
+        message: 'Unauthorized',
+      });
+    }
+    return user;
+  }
+}
 
 // Request с JWT
 // ↓

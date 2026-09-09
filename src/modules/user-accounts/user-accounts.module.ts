@@ -16,12 +16,7 @@ import { JwtModule } from '@nestjs/jwt';
 
 @Module({
   imports: [
-    JwtModule.register({
-      secret: 'access-token-secret',
-      signOptions: {
-        expiresIn: '20m',
-      },
-    }),
+    JwtModule.register({}),
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
     NotificationsModule,
   ],
