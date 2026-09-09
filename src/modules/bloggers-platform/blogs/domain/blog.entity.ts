@@ -18,10 +18,7 @@ export class Blog {
   @Prop({ type: Date, default: null })
   deletedAt: Date | null;
 
-  static createInstanceBlog(
-    this: BlogModelType,
-    dto: CreateBlogDomainDto,
-  ): BlogDocument {
+  static createInstanceBlog(dto: CreateBlogDomainDto): Blog {
     const blog = new this();
 
     blog.name = dto.name;
@@ -40,7 +37,7 @@ export class Blog {
     this.websiteUrl = dto.websiteUrl;
   }
 
-  makeDeleted() {
+  makeDeleted(): void {
     if (this.deletedAt != null) {
       throw new Error('Blog is already deleted');
     }
@@ -54,4 +51,4 @@ BlogSchema.loadClass(Blog);
 
 export type BlogDocument = HydratedDocument<Blog>;
 
-export type BlogModelType = Model<BlogDocument> & typeof Blog;
+export type BlogModelType = Model<Blog>;

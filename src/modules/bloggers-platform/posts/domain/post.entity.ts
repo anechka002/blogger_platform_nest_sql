@@ -61,4 +61,4 @@ PostSchema.loadClass(Post);
 
 export type PostDocument = HydratedDocument<Post>;
 
-export type PostModelType = Model<PostDocument> & typeof Post;
+export type PostModelType = Model<Post>;
