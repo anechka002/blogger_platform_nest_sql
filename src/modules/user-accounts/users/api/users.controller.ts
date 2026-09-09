@@ -46,8 +46,6 @@ export class UsersController {
     console.log('UsersController created');
   }
 
-  // @Public()
-  @Get()
   @ApiOperation({
     summary: 'Return all users',
   })
@@ -56,13 +54,14 @@ export class UsersController {
     type: UsersPaginationViewDto,
   })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  // @Public()
+  @Get()
   async getAll(
     @Query() query: GetUsersQueryParams,
   ): Promise<PaginationViewDto<UserViewDto>> {
     return this.usersQueryRepository.findAllUsers(query);
   }
 
-  @Get(':id')
   @ApiOperation({
     summary: 'Return user by id',
   })
@@ -78,12 +77,12 @@ export class UsersController {
   @ApiNotFoundResponse({
     description: 'Not Found',
   })
+  @Get(':id')
   async getById(@Param('id') id: string): Promise<UserViewDto> {
     // NestJS будет дожидаться, когда промис зарезолвится и затем NestJS вернёт результат клиенту
     return this.usersQueryRepository.getByIdOrNotFoundFail(id);
   }
 
-  @Post()
   @ApiOperation({
     summary: 'Add new user to the system',
   })
@@ -104,6 +103,7 @@ export class UsersController {
     type: APIErrorResult,
   })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @Post()
   async createUser(
     @Body(new ValidationPipe()) body: CreateUserInputDto,
   ): Promise<UserViewDto> {
@@ -111,8 +111,6 @@ export class UsersController {
     return this.usersQueryRepository.getByIdOrNotFoundFail(userId);
   }
 
-  @Delete(':id')
-  @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({
     summary: 'Delete user specified by id',
   })
@@ -130,6 +128,8 @@ export class UsersController {
   @ApiUnauthorizedResponse({
     description: 'Unauthorized',
   })
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Delete(':id')
   deleteUser(@Param() id: IdInputDto): Promise<void> {
     return this.usersService.deleteUser(id.id);
   }

@@ -43,7 +43,6 @@ export class BlogsController {
     console.log('BlogsController');
   }
 
-  @Get(':id')
   @ApiOperation({
     summary: 'Return blog by id',
   })
@@ -59,12 +58,12 @@ export class BlogsController {
   @ApiNotFoundResponse({
     description: 'Not Found',
   })
+  @Get(':id')
   async getById(@Param('id') id: string): Promise<BlogViewDto> {
     // NestJS будет дожидаться, когда промис зарезолвится и затем NestJS вернёт результат клиенту
     return this.blogsQueryRepository.getByIdOrNotFoundFail(id);
   }
 
-  @Get()
   @ApiOperation({
     summary: 'Return blogs with paging',
   })
@@ -72,6 +71,7 @@ export class BlogsController {
     description: 'Success',
     type: BlogsPaginationViewDto,
   })
+  @Get()
   async getAll(
     @Query() query: GetBlogsQueryParams,
   ): Promise<PaginationViewDto<BlogViewDto>> {
@@ -95,8 +95,6 @@ export class BlogsController {
     return this.blogsQueryRepository.getByIdOrNotFoundFail(blogId);
   }
 
-  @Put(':id')
-  @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({
     summary: 'Update existing Blog by id with InputModel',
   })
@@ -106,6 +104,8 @@ export class BlogsController {
   @ApiNotFoundResponse({
     description: 'No Content',
   })
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Put(':id')
   async updateBlog(
     @Param('id') id: string,
     @Body() body: UpdateBlogInputDto,
@@ -115,8 +115,6 @@ export class BlogsController {
     return this.blogsQueryRepository.getByIdOrNotFoundFail(blogId);
   }
 
-  @Delete(':id')
-  @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({
     summary: 'Delete blog specified by id',
   })
@@ -131,11 +129,12 @@ export class BlogsController {
   @ApiNotFoundResponse({
     description: 'No Content',
   })
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Delete(':id')
   async deleteBlog(@Param('id') id: string): Promise<void> {
     return this.blogsService.deleteBlog(id);
   }
 
-  @Get(':blogId/posts')
   @ApiOperation({
     summary: 'Returns all posts for specific blog',
   })
@@ -146,6 +145,7 @@ export class BlogsController {
   @ApiNotFoundResponse({
     description: 'If specified blog is not exists',
   })
+  @Get(':blogId/posts')
   async getPostsForBlog(
     @Param('blogId') blogId: string,
     @Query() query: GetPostsQueryParams,
@@ -154,7 +154,6 @@ export class BlogsController {
     return this.postsQueryRepository.findPostsByBlogId(blogId, query);
   }
 
-  @Post(':blogId/posts')
   @ApiOperation({
     summary: 'Create new post for specific blog',
   })
@@ -169,6 +168,7 @@ export class BlogsController {
   @ApiNotFoundResponse({
     description: "If specified blog doesn't exists",
   })
+  @Post(':blogId/posts')
   async createPostForBlog(
     @Param('blogId') blogId: string,
     @Body() body: CreatePostForBlogInputDto,

@@ -41,7 +41,6 @@ export class PostsController {
     console.log('BlogsController');
   }
 
-  @Get(':id')
   @ApiOperation({
     summary: 'Return post by id',
   })
@@ -57,12 +56,12 @@ export class PostsController {
   @ApiNotFoundResponse({
     description: 'Not Found',
   })
+  @Get(':id')
   async getById(@Param('id') id: string): Promise<ExtendedPostViewDto> {
     // NestJS будет дожидаться, когда промис зарезолвится и затем NestJS вернёт результат клиенту
     return this.postsQueryRepository.getByIdOrNotFoundFail(id);
   }
 
-  @Get()
   @ApiOperation({
     summary: 'Return all posts',
   })
@@ -70,13 +69,13 @@ export class PostsController {
     description: 'Success',
     type: PostsPaginationViewDto,
   })
+  @Get()
   async getAll(
     @Query() query: GetPostsQueryParams,
   ): Promise<PaginationViewDto<ExtendedPostViewDto>> {
     return this.postsQueryRepository.findAllPosts(query);
   }
 
-  @Post()
   @ApiOperation({
     summary: 'Create new post',
   })
@@ -88,6 +87,7 @@ export class PostsController {
     description: 'Returns the newly created post',
     type: ExtendedPostViewDto,
   })
+  @Post()
   async createPost(
     @Body() body: CreatePostInputDto,
   ): Promise<ExtendedPostViewDto> {
@@ -95,8 +95,6 @@ export class PostsController {
     return this.postsQueryRepository.getByIdOrNotFoundFail(postId);
   }
 
-  @Put(':id')
-  @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({
     summary: 'Update existing post by id with InputModel',
   })
@@ -115,6 +113,8 @@ export class PostsController {
   @ApiNotFoundResponse({
     description: 'No Content',
   })
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Put(':id')
   async updatePost(
     @Param('id') id: string,
     @Body() body: UpdatePostInputDto,
@@ -124,8 +124,6 @@ export class PostsController {
     return this.postsQueryRepository.getByIdOrNotFoundFail(postId);
   }
 
-  @Delete(':id')
-  @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({
     summary: 'Delete post specified by id',
   })
@@ -140,11 +138,12 @@ export class PostsController {
   @ApiNotFoundResponse({
     description: 'No Content',
   })
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Delete(':id')
   async deletePost(@Param('id') id: string): Promise<void> {
     return this.postsService.deletePost(id);
   }
 
-  @Get(':postId/comments')
   @ApiOperation({
     summary: 'Returns comments for specific post',
   })
@@ -155,6 +154,7 @@ export class PostsController {
   @ApiNotFoundResponse({
     description: "If post for passed postId doesn't exists",
   })
+  @Get(':postId/comments')
   async getCommentsForPost(
     @Param('postId') postId: string,
     @Query() query: GetPostsQueryParams,
