@@ -1,5 +1,5 @@
 import { Type } from 'class-transformer';
-import { IsEnum, IsNumber } from 'class-validator';
+import { IsEnum, IsInt, IsOptional, Min } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 
 enum SortDirectionEnum {
@@ -15,22 +15,27 @@ export class BaseQueryParams {
     default: 1,
     description: 'pageNumber is number of portions that should be returned',
   })
+  @IsOptional()
   @Type(() => Number)
-  @IsNumber()
+  @IsInt()
+  @Min(1)
   pageNumber: number = 1;
 
   @ApiPropertyOptional({
     default: 10,
     description: 'pageSize is portions size that should be returned',
   })
+  @IsOptional()
   @Type(() => Number)
-  @IsNumber()
+  @IsInt()
+  @Min(1)
   pageSize: number = 10;
 
   @ApiPropertyOptional({
     default: SortDirectionEnum.Desc,
     enum: ['asc', 'desc'],
   })
+  @IsOptional()
   @IsEnum(SortDirectionEnum)
   sortDirection: SortDirectionEnum = SortDirectionEnum.Desc;
 
