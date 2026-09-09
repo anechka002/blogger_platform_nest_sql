@@ -3,7 +3,6 @@ import type { UserModelType } from '../domain/user.entity';
 import { User, UserDocument } from '../domain/user.entity';
 import { InjectModel } from '@nestjs/mongoose';
 import { Types } from 'mongoose';
-import { CreateUserDomainDto } from '../domain/dto/create-user.domain.dto';
 import { DomainException } from '../../../../core/exceptions/domain-exceptions';
 import { DomainExceptionCode } from '../../../../core/exceptions/domain-exception-codes';
 
@@ -36,12 +35,10 @@ export class UsersRepository {
     });
   }
 
-  async create(dto: CreateUserDomainDto): Promise<UserDocument> {
-    const user = this.UserModel.createForRegistration(dto);
-
-    await user.save();
-
-    return user;
+  async create(user: User): Promise<UserDocument> {
+    const userDocument = new this.UserModel(user);
+    await userDocument.save();
+    return userDocument;
   }
 
   async findByEmail(email: string): Promise<UserDocument | null> {

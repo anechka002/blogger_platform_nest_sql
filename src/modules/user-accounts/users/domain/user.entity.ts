@@ -111,10 +111,7 @@ export class User {
   }
 
   // Пользователь регистрируется самостоятельно через /auth/registration
-  static createForRegistration(
-    this: UserModelType,
-    dto: CreateUserDomainDto,
-  ): UserDocument {
+  static createForRegistration(dto: CreateUserDomainDto): User {
     this.validateCreateParams(dto);
 
     const user = new this();

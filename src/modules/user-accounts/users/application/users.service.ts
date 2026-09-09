@@ -55,11 +55,13 @@ export class UsersService {
     const passwordHash: string =
       await this.bcryptService.generateHash(password);
 
-    const createdUser = await this.usersRepository.create({
+    const user = User.createForRegistration({
       login,
       email,
       passwordHash,
     });
+
+    const createdUser = await this.usersRepository.create(user);
 
     this.emailService
       .sendRegistrationConfirmationEmail(
