@@ -1,28 +1,39 @@
 import { Injectable } from '@nestjs/common';
 import { MailerService } from '@nestjs-modules/mailer';
+import { EmailTemplateManager } from './email-template.manager';
 
 @Injectable()
 export class EmailService {
-  constructor(private readonly mailerService: MailerService) {}
+  constructor(
+    private readonly mailerService: MailerService,
+    private readonly emailTemplateManager: EmailTemplateManager,
+  ) {}
 
-  async sendEmail(
+  async sendRegistrationConfirmationEmail(
     email: string,
-    subject: string,
     code: string | null,
   ): Promise<void> {
-    const confirmationLink = `https://some-front.com/confirm-registration?code=${code}`;
+    const html =
+      this.emailTemplateManager.getRegistrationConfirmationTemplate(code);
 
     await this.mailerService.sendMail({
       to: email,
-      subject: subject,
-      text: `Confirm registration via link ${confirmationLink}`,
-      html: `
-        <h1>Thank for your registration</h1>
-        <p>
-          To finish registration please follow the link below:
-          <a href="${confirmationLink}">complete registration</a>
-        </p>
-    `,
+      subject: 'Registration confirmation',
+      html,
+    });
+  }
+
+  async sendPasswordRecoveryEmail(
+    email: string,
+    recoveryCode: string | null,
+  ): Promise<void> {
+    const html =
+      this.emailTemplateManager.getPasswordRecoveryTemplate(recoveryCode);
+
+    await this.mailerService.sendMail({
+      to: email,
+      subject: 'Password recovery',
+      html,
     });
   }
 }

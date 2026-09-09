@@ -62,9 +62,8 @@ export class UsersService {
     });
 
     this.emailService
-      .sendEmail(
+      .sendRegistrationConfirmationEmail(
         createdUser.email,
-        'Registration confirmation',
         createdUser.emailConfirmation.confirmationCode,
       )
       .catch((error) =>
@@ -100,7 +99,7 @@ export class UsersService {
 
     // отправили письмо со ссылкой
     this.emailService
-      .sendEmail(user.email, 'Password recovery', recoveryCode)
+      .sendPasswordRecoveryEmail(user.email, recoveryCode)
       .catch((error) => console.log('error in send email', error));
   }
 
@@ -175,7 +174,7 @@ export class UsersService {
 
     // Отправляем новое письмо
     this.emailService
-      .sendEmail(user.email, 'Registration confirmation', newConfirmationCode)
+      .sendRegistrationConfirmationEmail(user.email, newConfirmationCode)
       .catch((error) =>
         console.log('Failed to send registration confirmation email', error),
       );
