@@ -1,13 +1,11 @@
+import { ApiProperty, OmitType } from '@nestjs/swagger';
 import { UserDocument } from '../../domain/user.entity';
-import { ApiProperty } from '@nestjs/swagger';
+import { UserViewDto } from './user.view-dto';
 
-export class MeViewDto {
-  @ApiProperty()
-  login: string;
-
-  @ApiProperty()
-  email: string;
-
+export class MeViewDto extends OmitType(UserViewDto, [
+  'id',
+  'createdAt',
+] as const) {
   @ApiProperty()
   userId: string;
 
