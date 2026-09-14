@@ -30,10 +30,10 @@ graph LR
   AppModule --> AppModule_AppController
   AppModule_AppService["⚙️ AppService"]
   AppModule --> AppModule_AppService
-  AppModule_APP_FILTER__UUID__dff36046dbf5b3c7fe3ab_["⚙️ APP_FILTER (UUID: dff36046dbf5b3c7fe3ab)"]
-  AppModule --> AppModule_APP_FILTER__UUID__dff36046dbf5b3c7fe3ab_
-  AppModule_APP_FILTER__UUID__f36046dbf5b3c7fe3ab27_["⚙️ APP_FILTER (UUID: f36046dbf5b3c7fe3ab27)"]
-  AppModule --> AppModule_APP_FILTER__UUID__f36046dbf5b3c7fe3ab27_
+  AppModule_APP_FILTER__UUID__7917f131bc03718588cd8_["⚙️ APP_FILTER (UUID: 7917f131bc03718588cd8)"]
+  AppModule --> AppModule_APP_FILTER__UUID__7917f131bc03718588cd8_
+  AppModule_APP_FILTER__UUID__17f131bc03718588cd876_["⚙️ APP_FILTER (UUID: 17f131bc03718588cd876)"]
+  AppModule --> AppModule_APP_FILTER__UUID__17f131bc03718588cd876_
   UserAccountsModule["📦 UserAccountsModule"]
   UserAccountsModule_UsersController["🎮 UsersController"]
   UserAccountsModule --> UserAccountsModule_UsersController
@@ -83,8 +83,6 @@ graph LR
   BloggersPlatformModule --> BloggersPlatformModule_PostsController
   BloggersPlatformModule_CommentsController["🎮 CommentsController"]
   BloggersPlatformModule --> BloggersPlatformModule_CommentsController
-  BloggersPlatformModule_BlogsService["⚙️ BlogsService"]
-  BloggersPlatformModule --> BloggersPlatformModule_BlogsService
   BloggersPlatformModule_BlogsRepository["🗄️ BlogsRepository"]
   BloggersPlatformModule --> BloggersPlatformModule_BlogsRepository
   BloggersPlatformModule_BlogsQueryRepository["🔎 BlogsQueryRepository"]
@@ -97,6 +95,14 @@ graph LR
   BloggersPlatformModule --> BloggersPlatformModule_PostsQueryRepository
   BloggersPlatformModule_CommentsQueryRepository["🔎 CommentsQueryRepository"]
   BloggersPlatformModule --> BloggersPlatformModule_CommentsQueryRepository
+  BloggersPlatformModule_CreateBlogUseCase["🧩 CreateBlogUseCase"]
+  BloggersPlatformModule --> BloggersPlatformModule_CreateBlogUseCase
+  BloggersPlatformModule_UpdateBlogUseCase["🧩 UpdateBlogUseCase"]
+  BloggersPlatformModule --> BloggersPlatformModule_UpdateBlogUseCase
+  BloggersPlatformModule_DeleteBlogUseCase["🧩 DeleteBlogUseCase"]
+  BloggersPlatformModule --> BloggersPlatformModule_DeleteBlogUseCase
+  BloggersPlatformModule_CreatePostForBlogUseCase["🧩 CreatePostForBlogUseCase"]
+  BloggersPlatformModule --> BloggersPlatformModule_CreatePostForBlogUseCase
   TestingModule["📦 TestingModule"]
   TestingModule_TestingController["🎮 TestingController"]
   TestingModule --> TestingModule_TestingController
@@ -184,28 +190,30 @@ graph LR
 ```mermaid
 graph LR
   BlogsController["🎮 BlogsController"]
-  BlogsService["⚙️ BlogsService"]
   BlogsQueryRepository["🔎 BlogsQueryRepository"]
   PostsQueryRepository["🔎 PostsQueryRepository"]
+  CommandBus["🚌 CommandBus"]
   PostsController["🎮 PostsController"]
   PostsService["⚙️ PostsService"]
   CommentsQueryRepository["🔎 CommentsQueryRepository"]
   CommentsController["🎮 CommentsController"]
   BlogsRepository["🗄️ BlogsRepository"]
-  PostsRepository["🗄️ PostsRepository"]
   BlogModel["⚙️ BlogModel"]
+  PostsRepository["🗄️ PostsRepository"]
   PostModel["⚙️ PostModel"]
   PostLikeModel["⚙️ PostLikeModel"]
   CommentModel["⚙️ CommentModel"]
-  BlogsController -->|injects| BlogsService
+  CreateBlogUseCase["🧩 CreateBlogUseCase"]
+  UpdateBlogUseCase["🧩 UpdateBlogUseCase"]
+  DeleteBlogUseCase["🧩 DeleteBlogUseCase"]
+  CreatePostForBlogUseCase["🧩 CreatePostForBlogUseCase"]
   BlogsController -->|injects| BlogsQueryRepository
   BlogsController -->|injects| PostsQueryRepository
+  BlogsController -->|injects| CommandBus
   PostsController -->|injects| PostsService
   PostsController -->|injects| PostsQueryRepository
   PostsController -->|injects| CommentsQueryRepository
   CommentsController -->|injects| CommentsQueryRepository
-  BlogsService -->|injects| BlogsRepository
-  BlogsService -->|injects| PostsRepository
   BlogsRepository -->|injects| BlogModel
   BlogsQueryRepository -->|injects| BlogModel
   PostsService -->|injects| PostsRepository
@@ -214,6 +222,11 @@ graph LR
   PostsQueryRepository -->|injects| PostModel
   PostsQueryRepository -->|injects| PostLikeModel
   CommentsQueryRepository -->|injects| CommentModel
+  CreateBlogUseCase -->|injects| BlogsRepository
+  UpdateBlogUseCase -->|injects| BlogsRepository
+  DeleteBlogUseCase -->|injects| BlogsRepository
+  CreatePostForBlogUseCase -->|injects| BlogsRepository
+  CreatePostForBlogUseCase -->|injects| PostsRepository
 ```
 
 ### TestingModule
@@ -294,28 +307,30 @@ graph LR
 ```mermaid
 graph LR
   BlogsController["🎮 BlogsController"]
-  BlogsService["⚙️ BlogsService"]
   BlogsQueryRepository["🔎 BlogsQueryRepository"]
   PostsQueryRepository["🔎 PostsQueryRepository"]
+  CommandBus["🚌 CommandBus"]
   PostsController["🎮 PostsController"]
   PostsService["⚙️ PostsService"]
   CommentsQueryRepository["🔎 CommentsQueryRepository"]
   CommentsController["🎮 CommentsController"]
   BlogsRepository["🗄️ BlogsRepository"]
-  PostsRepository["🗄️ PostsRepository"]
   BlogModel["⚙️ BlogModel"]
+  PostsRepository["🗄️ PostsRepository"]
   PostModel["⚙️ PostModel"]
   PostLikeModel["⚙️ PostLikeModel"]
   CommentModel["⚙️ CommentModel"]
-  BlogsController -->|injects| BlogsService
+  CreateBlogUseCase["🧩 CreateBlogUseCase"]
+  UpdateBlogUseCase["🧩 UpdateBlogUseCase"]
+  DeleteBlogUseCase["🧩 DeleteBlogUseCase"]
+  CreatePostForBlogUseCase["🧩 CreatePostForBlogUseCase"]
   BlogsController -->|injects| BlogsQueryRepository
   BlogsController -->|injects| PostsQueryRepository
+  BlogsController -->|injects| CommandBus
   PostsController -->|injects| PostsService
   PostsController -->|injects| PostsQueryRepository
   PostsController -->|injects| CommentsQueryRepository
   CommentsController -->|injects| CommentsQueryRepository
-  BlogsService -->|injects| BlogsRepository
-  BlogsService -->|injects| PostsRepository
   BlogsRepository -->|injects| BlogModel
   BlogsQueryRepository -->|injects| BlogModel
   PostsService -->|injects| PostsRepository
@@ -324,6 +339,11 @@ graph LR
   PostsQueryRepository -->|injects| PostModel
   PostsQueryRepository -->|injects| PostLikeModel
   CommentsQueryRepository -->|injects| CommentModel
+  CreateBlogUseCase -->|injects| BlogsRepository
+  UpdateBlogUseCase -->|injects| BlogsRepository
+  DeleteBlogUseCase -->|injects| BlogsRepository
+  CreatePostForBlogUseCase -->|injects| BlogsRepository
+  CreatePostForBlogUseCase -->|injects| PostsRepository
 ```
 
 ### NotificationsModule
@@ -357,6 +377,14 @@ graph LR
   handler_NewPasswordRecoveryUseCase["🧩 NewPasswordRecoveryUseCase"]
   command_PasswordRecoveryCommand["📨 PasswordRecoveryCommand"]
   handler_PasswordRecoveryUseCase["🧩 PasswordRecoveryUseCase"]
+  command_CreateBlogCommand["📨 CreateBlogCommand"]
+  handler_CreateBlogUseCase["🧩 CreateBlogUseCase"]
+  command_UpdateBlogCommand["📨 UpdateBlogCommand"]
+  handler_UpdateBlogUseCase["🧩 UpdateBlogUseCase"]
+  command_DeleteBlogCommand["📨 DeleteBlogCommand"]
+  handler_DeleteBlogUseCase["🧩 DeleteBlogUseCase"]
+  command_CreatePostForBlogCommand["📨 CreatePostForBlogCommand"]
+  handler_CreatePostForBlogUseCase["🧩 CreatePostForBlogUseCase"]
   command_CreateUserCommand -->|handled by| handler_CreateUserUseCase
   command_DeleteUserCommand -->|handled by| handler_DeleteUserUseCase
   command_LoginUserCommand -->|handled by| handler_LoginUserUseCase
@@ -365,6 +393,10 @@ graph LR
   command_RegisterEmailResendingCommand -->|handled by| handler_RegisterEmailResendingUseCase
   command_NewPasswordRecoveryCommand -->|handled by| handler_NewPasswordRecoveryUseCase
   command_PasswordRecoveryCommand -->|handled by| handler_PasswordRecoveryUseCase
+  command_CreateBlogCommand -->|handled by| handler_CreateBlogUseCase
+  command_UpdateBlogCommand -->|handled by| handler_UpdateBlogUseCase
+  command_DeleteBlogCommand -->|handled by| handler_DeleteBlogUseCase
+  command_CreatePostForBlogCommand -->|handled by| handler_CreatePostForBlogUseCase
   command_CreateUserCommand -->|handled by| handler_CreateUserUseCase
   command_DeleteUserCommand -->|handled by| handler_DeleteUserUseCase
   command_LoginUserCommand -->|handled by| handler_LoginUserUseCase
@@ -373,4 +405,8 @@ graph LR
   command_RegisterEmailResendingCommand -->|handled by| handler_RegisterEmailResendingUseCase
   command_NewPasswordRecoveryCommand -->|handled by| handler_NewPasswordRecoveryUseCase
   command_PasswordRecoveryCommand -->|handled by| handler_PasswordRecoveryUseCase
+  command_CreateBlogCommand -->|handled by| handler_CreateBlogUseCase
+  command_UpdateBlogCommand -->|handled by| handler_UpdateBlogUseCase
+  command_DeleteBlogCommand -->|handled by| handler_DeleteBlogUseCase
+  command_CreatePostForBlogCommand -->|handled by| handler_CreatePostForBlogUseCase
 ```

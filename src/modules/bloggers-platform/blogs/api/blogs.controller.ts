@@ -9,10 +9,10 @@ import {
   Post,
   Put,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { CreateBlogInputDto } from './input-dto/blogs.input-dto';
 import { BlogViewDto } from './view-dto/blog.view-dto';
-import { BlogsService } from '../application/blogs-service';
 import { BlogsQueryRepository } from '../infrastructure/query/blogs.query-repository';
 import { PaginationViewDto } from '../../../../core/dto/base.paginated.view-dto';
 import { GetBlogsQueryParams } from './input-dto/get-blogs-query-params.input-dto';
@@ -21,56 +21,42 @@ import { PostsQueryRepository } from '../../posts/infrastructure/query/posts.que
 import { GetPostsQueryParams } from '../../posts/api/input-dto/get-posts-query-params.input-dto';
 import { ExtendedPostViewDto } from '../../posts/api/view-dto/extended-post.view-dto';
 import { CreatePostForBlogInputDto } from './input-dto/create-post-for-blog.input-dto';
-import {
-  ApiBody,
-  ApiCreatedResponse,
-  ApiNoContentResponse,
-  ApiNotFoundResponse,
-  ApiOkResponse,
-  ApiOperation,
-  ApiParam,
-} from '@nestjs/swagger';
-import { BlogsPaginationViewDto } from './view-dto/blogs-pagination.view-dto';
-import { PostsPaginationViewDto } from '../../posts/api/view-dto/posts-pagination.view-dto';
+import { CommandBus } from '@nestjs/cqrs';
+import { CreateBlogCommand } from '../application/use-cases/create-blog.use-case';
+import { UpdateBlogCommand } from '../application/use-cases/update-blog.use-case';
+import { DeleteBlogCommand } from '../application/use-cases/delete-blog.use-case';
+import { CreatePostForBlogCommand } from '../application/use-cases/create-post-for-blog.use-case';
+import { BasicAuthGuard } from '../../../user-accounts/users/guards/basic/basic-auth.guard';
+import { CreateBlogSwagger } from './swagger/create-blog.swagger.decorator';
+import { UpdateBlogSwagger } from './swagger/update-blog.swagger.decorator';
+import { DeleteBlogSwagger } from './swagger/delete-blog.swagger.decorator';
+import { CreatePostForBlogSwagger } from './swagger/create-post-for-blog.swagger.decorator';
+import { GetBlogsSwagger } from './swagger/get-blogs.swagger.decorator';
+import { GetBlogByIdSwagger } from './swagger/get-blog-by-id.swagger.decorator';
+import { GetPostsForBlogSwagger } from './swagger/get-posts-for-blog.swagger.decorator';
+import { Public } from '../../../user-accounts/users/guards/decorators/public.decorator';
 
+@UseGuards(BasicAuthGuard)
 @Controller('blogs')
 export class BlogsController {
   constructor(
-    private blogsService: BlogsService,
     private blogsQueryRepository: BlogsQueryRepository,
     private postsQueryRepository: PostsQueryRepository,
+    private readonly commandBus: CommandBus,
   ) {
     console.log('BlogsController');
   }
 
-  @ApiOperation({
-    summary: 'Return blog by id',
-  })
-  @ApiParam({
-    name: 'id',
-    description: 'Existing blog id',
-    type: String,
-  })
-  @ApiOkResponse({
-    description: 'Success',
-    type: BlogViewDto,
-  })
-  @ApiNotFoundResponse({
-    description: 'Not Found',
-  })
+  @GetBlogByIdSwagger()
+  @Public()
   @Get(':id')
   async getById(@Param('id') id: string): Promise<BlogViewDto> {
     // NestJS будет дожидаться, когда промис зарезолвится и затем NestJS вернёт результат клиенту
     return this.blogsQueryRepository.getByIdOrNotFoundFail(id);
   }
 
-  @ApiOperation({
-    summary: 'Return blogs with paging',
-  })
-  @ApiOkResponse({
-    description: 'Success',
-    type: BlogsPaginationViewDto,
-  })
+  @GetBlogsSwagger()
+  @Public()
   @Get()
   async getAll(
     @Query() query: GetBlogsQueryParams,
@@ -78,73 +64,8 @@ export class BlogsController {
     return this.blogsQueryRepository.findAllBlogs(query);
   }
 
-  @ApiOperation({
-    summary: 'Create new blog',
-  })
-  @ApiBody({
-    description: 'Data for constructing new Blog entity',
-    type: CreateBlogInputDto,
-  })
-  @ApiCreatedResponse({
-    description: 'Returns the newly created blog',
-    type: BlogViewDto,
-  })
-  @Post()
-  async createBlog(@Body() body: CreateBlogInputDto): Promise<BlogViewDto> {
-    const blogId = await this.blogsService.createBlog(body);
-    return this.blogsQueryRepository.getByIdOrNotFoundFail(blogId);
-  }
-
-  @ApiOperation({
-    summary: 'Update existing Blog by id with InputModel',
-  })
-  @ApiNoContentResponse({
-    description: 'No Content',
-  })
-  @ApiNotFoundResponse({
-    description: 'No Content',
-  })
-  @HttpCode(HttpStatus.NO_CONTENT)
-  @Put(':id')
-  async updateBlog(
-    @Param('id') id: string,
-    @Body() body: UpdateBlogInputDto,
-  ): Promise<BlogViewDto> {
-    const blogId = await this.blogsService.updateBlog(id, body);
-
-    return this.blogsQueryRepository.getByIdOrNotFoundFail(blogId);
-  }
-
-  @ApiOperation({
-    summary: 'Delete blog specified by id',
-  })
-  @ApiParam({
-    name: 'id',
-    description: 'Blog id',
-    type: String,
-  })
-  @ApiNoContentResponse({
-    description: 'No Content',
-  })
-  @ApiNotFoundResponse({
-    description: 'No Content',
-  })
-  @HttpCode(HttpStatus.NO_CONTENT)
-  @Delete(':id')
-  async deleteBlog(@Param('id') id: string): Promise<void> {
-    return this.blogsService.deleteBlog(id);
-  }
-
-  @ApiOperation({
-    summary: 'Returns all posts for specific blog',
-  })
-  @ApiOkResponse({
-    description: 'Success',
-    type: PostsPaginationViewDto,
-  })
-  @ApiNotFoundResponse({
-    description: 'If specified blog is not exists',
-  })
+  @GetPostsForBlogSwagger()
+  @Public()
   @Get(':blogId/posts')
   async getPostsForBlog(
     @Param('blogId') blogId: string,
@@ -154,26 +75,48 @@ export class BlogsController {
     return this.postsQueryRepository.findPostsByBlogId(blogId, query);
   }
 
-  @ApiOperation({
-    summary: 'Create new post for specific blog',
-  })
-  @ApiBody({
-    description: 'Data for constructing new Post entity',
-    type: CreatePostForBlogInputDto,
-  })
-  @ApiCreatedResponse({
-    description: 'Returns the newly created post',
-    type: ExtendedPostViewDto,
-  })
-  @ApiNotFoundResponse({
-    description: "If specified blog doesn't exists",
-  })
+  @CreateBlogSwagger()
+  @Post()
+  async createBlog(@Body() body: CreateBlogInputDto): Promise<BlogViewDto> {
+    const blogId = await this.commandBus.execute<CreateBlogCommand, string>(
+      new CreateBlogCommand(body),
+    );
+    return this.blogsQueryRepository.getByIdOrNotFoundFail(blogId);
+  }
+
+  @UpdateBlogSwagger()
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Put(':id')
+  async updateBlog(
+    @Param('id') id: string,
+    @Body() body: UpdateBlogInputDto,
+  ): Promise<BlogViewDto> {
+    const blogId = await this.commandBus.execute<UpdateBlogCommand, string>(
+      new UpdateBlogCommand(id, body),
+    );
+
+    return this.blogsQueryRepository.getByIdOrNotFoundFail(blogId);
+  }
+
+  @DeleteBlogSwagger()
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Delete(':id')
+  async deleteBlog(@Param('id') id: string): Promise<void> {
+    return this.commandBus.execute<DeleteBlogCommand, void>(
+      new DeleteBlogCommand(id),
+    );
+  }
+
+  @CreatePostForBlogSwagger()
   @Post(':blogId/posts')
   async createPostForBlog(
     @Param('blogId') blogId: string,
     @Body() body: CreatePostForBlogInputDto,
   ): Promise<ExtendedPostViewDto> {
-    const postId = await this.blogsService.createPostForBlog(blogId, body);
+    const postId = await this.commandBus.execute<
+      CreatePostForBlogCommand,
+      string
+    >(new CreatePostForBlogCommand(blogId, body));
     return this.postsQueryRepository.getByIdOrNotFoundFail(postId);
   }
 }
