@@ -30,10 +30,10 @@ graph LR
   AppModule --> AppModule_AppController
   AppModule_AppService["⚙️ AppService"]
   AppModule --> AppModule_AppService
-  AppModule_APP_FILTER__UUID__efa8daa6a6109934d02d0_["⚙️ APP_FILTER (UUID: efa8daa6a6109934d02d0)"]
-  AppModule --> AppModule_APP_FILTER__UUID__efa8daa6a6109934d02d0_
-  AppModule_APP_FILTER__UUID__a8daa6a6109934d02d097_["⚙️ APP_FILTER (UUID: a8daa6a6109934d02d097)"]
-  AppModule --> AppModule_APP_FILTER__UUID__a8daa6a6109934d02d097_
+  AppModule_APP_FILTER__UUID__dff36046dbf5b3c7fe3ab_["⚙️ APP_FILTER (UUID: dff36046dbf5b3c7fe3ab)"]
+  AppModule --> AppModule_APP_FILTER__UUID__dff36046dbf5b3c7fe3ab_
+  AppModule_APP_FILTER__UUID__f36046dbf5b3c7fe3ab27_["⚙️ APP_FILTER (UUID: f36046dbf5b3c7fe3ab27)"]
+  AppModule --> AppModule_APP_FILTER__UUID__f36046dbf5b3c7fe3ab27_
   UserAccountsModule["📦 UserAccountsModule"]
   UserAccountsModule_UsersController["🎮 UsersController"]
   UserAccountsModule --> UserAccountsModule_UsersController
@@ -47,14 +47,30 @@ graph LR
   UserAccountsModule --> UserAccountsModule_UsersQueryRepository
   UserAccountsModule_UsersRepository["🗄️ UsersRepository"]
   UserAccountsModule --> UserAccountsModule_UsersRepository
-  UserAccountsModule_UsersService["⚙️ UsersService"]
-  UserAccountsModule --> UserAccountsModule_UsersService
-  UserAccountsModule_BcryptService["⚙️ BcryptService"]
-  UserAccountsModule --> UserAccountsModule_BcryptService
+  UserAccountsModule_PasswordService["⚙️ PasswordService"]
+  UserAccountsModule --> UserAccountsModule_PasswordService
+  UserAccountsModule_CreateUserUseCase["🧩 CreateUserUseCase"]
+  UserAccountsModule --> UserAccountsModule_CreateUserUseCase
+  UserAccountsModule_DeleteUserUseCase["🧩 DeleteUserUseCase"]
+  UserAccountsModule --> UserAccountsModule_DeleteUserUseCase
+  UserAccountsModule_LoginUserUseCase["🧩 LoginUserUseCase"]
+  UserAccountsModule --> UserAccountsModule_LoginUserUseCase
+  UserAccountsModule_RegisterUserUseCase["🧩 RegisterUserUseCase"]
+  UserAccountsModule --> UserAccountsModule_RegisterUserUseCase
+  UserAccountsModule_ConfirmCodeUseCase["🧩 ConfirmCodeUseCase"]
+  UserAccountsModule --> UserAccountsModule_ConfirmCodeUseCase
+  UserAccountsModule_RegisterEmailResendingUseCase["🧩 RegisterEmailResendingUseCase"]
+  UserAccountsModule --> UserAccountsModule_RegisterEmailResendingUseCase
+  UserAccountsModule_NewPasswordRecoveryUseCase["🧩 NewPasswordRecoveryUseCase"]
+  UserAccountsModule --> UserAccountsModule_NewPasswordRecoveryUseCase
+  UserAccountsModule_PasswordRecoveryUseCase["🧩 PasswordRecoveryUseCase"]
+  UserAccountsModule --> UserAccountsModule_PasswordRecoveryUseCase
   UserAccountsModule_LocalStrategy["🔐 LocalStrategy"]
   UserAccountsModule --> UserAccountsModule_LocalStrategy
   UserAccountsModule_JwtStrategy["🔐 JwtStrategy"]
   UserAccountsModule --> UserAccountsModule_JwtStrategy
+  UserAccountsModule_JwtAdapter["⚙️ JwtAdapter"]
+  UserAccountsModule --> UserAccountsModule_JwtAdapter
   NotificationsModule["📦 NotificationsModule"]
   NotificationsModule_EmailService["⚙️ EmailService"]
   NotificationsModule --> NotificationsModule_EmailService
@@ -99,65 +115,57 @@ graph LR
   AppController -->|injects| AppService
 ```
 
-### ThrottlerModule
-
-```mermaid
-graph LR
-  THROTTLER_MODULE_OPTIONS["⚙️ THROTTLER:MODULE_OPTIONS"]
-  Symbol_ThrottlerStorage_["⚙️ Symbol(ThrottlerStorage)"]
-  Symbol_ThrottlerStorage_ -->|injects| THROTTLER_MODULE_OPTIONS
-```
-
-### ConfigModule
-
-```mermaid
-graph LR
-  ConfigService["⚙️ ConfigService"]
-  Symbol_CONFIG_SERVICE_["⚙️ Symbol(CONFIG_SERVICE)"]
-  ConfigService -->|injects| Symbol_CONFIG_SERVICE_
-```
-
 ### UserAccountsModule
 
 ```mermaid
 graph LR
   UsersController["🎮 UsersController"]
+  CommandBus["🚌 CommandBus"]
   UsersQueryRepository["🔎 UsersQueryRepository"]
-  UsersService["⚙️ UsersService"]
   AuthController["🎮 AuthController"]
   AuthQueryRepository["🔎 AuthQueryRepository"]
   AuthService["⚙️ AuthService"]
   UsersRepository["🗄️ UsersRepository"]
-  BcryptService["⚙️ BcryptService"]
-  JwtService["⚙️ JwtService"]
+  PasswordService["⚙️ PasswordService"]
   UserModel["⚙️ UserModel"]
+  CreateUserUseCase["🧩 CreateUserUseCase"]
+  DeleteUserUseCase["🧩 DeleteUserUseCase"]
+  LoginUserUseCase["🧩 LoginUserUseCase"]
+  JwtAdapter["⚙️ JwtAdapter"]
+  RegisterUserUseCase["🧩 RegisterUserUseCase"]
   EmailService["⚙️ EmailService"]
+  ConfirmCodeUseCase["🧩 ConfirmCodeUseCase"]
+  RegisterEmailResendingUseCase["🧩 RegisterEmailResendingUseCase"]
+  NewPasswordRecoveryUseCase["🧩 NewPasswordRecoveryUseCase"]
+  PasswordRecoveryUseCase["🧩 PasswordRecoveryUseCase"]
   LocalStrategy["🔐 LocalStrategy"]
   JwtStrategy["🔐 JwtStrategy"]
+  JwtService["⚙️ JwtService"]
+  UsersController -->|injects| CommandBus
   UsersController -->|injects| UsersQueryRepository
-  UsersController -->|injects| UsersService
   AuthController -->|injects| AuthQueryRepository
-  AuthController -->|injects| AuthService
-  AuthController -->|injects| UsersService
+  AuthController -->|injects| CommandBus
   AuthService -->|injects| UsersRepository
-  AuthService -->|injects| BcryptService
-  AuthService -->|injects| JwtService
+  AuthService -->|injects| PasswordService
   AuthQueryRepository -->|injects| UserModel
   UsersQueryRepository -->|injects| UserModel
   UsersRepository -->|injects| UserModel
-  UsersService -->|injects| UsersRepository
-  UsersService -->|injects| BcryptService
-  UsersService -->|injects| EmailService
+  CreateUserUseCase -->|injects| UsersRepository
+  CreateUserUseCase -->|injects| PasswordService
+  DeleteUserUseCase -->|injects| UsersRepository
+  LoginUserUseCase -->|injects| JwtAdapter
+  RegisterUserUseCase -->|injects| UsersRepository
+  RegisterUserUseCase -->|injects| PasswordService
+  RegisterUserUseCase -->|injects| EmailService
+  ConfirmCodeUseCase -->|injects| UsersRepository
+  RegisterEmailResendingUseCase -->|injects| UsersRepository
+  RegisterEmailResendingUseCase -->|injects| EmailService
+  NewPasswordRecoveryUseCase -->|injects| UsersRepository
+  NewPasswordRecoveryUseCase -->|injects| PasswordService
+  PasswordRecoveryUseCase -->|injects| UsersRepository
+  PasswordRecoveryUseCase -->|injects| EmailService
   LocalStrategy -->|injects| AuthService
-```
-
-### MongooseModule
-
-```mermaid
-graph LR
-  UserModel["⚙️ UserModel"]
-  DatabaseConnection["⚙️ DatabaseConnection"]
-  UserModel -->|injects| DatabaseConnection
+  JwtAdapter -->|injects| JwtService
 ```
 
 ### NotificationsModule
@@ -169,28 +177,6 @@ graph LR
   EmailTemplateManager["⚙️ EmailTemplateManager"]
   EmailService -->|injects| MailerService
   EmailService -->|injects| EmailTemplateManager
-```
-
-### MailerCoreModule
-
-```mermaid
-graph LR
-  MAILER_OPTIONS["⚙️ MAILER_OPTIONS"]
-  MailerEventService["⚙️ MailerEventService"]
-  Object["⚙️ Object"]
-  MailerService["⚙️ MailerService"]
-  MAILER_TRANSPORT_FACTORY["⚙️ MAILER_TRANSPORT_FACTORY"]
-  MailerBatchService["⚙️ MailerBatchService"]
-  MailerHealthIndicator["⚙️ MailerHealthIndicator"]
-  MailerQueueService["⚙️ MailerQueueService"]
-  MailerEventService -->|injects| Object
-  MailerService -->|injects| MAILER_OPTIONS
-  MailerService -->|injects| MAILER_TRANSPORT_FACTORY
-  MailerService -->|injects| MailerEventService
-  MailerBatchService -->|injects| MailerService
-  MailerBatchService -->|injects| MAILER_OPTIONS
-  MailerHealthIndicator -->|injects| MailerService
-  MailerHealthIndicator -->|injects| MailerQueueService
 ```
 
 ### BloggersPlatformModule
@@ -228,42 +214,6 @@ graph LR
   PostsQueryRepository -->|injects| PostModel
   PostsQueryRepository -->|injects| PostLikeModel
   CommentsQueryRepository -->|injects| CommentModel
-```
-
-### MongooseModule
-
-```mermaid
-graph LR
-  BlogModel["⚙️ BlogModel"]
-  DatabaseConnection["⚙️ DatabaseConnection"]
-  BlogModel -->|injects| DatabaseConnection
-```
-
-### MongooseModule
-
-```mermaid
-graph LR
-  PostModel["⚙️ PostModel"]
-  DatabaseConnection["⚙️ DatabaseConnection"]
-  PostModel -->|injects| DatabaseConnection
-```
-
-### MongooseModule
-
-```mermaid
-graph LR
-  CommentModel["⚙️ CommentModel"]
-  DatabaseConnection["⚙️ DatabaseConnection"]
-  CommentModel -->|injects| DatabaseConnection
-```
-
-### MongooseModule
-
-```mermaid
-graph LR
-  PostLikeModel["⚙️ PostLikeModel"]
-  DatabaseConnection["⚙️ DatabaseConnection"]
-  PostLikeModel -->|injects| DatabaseConnection
 ```
 
 ### TestingModule
@@ -280,42 +230,52 @@ graph LR
 ```mermaid
 graph LR
   UsersController["🎮 UsersController"]
+  CommandBus["🚌 CommandBus"]
   UsersQueryRepository["🔎 UsersQueryRepository"]
-  UsersService["⚙️ UsersService"]
   AuthController["🎮 AuthController"]
   AuthQueryRepository["🔎 AuthQueryRepository"]
   AuthService["⚙️ AuthService"]
   UsersRepository["🗄️ UsersRepository"]
-  BcryptService["⚙️ BcryptService"]
-  JwtService["⚙️ JwtService"]
+  PasswordService["⚙️ PasswordService"]
   UserModel["⚙️ UserModel"]
+  CreateUserUseCase["🧩 CreateUserUseCase"]
+  DeleteUserUseCase["🧩 DeleteUserUseCase"]
+  LoginUserUseCase["🧩 LoginUserUseCase"]
+  JwtAdapter["⚙️ JwtAdapter"]
+  RegisterUserUseCase["🧩 RegisterUserUseCase"]
   EmailService["⚙️ EmailService"]
+  ConfirmCodeUseCase["🧩 ConfirmCodeUseCase"]
+  RegisterEmailResendingUseCase["🧩 RegisterEmailResendingUseCase"]
+  NewPasswordRecoveryUseCase["🧩 NewPasswordRecoveryUseCase"]
+  PasswordRecoveryUseCase["🧩 PasswordRecoveryUseCase"]
   LocalStrategy["🔐 LocalStrategy"]
   JwtStrategy["🔐 JwtStrategy"]
+  JwtService["⚙️ JwtService"]
+  UsersController -->|injects| CommandBus
   UsersController -->|injects| UsersQueryRepository
-  UsersController -->|injects| UsersService
   AuthController -->|injects| AuthQueryRepository
-  AuthController -->|injects| AuthService
-  AuthController -->|injects| UsersService
+  AuthController -->|injects| CommandBus
   AuthService -->|injects| UsersRepository
-  AuthService -->|injects| BcryptService
-  AuthService -->|injects| JwtService
+  AuthService -->|injects| PasswordService
   AuthQueryRepository -->|injects| UserModel
   UsersQueryRepository -->|injects| UserModel
   UsersRepository -->|injects| UserModel
-  UsersService -->|injects| UsersRepository
-  UsersService -->|injects| BcryptService
-  UsersService -->|injects| EmailService
+  CreateUserUseCase -->|injects| UsersRepository
+  CreateUserUseCase -->|injects| PasswordService
+  DeleteUserUseCase -->|injects| UsersRepository
+  LoginUserUseCase -->|injects| JwtAdapter
+  RegisterUserUseCase -->|injects| UsersRepository
+  RegisterUserUseCase -->|injects| PasswordService
+  RegisterUserUseCase -->|injects| EmailService
+  ConfirmCodeUseCase -->|injects| UsersRepository
+  RegisterEmailResendingUseCase -->|injects| UsersRepository
+  RegisterEmailResendingUseCase -->|injects| EmailService
+  NewPasswordRecoveryUseCase -->|injects| UsersRepository
+  NewPasswordRecoveryUseCase -->|injects| PasswordService
+  PasswordRecoveryUseCase -->|injects| UsersRepository
+  PasswordRecoveryUseCase -->|injects| EmailService
   LocalStrategy -->|injects| AuthService
-```
-
-### MongooseModule
-
-```mermaid
-graph LR
-  UserModel["⚙️ UserModel"]
-  DatabaseConnection["⚙️ DatabaseConnection"]
-  UserModel -->|injects| DatabaseConnection
+  JwtAdapter -->|injects| JwtService
 ```
 
 ### NotificationsModule
@@ -327,28 +287,6 @@ graph LR
   EmailTemplateManager["⚙️ EmailTemplateManager"]
   EmailService -->|injects| MailerService
   EmailService -->|injects| EmailTemplateManager
-```
-
-### MailerCoreModule
-
-```mermaid
-graph LR
-  MAILER_OPTIONS["⚙️ MAILER_OPTIONS"]
-  MailerEventService["⚙️ MailerEventService"]
-  Object["⚙️ Object"]
-  MailerService["⚙️ MailerService"]
-  MAILER_TRANSPORT_FACTORY["⚙️ MAILER_TRANSPORT_FACTORY"]
-  MailerBatchService["⚙️ MailerBatchService"]
-  MailerHealthIndicator["⚙️ MailerHealthIndicator"]
-  MailerQueueService["⚙️ MailerQueueService"]
-  MailerEventService -->|injects| Object
-  MailerService -->|injects| MAILER_OPTIONS
-  MailerService -->|injects| MAILER_TRANSPORT_FACTORY
-  MailerService -->|injects| MailerEventService
-  MailerBatchService -->|injects| MailerService
-  MailerBatchService -->|injects| MAILER_OPTIONS
-  MailerHealthIndicator -->|injects| MailerService
-  MailerHealthIndicator -->|injects| MailerQueueService
 ```
 
 ### BloggersPlatformModule
@@ -388,42 +326,6 @@ graph LR
   CommentsQueryRepository -->|injects| CommentModel
 ```
 
-### MongooseModule
-
-```mermaid
-graph LR
-  BlogModel["⚙️ BlogModel"]
-  DatabaseConnection["⚙️ DatabaseConnection"]
-  BlogModel -->|injects| DatabaseConnection
-```
-
-### MongooseModule
-
-```mermaid
-graph LR
-  PostModel["⚙️ PostModel"]
-  DatabaseConnection["⚙️ DatabaseConnection"]
-  PostModel -->|injects| DatabaseConnection
-```
-
-### MongooseModule
-
-```mermaid
-graph LR
-  CommentModel["⚙️ CommentModel"]
-  DatabaseConnection["⚙️ DatabaseConnection"]
-  CommentModel -->|injects| DatabaseConnection
-```
-
-### MongooseModule
-
-```mermaid
-graph LR
-  PostLikeModel["⚙️ PostLikeModel"]
-  DatabaseConnection["⚙️ DatabaseConnection"]
-  PostLikeModel -->|injects| DatabaseConnection
-```
-
 ### NotificationsModule
 
 ```mermaid
@@ -435,24 +337,40 @@ graph LR
   EmailService -->|injects| EmailTemplateManager
 ```
 
-### MailerCoreModule
+## 4. CQRS
 
 ```mermaid
 graph LR
-  MAILER_OPTIONS["⚙️ MAILER_OPTIONS"]
-  MailerEventService["⚙️ MailerEventService"]
-  Object["⚙️ Object"]
-  MailerService["⚙️ MailerService"]
-  MAILER_TRANSPORT_FACTORY["⚙️ MAILER_TRANSPORT_FACTORY"]
-  MailerBatchService["⚙️ MailerBatchService"]
-  MailerHealthIndicator["⚙️ MailerHealthIndicator"]
-  MailerQueueService["⚙️ MailerQueueService"]
-  MailerEventService -->|injects| Object
-  MailerService -->|injects| MAILER_OPTIONS
-  MailerService -->|injects| MAILER_TRANSPORT_FACTORY
-  MailerService -->|injects| MailerEventService
-  MailerBatchService -->|injects| MailerService
-  MailerBatchService -->|injects| MAILER_OPTIONS
-  MailerHealthIndicator -->|injects| MailerService
-  MailerHealthIndicator -->|injects| MailerQueueService
+  command_CreateUserCommand["📨 CreateUserCommand"]
+  handler_CreateUserUseCase["🧩 CreateUserUseCase"]
+  command_DeleteUserCommand["📨 DeleteUserCommand"]
+  handler_DeleteUserUseCase["🧩 DeleteUserUseCase"]
+  command_LoginUserCommand["📨 LoginUserCommand"]
+  handler_LoginUserUseCase["🧩 LoginUserUseCase"]
+  command_RegisterUserCommand["📨 RegisterUserCommand"]
+  handler_RegisterUserUseCase["🧩 RegisterUserUseCase"]
+  command_ConfirmCodeCommand["📨 ConfirmCodeCommand"]
+  handler_ConfirmCodeUseCase["🧩 ConfirmCodeUseCase"]
+  command_RegisterEmailResendingCommand["📨 RegisterEmailResendingCommand"]
+  handler_RegisterEmailResendingUseCase["🧩 RegisterEmailResendingUseCase"]
+  command_NewPasswordRecoveryCommand["📨 NewPasswordRecoveryCommand"]
+  handler_NewPasswordRecoveryUseCase["🧩 NewPasswordRecoveryUseCase"]
+  command_PasswordRecoveryCommand["📨 PasswordRecoveryCommand"]
+  handler_PasswordRecoveryUseCase["🧩 PasswordRecoveryUseCase"]
+  command_CreateUserCommand -->|handled by| handler_CreateUserUseCase
+  command_DeleteUserCommand -->|handled by| handler_DeleteUserUseCase
+  command_LoginUserCommand -->|handled by| handler_LoginUserUseCase
+  command_RegisterUserCommand -->|handled by| handler_RegisterUserUseCase
+  command_ConfirmCodeCommand -->|handled by| handler_ConfirmCodeUseCase
+  command_RegisterEmailResendingCommand -->|handled by| handler_RegisterEmailResendingUseCase
+  command_NewPasswordRecoveryCommand -->|handled by| handler_NewPasswordRecoveryUseCase
+  command_PasswordRecoveryCommand -->|handled by| handler_PasswordRecoveryUseCase
+  command_CreateUserCommand -->|handled by| handler_CreateUserUseCase
+  command_DeleteUserCommand -->|handled by| handler_DeleteUserUseCase
+  command_LoginUserCommand -->|handled by| handler_LoginUserUseCase
+  command_RegisterUserCommand -->|handled by| handler_RegisterUserUseCase
+  command_ConfirmCodeCommand -->|handled by| handler_ConfirmCodeUseCase
+  command_RegisterEmailResendingCommand -->|handled by| handler_RegisterEmailResendingUseCase
+  command_NewPasswordRecoveryCommand -->|handled by| handler_NewPasswordRecoveryUseCase
+  command_PasswordRecoveryCommand -->|handled by| handler_PasswordRecoveryUseCase
 ```

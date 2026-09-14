@@ -5,6 +5,7 @@ import {
   HttpCode,
   HttpStatus,
   Post,
+  Res,
   UseGuards,
 } from '@nestjs/common';
 import {
@@ -17,13 +18,12 @@ import {
   ApiTooManyRequestsResponse,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
+import type { Response } from 'express';
 import { MeViewDto } from './view-dto/me.view.dto';
 import { ExtractUserFromRequest } from '../guards/decorators/param/extract-user-from-request.decorator';
 import { UserContextDto } from '../guards/dto/user-context.dto';
 import { AuthQueryRepository } from '../infrastructure/query/auth.query-repository';
 import { JwtAuthGuard } from '../guards/bearer/jwt-auth.guard';
-import { AuthService } from '../application/auth.service';
-import { UsersService } from '../application/users.service';
 import { CreateUserInputDto } from './input-dto/users.input-dto';
 import { ThrottlerGuard } from '@nestjs/throttler';
 import { APIErrorResult } from '../../../../core/exceptions/filters/api-error-result';
@@ -32,15 +32,22 @@ import { RegistrationEmailResendingInputDto } from './input-dto/registration-ema
 import { NewPasswordRecoveryInputDto } from './input-dto/new-password-recovery.input-dto';
 import { PasswordRecoveryInputDto } from './input-dto/password-recovery.input-dto';
 import { LocalAuthGuard } from '../guards/local/local-auth.guard';
-import { LoginViewDto } from './view-dto/login.view-dto';
+import { AccessTokenViewDto } from './view-dto/login.view-dto';
 import { LoginInputDto } from './input-dto/login.input-dto';
+import { CommandBus } from '@nestjs/cqrs';
+import { RegisterUserCommand } from '../application/use-cases/register-user.use-case';
+import { ConfirmCodeCommand } from '../application/use-cases/confirm-code.use-case';
+import { RegisterEmailResendingCommand } from '../application/use-cases/register-email-resending.use-case';
+import { PasswordRecoveryCommand } from '../application/use-cases/password-recovery.use-case';
+import { NewPasswordRecoveryCommand } from '../application/use-cases/new-password-recovery.use-case';
+import { LoginUserCommand } from '../application/use-cases/login-user.use-case';
+import { TokensPairType } from '../../../../core/types/tokens-pair.type';
 
 @Controller('auth')
 export class AuthController {
   constructor(
     private authQueryRepository: AuthQueryRepository,
-    private authService: AuthService,
-    private usersService: UsersService,
+    private readonly commandBus: CommandBus,
   ) {
     console.log('AuthController created');
   }
@@ -69,7 +76,9 @@ export class AuthController {
   @UseGuards(ThrottlerGuard)
   @Post('registration')
   async register(@Body() body: CreateUserInputDto): Promise<void> {
-    return this.usersService.registerUser(body);
+    return this.commandBus.execute<RegisterUserCommand, void>(
+      new RegisterUserCommand(body),
+    );
   }
 
   @ApiOperation({
@@ -95,7 +104,9 @@ export class AuthController {
   async confirm(
     @Body() body: RegistrationConfirmationCodeInputDto,
   ): Promise<void> {
-    return this.usersService.confirmCode(body.code);
+    return this.commandBus.execute<ConfirmCodeCommand, void>(
+      new ConfirmCodeCommand(body.code),
+    );
   }
 
   @ApiOperation({
@@ -118,7 +129,9 @@ export class AuthController {
   async registrationEmailResending(
     @Body() body: RegistrationEmailResendingInputDto,
   ): Promise<void> {
-    return this.usersService.registrationEmailResending(body.email);
+    return this.commandBus.execute<RegisterEmailResendingCommand, void>(
+      new RegisterEmailResendingCommand(body.email),
+    );
   }
 
   @ApiOperation({
@@ -143,7 +156,9 @@ export class AuthController {
   async passwordRecovery(
     @Body() body: PasswordRecoveryInputDto,
   ): Promise<void> {
-    return this.usersService.passwordRecovery(body.email);
+    return this.commandBus.execute<PasswordRecoveryCommand, void>(
+      new PasswordRecoveryCommand(body.email),
+    );
   }
 
   @ApiOperation({
@@ -166,7 +181,9 @@ export class AuthController {
   async newPasswordRecovery(
     @Body() body: NewPasswordRecoveryInputDto,
   ): Promise<void> {
-    return this.usersService.newPasswordRecovery(body);
+    return this.commandBus.execute<NewPasswordRecoveryCommand, void>(
+      new NewPasswordRecoveryCommand(body),
+    );
   }
 
   @ApiBearerAuth('bearer')
@@ -189,7 +206,7 @@ export class AuthController {
   })
   @ApiOkResponse({
     description: 'Returns JWT accessToken (expired after 5 minutes) in body.',
-    type: LoginViewDto,
+    type: AccessTokenViewDto,
   })
   @ApiBadRequestResponse({
     description: 'If the inputModel has incorrect values',
@@ -204,7 +221,22 @@ export class AuthController {
   async login(
     @Body() body: LoginInputDto,
     @ExtractUserFromRequest() user: UserContextDto,
-  ): Promise<LoginViewDto> {
-    return this.authService.login(user.id);
+    // я немного меняю response, но Nest всё ещё сам его отправляет
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<AccessTokenViewDto> {
+    const { accessToken, refreshToken } = await this.commandBus.execute<
+      LoginUserCommand,
+      TokensPairType
+    >(new LoginUserCommand(user.id));
+
+    res.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'strict',
+      path: '/',
+      maxAge: 2 * 60 * 1000,
+    });
+
+    return { accessToken };
   }
 }

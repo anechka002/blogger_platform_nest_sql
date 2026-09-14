@@ -12,7 +12,7 @@ import { NotificationsModule } from '../../modules/notifications/notifications.m
 import { TestingModule } from '@nestjs/testing';
 
 /**
- * Наши модули, которые хотим подробно показывать на диаграмме.
+ * Наши основные модули проекта.
  */
 const projectModules: Type[] = [
   AppModule,
@@ -28,15 +28,12 @@ export async function generateNestGraph(app: INestApplication): Promise<void> {
 
   const projectModuleNames = projectModules.map((module) => module.name);
 
-  /*
-   * Получаем структуру Nest-приложения:
-   * modules, imports, controllers, providers и т.д.
-   */
   const tree = SpelunkerModule.explore(app, {
     ignoreImports: [
       /^MongooseCoreModule$/,
       /^ConfigHostModule$/,
       /^MailerCoreModule$/,
+      /^CqrsModule$/,
     ],
   });
 
@@ -90,9 +87,6 @@ export async function generateNestGraph(app: INestApplication): Promise<void> {
 
     lines.push(`  ${moduleId}["📦 ${module.name}"]`);
 
-    /*
-     * Controllers
-     */
     for (const controller of module.controllers) {
       const controllerId = safeId(`${module.name}_${controller}`);
 
@@ -101,10 +95,6 @@ export async function generateNestGraph(app: INestApplication): Promise<void> {
       lines.push(`  ${moduleId} --> ${controllerId}`);
     }
 
-    /*
-     * Providers:
-     * UseCase, Service, Repository, Strategy и т.д.
-     */
     for (const providerName of Object.keys(module.providers)) {
       const providerId = safeId(`${module.name}_${providerName}`);
 
@@ -128,16 +118,13 @@ export async function generateNestGraph(app: INestApplication): Promise<void> {
     const debugInfo = await SpelunkerModule.debug(moduleClass);
 
     for (const module of debugInfo) {
+      if (!projectModuleNames.includes(module.name)) {
+        continue;
+      }
+
       const connections: string[] = [];
       const declarations = new Set<string>();
 
-      /*
-       * Controllers dependencies
-       *
-       * UsersController
-       *    ↓ injects
-       * CreateUserUseCase
-       */
       for (const controller of module.controllers) {
         const controllerId = safeId(controller.name);
 
@@ -154,13 +141,6 @@ export async function generateNestGraph(app: INestApplication): Promise<void> {
         }
       }
 
-      /*
-       * Provider dependencies
-       *
-       * CreateUserUseCase
-       *    ↓ injects
-       * UsersRepository
-       */
       for (const provider of module.providers) {
         const providerId = safeId(provider.name);
 
@@ -179,10 +159,6 @@ export async function generateNestGraph(app: INestApplication): Promise<void> {
         }
       }
 
-      /*
-       * Если в модуле вообще нет DI-связей,
-       * пустой Mermaid-граф не создаём.
-       */
       if (connections.length === 0) {
         continue;
       }
@@ -200,24 +176,81 @@ export async function generateNestGraph(app: INestApplication): Promise<void> {
     }
   }
 
-  /*
-   * Создаём nest-graph.md
-   * в корне проекта.
-   */
+  // =========================================================
+  // 4. CQRS
+  // =========================================================
+
+  lines.push('## 4. CQRS');
+  lines.push('');
+
+  const cqrsConnections: string[] = [];
+  const cqrsDeclarations = new Set<string>();
+
+  for (const moduleClass of projectModules) {
+    const debugInfo = await SpelunkerModule.debug(moduleClass);
+
+    for (const module of debugInfo) {
+      if (!projectModuleNames.includes(module.name)) {
+        continue;
+      }
+
+      for (const provider of module.providers) {
+        const handlerName = provider.name;
+
+        // Нас интересуют только UseCase
+        if (!handlerName.endsWith('UseCase')) {
+          continue;
+        }
+
+        /*
+         * CreateUserUseCase
+         *        ↓
+         * CreateUserCommand
+         */
+        const commandName = handlerName.replace(/UseCase$/, 'Command');
+
+        const commandId = safeId(`command_${commandName}`);
+
+        const handlerId = safeId(`handler_${handlerName}`);
+
+        cqrsDeclarations.add(`  ${commandId}["📨 ${commandName}"]`);
+
+        cqrsDeclarations.add(`  ${handlerId}["🧩 ${handlerName}"]`);
+
+        cqrsConnections.push(`  ${commandId} -->|handled by| ${handlerId}`);
+      }
+    }
+  }
+
+  if (cqrsConnections.length > 0) {
+    lines.push('```mermaid');
+    lines.push('graph LR');
+
+    lines.push(...cqrsDeclarations);
+    lines.push(...cqrsConnections);
+
+    lines.push('```');
+    lines.push('');
+  }
+
+  // =========================================================
+  // CREATE FILE
+  // =========================================================
+
   writeFileSync('nest-graph.md', lines.join('\n'), 'utf-8');
 
   console.log('Nest graph создан: nest-graph.md');
 }
 
 /**
- * Делает безопасный id для Mermaid.
+ * Безопасный id для Mermaid.
  */
 function safeId(value: string): string {
   return value.replace(/[^a-zA-Z0-9_]/g, '_');
 }
 
 /**
- * Визуально различаем типы providers.
+ * Подписи разных provider'ов.
  */
 function getProviderLabel(name: string): string {
   if (name.endsWith('UseCase') || name.endsWith('CommandHandler')) {
@@ -238,6 +271,10 @@ function getProviderLabel(name: string): string {
 
   if (name.endsWith('Strategy') || name.endsWith('Guard')) {
     return `🔐 ${name}`;
+  }
+
+  if (name === 'CommandBus' || name === 'QueryBus' || name === 'EventBus') {
+    return `🚌 ${name}`;
   }
 
   return `⚙️ ${name}`;

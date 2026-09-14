@@ -12,7 +12,6 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { UsersQueryRepository } from '../infrastructure/query/users.query-repository';
-import { UsersService } from '../application/users.service';
 import { GetUsersQueryParams } from './input-dto/get-users-query-params.input-dto';
 import { PaginationViewDto } from '../../../../core/dto/base.paginated.view-dto';
 import { UserViewDto } from './view-dto/user.view-dto';
@@ -32,16 +31,19 @@ import {
 import { UsersPaginationViewDto } from './view-dto/users-pagination.view-dto';
 import { BasicAuthGuard } from '../guards/basic/basic-auth.guard';
 // import { Public } from '../decorators/public.decorator';
-import { IdInputDto } from './input-dto/id.input-dto';
 import { APIErrorResult } from '../../../../core/exceptions/filters/api-error-result';
+import { CommandBus } from '@nestjs/cqrs';
+import { CreateUserCommand } from '../application/use-cases/admin/create-user.use-case';
+import { DeleteUserCommand } from '../application/use-cases/delete-user.use-case';
+import { Types } from 'mongoose';
 
 @Controller('users')
 @UseGuards(BasicAuthGuard)
 @ApiBasicAuth('basicAuth')
 export class UsersController {
   constructor(
+    private readonly commandBus: CommandBus,
     private usersQueryRepository: UsersQueryRepository,
-    private usersService: UsersService,
   ) {
     console.log('UsersController created');
   }
@@ -107,7 +109,10 @@ export class UsersController {
   async createUser(
     @Body(new ValidationPipe()) body: CreateUserInputDto,
   ): Promise<UserViewDto> {
-    const userId = await this.usersService.createUser(body);
+    // Отправка команды в шину команд
+    const userId = await this.commandBus.execute<CreateUserCommand, string>(
+      new CreateUserCommand(body),
+    );
     return this.usersQueryRepository.getByIdOrNotFoundFail(userId);
   }
 
@@ -130,7 +135,9 @@ export class UsersController {
   })
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete(':id')
-  deleteUser(@Param() id: IdInputDto): Promise<void> {
-    return this.usersService.deleteUser(id.id);
+  deleteUser(@Param() id: Types.ObjectId): Promise<void> {
+    return this.commandBus.execute<DeleteUserCommand, void>(
+      new DeleteUserCommand(id),
+    );
   }
 }

@@ -75,8 +75,8 @@ export class User {
     }
   }
 
-  // создаём пользователя через POST /users
-  static createInstance(dto: CreateUserDomainDto): User {
+  // создаём пользователя через admin POST /users
+  static createUser(dto: CreateUserDomainDto): User {
     this.validateCreateParams(dto);
 
     const user = new this();
