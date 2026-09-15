@@ -4,6 +4,7 @@ import {
   CommentatorInfo,
   CommentatorInfoSchema,
 } from './commentator-info.schema';
+import { CreateCommentDto } from '../dto/create-comment.dto';
 
 @Schema({ timestamps: true })
 export class Comment {
@@ -22,10 +23,20 @@ export class Comment {
   @Prop({ type: Number, required: true, default: 0 })
   dislikesCount: number;
 
-  @Prop({ type: Date, required: true })
+  @Prop({ type: Date })
   createdAt: Date;
   @Prop({ type: Date, default: null })
   deletedAt: Date | null;
+
+  static createComment(dto: CreateCommentDto): Comment {
+    const comment = new this();
+
+    comment.content = dto.content;
+    comment.postId = dto.postId;
+    comment.commentatorInfo = dto.commentatorInfo;
+
+    return comment;
+  }
 }
 
 export const CommentSchema = SchemaFactory.createForClass(Comment);

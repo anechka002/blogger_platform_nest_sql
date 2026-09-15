@@ -6,7 +6,6 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { Blog, BlogSchema } from './blogs/domain/blog.entity';
 import { Post, PostSchema } from './posts/domain/post.entity';
 import { PostsController } from './posts/api/posts.controller';
-import { PostsService } from './posts/application/posts-service';
 import { PostsRepository } from './posts/infrastructure/posts.repository';
 import { PostsQueryRepository } from './posts/infrastructure/query/posts.query-repository';
 import { CommentsController } from './comments/api/comments.controller';
@@ -18,10 +17,17 @@ import { UpdateBlogUseCase } from './blogs/application/use-cases/update-blog.use
 import { DeleteBlogUseCase } from './blogs/application/use-cases/delete-blog.use-case';
 import { CreatePostForBlogUseCase } from './blogs/application/use-cases/create-post-for-blog.use-case';
 import { CqrsModule } from '@nestjs/cqrs';
+import { CreatePostUseCase } from './posts/application/use-cases/create-post.use-case';
+import { UpdatePostUseCase } from './posts/application/use-cases/update-post.use-case';
+import { DeletePostUseCase } from './posts/application/use-cases/delete-post.use-case';
+import { CreateCommentForPostUseCase } from './comments/application/use-cases/create-comment-for-post.use-case';
+import { UserAccountsModule } from '../user-accounts/user-accounts.module';
+import { CommentsRepository } from './comments/infrastructure/comments.repository';
 
 @Module({
   imports: [
     CqrsModule,
+    UserAccountsModule,
     MongooseModule.forFeature([{ name: Blog.name, schema: BlogSchema }]),
     MongooseModule.forFeature([{ name: Post.name, schema: PostSchema }]),
     MongooseModule.forFeature([{ name: Comment.name, schema: CommentSchema }]),
@@ -34,16 +40,21 @@ import { CqrsModule } from '@nestjs/cqrs';
     BlogsRepository,
     BlogsQueryRepository,
 
-    PostsService,
     PostsRepository,
     PostsQueryRepository,
 
     CommentsQueryRepository,
+    CommentsRepository,
 
     CreateBlogUseCase,
     UpdateBlogUseCase,
     DeleteBlogUseCase,
     CreatePostForBlogUseCase,
+
+    CreatePostUseCase,
+    UpdatePostUseCase,
+    DeletePostUseCase,
+    CreateCommentForPostUseCase,
   ],
 })
 export class BloggersPlatformModule {}
