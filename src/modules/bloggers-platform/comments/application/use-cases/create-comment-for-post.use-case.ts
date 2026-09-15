@@ -1,15 +1,15 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { CommentForPostInputDto } from '../../api/input-dto/comment-for-post.input-dto';
 import { PostsQueryRepository } from '../../../posts/infrastructure/query/posts.query-repository';
 import { Comment } from '../../domain/comment.entity';
 import { CommentsRepository } from '../../infrastructure/comments.repository';
 import { UsersExternalQueryRepository } from '../../../../user-accounts/users/infrastructure/external-query/users.external-query-repository';
+import { CommentDto } from '../../dto/comment.dto';
 
 export class CreateCommentForPostCommand {
   constructor(
     public userId: string,
     public postId: string,
-    public dto: CommentForPostInputDto,
+    public dto: CommentDto,
   ) {}
 }
 

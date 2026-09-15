@@ -9,8 +9,8 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 
-import { CommentForPostInputDto } from '../../../comments/api/input-dto/comment-for-post.input-dto';
-import { CommentViewDto } from '../../../comments/api/view-dto/comment.view-dto';
+import { CommentForPostInputDto } from '../input-dto/comment-for-post.input-dto';
+import { CommentViewDto } from '../view-dto/comment.view-dto';
 import { APIErrorResult } from '../../../../../core/exceptions/filters/api-error-result';
 
 export function CreateCommentForPostSwagger() {

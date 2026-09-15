@@ -35,7 +35,7 @@ import { ExtractUserFromRequest } from '../../../user-accounts/users/guards/deco
 import { CreateCommentForPostCommand } from '../../comments/application/use-cases/create-comment-for-post.use-case';
 import { UserContextDto } from '../../../user-accounts/users/guards/dto/user-context.dto';
 import { JwtAuthGuard } from '../../../user-accounts/users/guards/bearer/jwt-auth.guard';
-import { CreateCommentForPostSwagger } from './swagger/create-comment-for-blog.swagger.decorator';
+import { CreateCommentForPostSwagger } from '../../comments/api/swagger/create-comment-for-blog.swagger.decorator';
 
 @Controller('posts')
 export class PostsController {

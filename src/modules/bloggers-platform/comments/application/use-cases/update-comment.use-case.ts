@@ -38,7 +38,7 @@ export class UpdateCommentUseCase implements ICommandHandler<
       });
     }
 
-    comment.content = dto.content;
+    comment.updateContent(dto.content);
 
     await this.commentsRepository.saveComment(comment);
   }

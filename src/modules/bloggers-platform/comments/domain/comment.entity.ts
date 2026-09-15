@@ -46,6 +46,13 @@ export class Comment {
     this.deletedAt = new Date();
   }
 
+  updateContent(content: string): void {
+    if (!content.trim()) {
+      throw new Error('Comment content cannot be empty');
+    }
+    this.content = content;
+  }
+
   updateReactionCounters(prevStatus: LikeStatus, newStatus: LikeStatus): void {
     if (prevStatus === LikeStatus.None && newStatus === LikeStatus.Like) {
       this.likesCount += 1;

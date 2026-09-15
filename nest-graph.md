@@ -31,10 +31,10 @@ graph LR
   AppModule --> AppModule_AppController
   AppModule_AppService["⚙️ AppService"]
   AppModule --> AppModule_AppService
-  AppModule_APP_FILTER__UUID__5b74c2400fa5e6028e6b3_["⚙️ APP_FILTER (UUID: 5b74c2400fa5e6028e6b3)"]
-  AppModule --> AppModule_APP_FILTER__UUID__5b74c2400fa5e6028e6b3_
-  AppModule_APP_FILTER__UUID__74c2400fa5e6028e6b350_["⚙️ APP_FILTER (UUID: 74c2400fa5e6028e6b350)"]
-  AppModule --> AppModule_APP_FILTER__UUID__74c2400fa5e6028e6b350_
+  AppModule_APP_FILTER__UUID__dc15c89da30c735632355_["⚙️ APP_FILTER (UUID: dc15c89da30c735632355)"]
+  AppModule --> AppModule_APP_FILTER__UUID__dc15c89da30c735632355_
+  AppModule_APP_FILTER__UUID__15c89da30c73563235583_["⚙️ APP_FILTER (UUID: 15c89da30c73563235583)"]
+  AppModule --> AppModule_APP_FILTER__UUID__15c89da30c73563235583_
   UserAccountsModule["📦 UserAccountsModule"]
   UserAccountsModule_UsersController["🎮 UsersController"]
   UserAccountsModule --> UserAccountsModule_UsersController
