@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   HttpStatus,
@@ -18,6 +19,8 @@ import { ExtractUserFromRequest } from '../../../user-accounts/users/guards/deco
 import { UserContextDto } from '../../../user-accounts/users/guards/dto/user-context.dto';
 import { JwtAuthGuard } from '../../../user-accounts/users/guards/bearer/jwt-auth.guard';
 import { UpdateCommentSwagger } from './swagger/update-comment.swagger.decorator';
+import { DeleteCommentCommand } from '../application/use-cases/delete-comment.use-case';
+import { DeleteCommentSwagger } from './swagger/delete-comment.swagger.decorator';
 
 @Controller('comments')
 export class CommentsController {
@@ -46,6 +49,19 @@ export class CommentsController {
   ): Promise<void> {
     return this.commandBus.execute<UpdateCommentCommand, void>(
       new UpdateCommentCommand(user.id, commentId, body),
+    );
+  }
+
+  @DeleteCommentSwagger()
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @UseGuards(JwtAuthGuard)
+  @Delete(':commentId')
+  async deleteComment(
+    @Param('commentId') commentId: string,
+    @ExtractUserFromRequest() user: UserContextDto,
+  ): Promise<void> {
+    return this.commandBus.execute<DeleteCommentCommand, void>(
+      new DeleteCommentCommand(user.id, commentId),
     );
   }
 }
