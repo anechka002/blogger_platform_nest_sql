@@ -15,6 +15,7 @@ graph LR
   NotificationsModule["📦 NotificationsModule"]
   NotificationsModule -->|imports| CoreModule
   BloggersPlatformModule["📦 BloggersPlatformModule"]
+  BloggersPlatformModule -->|imports| UserAccountsModule
   BloggersPlatformModule -->|imports| CoreModule
   TestingModule["📦 TestingModule"]
   TestingModule -->|imports| CoreModule
@@ -30,10 +31,10 @@ graph LR
   AppModule --> AppModule_AppController
   AppModule_AppService["⚙️ AppService"]
   AppModule --> AppModule_AppService
-  AppModule_APP_FILTER__UUID__7917f131bc03718588cd8_["⚙️ APP_FILTER (UUID: 7917f131bc03718588cd8)"]
-  AppModule --> AppModule_APP_FILTER__UUID__7917f131bc03718588cd8_
-  AppModule_APP_FILTER__UUID__17f131bc03718588cd876_["⚙️ APP_FILTER (UUID: 17f131bc03718588cd876)"]
-  AppModule --> AppModule_APP_FILTER__UUID__17f131bc03718588cd876_
+  AppModule_APP_FILTER__UUID__4b012d04ea264d988bf50_["⚙️ APP_FILTER (UUID: 4b012d04ea264d988bf50)"]
+  AppModule --> AppModule_APP_FILTER__UUID__4b012d04ea264d988bf50_
+  AppModule_APP_FILTER__UUID__012d04ea264d988bf505c_["⚙️ APP_FILTER (UUID: 012d04ea264d988bf505c)"]
+  AppModule --> AppModule_APP_FILTER__UUID__012d04ea264d988bf505c_
   UserAccountsModule["📦 UserAccountsModule"]
   UserAccountsModule_UsersController["🎮 UsersController"]
   UserAccountsModule --> UserAccountsModule_UsersController
@@ -43,6 +44,8 @@ graph LR
   UserAccountsModule --> UserAccountsModule_AuthService
   UserAccountsModule_AuthQueryRepository["🔎 AuthQueryRepository"]
   UserAccountsModule --> UserAccountsModule_AuthQueryRepository
+  UserAccountsModule_UsersExternalQueryRepository["🔎 UsersExternalQueryRepository"]
+  UserAccountsModule --> UserAccountsModule_UsersExternalQueryRepository
   UserAccountsModule_UsersQueryRepository["🔎 UsersQueryRepository"]
   UserAccountsModule --> UserAccountsModule_UsersQueryRepository
   UserAccountsModule_UsersRepository["🗄️ UsersRepository"]
@@ -87,14 +90,14 @@ graph LR
   BloggersPlatformModule --> BloggersPlatformModule_BlogsRepository
   BloggersPlatformModule_BlogsQueryRepository["🔎 BlogsQueryRepository"]
   BloggersPlatformModule --> BloggersPlatformModule_BlogsQueryRepository
-  BloggersPlatformModule_PostsService["⚙️ PostsService"]
-  BloggersPlatformModule --> BloggersPlatformModule_PostsService
   BloggersPlatformModule_PostsRepository["🗄️ PostsRepository"]
   BloggersPlatformModule --> BloggersPlatformModule_PostsRepository
   BloggersPlatformModule_PostsQueryRepository["🔎 PostsQueryRepository"]
   BloggersPlatformModule --> BloggersPlatformModule_PostsQueryRepository
   BloggersPlatformModule_CommentsQueryRepository["🔎 CommentsQueryRepository"]
   BloggersPlatformModule --> BloggersPlatformModule_CommentsQueryRepository
+  BloggersPlatformModule_CommentsRepository["🗄️ CommentsRepository"]
+  BloggersPlatformModule --> BloggersPlatformModule_CommentsRepository
   BloggersPlatformModule_CreateBlogUseCase["🧩 CreateBlogUseCase"]
   BloggersPlatformModule --> BloggersPlatformModule_CreateBlogUseCase
   BloggersPlatformModule_UpdateBlogUseCase["🧩 UpdateBlogUseCase"]
@@ -103,6 +106,14 @@ graph LR
   BloggersPlatformModule --> BloggersPlatformModule_DeleteBlogUseCase
   BloggersPlatformModule_CreatePostForBlogUseCase["🧩 CreatePostForBlogUseCase"]
   BloggersPlatformModule --> BloggersPlatformModule_CreatePostForBlogUseCase
+  BloggersPlatformModule_CreatePostUseCase["🧩 CreatePostUseCase"]
+  BloggersPlatformModule --> BloggersPlatformModule_CreatePostUseCase
+  BloggersPlatformModule_UpdatePostUseCase["🧩 UpdatePostUseCase"]
+  BloggersPlatformModule --> BloggersPlatformModule_UpdatePostUseCase
+  BloggersPlatformModule_DeletePostUseCase["🧩 DeletePostUseCase"]
+  BloggersPlatformModule --> BloggersPlatformModule_DeletePostUseCase
+  BloggersPlatformModule_CreateCommentForPostUseCase["🧩 CreateCommentForPostUseCase"]
+  BloggersPlatformModule --> BloggersPlatformModule_CreateCommentForPostUseCase
   TestingModule["📦 TestingModule"]
   TestingModule_TestingController["🎮 TestingController"]
   TestingModule --> TestingModule_TestingController
@@ -134,6 +145,7 @@ graph LR
   UsersRepository["🗄️ UsersRepository"]
   PasswordService["⚙️ PasswordService"]
   UserModel["⚙️ UserModel"]
+  UsersExternalQueryRepository["🔎 UsersExternalQueryRepository"]
   CreateUserUseCase["🧩 CreateUserUseCase"]
   DeleteUserUseCase["🧩 DeleteUserUseCase"]
   LoginUserUseCase["🧩 LoginUserUseCase"]
@@ -154,6 +166,7 @@ graph LR
   AuthService -->|injects| UsersRepository
   AuthService -->|injects| PasswordService
   AuthQueryRepository -->|injects| UserModel
+  UsersExternalQueryRepository -->|injects| UserModel
   UsersQueryRepository -->|injects| UserModel
   UsersRepository -->|injects| UserModel
   CreateUserUseCase -->|injects| UsersRepository
@@ -194,7 +207,6 @@ graph LR
   PostsQueryRepository["🔎 PostsQueryRepository"]
   CommandBus["🚌 CommandBus"]
   PostsController["🎮 PostsController"]
-  PostsService["⚙️ PostsService"]
   CommentsQueryRepository["🔎 CommentsQueryRepository"]
   CommentsController["🎮 CommentsController"]
   BlogsRepository["🗄️ BlogsRepository"]
@@ -203,30 +215,43 @@ graph LR
   PostModel["⚙️ PostModel"]
   PostLikeModel["⚙️ PostLikeModel"]
   CommentModel["⚙️ CommentModel"]
+  CommentsRepository["🗄️ CommentsRepository"]
   CreateBlogUseCase["🧩 CreateBlogUseCase"]
   UpdateBlogUseCase["🧩 UpdateBlogUseCase"]
   DeleteBlogUseCase["🧩 DeleteBlogUseCase"]
   CreatePostForBlogUseCase["🧩 CreatePostForBlogUseCase"]
+  CreatePostUseCase["🧩 CreatePostUseCase"]
+  UpdatePostUseCase["🧩 UpdatePostUseCase"]
+  DeletePostUseCase["🧩 DeletePostUseCase"]
+  CreateCommentForPostUseCase["🧩 CreateCommentForPostUseCase"]
+  UsersExternalQueryRepository["🔎 UsersExternalQueryRepository"]
   BlogsController -->|injects| BlogsQueryRepository
   BlogsController -->|injects| PostsQueryRepository
   BlogsController -->|injects| CommandBus
-  PostsController -->|injects| PostsService
+  PostsController -->|injects| CommandBus
   PostsController -->|injects| PostsQueryRepository
   PostsController -->|injects| CommentsQueryRepository
   CommentsController -->|injects| CommentsQueryRepository
+  CommentsController -->|injects| CommandBus
   BlogsRepository -->|injects| BlogModel
   BlogsQueryRepository -->|injects| BlogModel
-  PostsService -->|injects| PostsRepository
-  PostsService -->|injects| BlogsRepository
   PostsRepository -->|injects| PostModel
   PostsQueryRepository -->|injects| PostModel
   PostsQueryRepository -->|injects| PostLikeModel
   CommentsQueryRepository -->|injects| CommentModel
+  CommentsRepository -->|injects| CommentModel
   CreateBlogUseCase -->|injects| BlogsRepository
   UpdateBlogUseCase -->|injects| BlogsRepository
   DeleteBlogUseCase -->|injects| BlogsRepository
   CreatePostForBlogUseCase -->|injects| BlogsRepository
   CreatePostForBlogUseCase -->|injects| PostsRepository
+  CreatePostUseCase -->|injects| BlogsRepository
+  CreatePostUseCase -->|injects| PostsRepository
+  UpdatePostUseCase -->|injects| PostsRepository
+  DeletePostUseCase -->|injects| PostsRepository
+  CreateCommentForPostUseCase -->|injects| UsersExternalQueryRepository
+  CreateCommentForPostUseCase -->|injects| PostsQueryRepository
+  CreateCommentForPostUseCase -->|injects| CommentsRepository
 ```
 
 ### TestingModule
@@ -251,6 +276,7 @@ graph LR
   UsersRepository["🗄️ UsersRepository"]
   PasswordService["⚙️ PasswordService"]
   UserModel["⚙️ UserModel"]
+  UsersExternalQueryRepository["🔎 UsersExternalQueryRepository"]
   CreateUserUseCase["🧩 CreateUserUseCase"]
   DeleteUserUseCase["🧩 DeleteUserUseCase"]
   LoginUserUseCase["🧩 LoginUserUseCase"]
@@ -271,6 +297,7 @@ graph LR
   AuthService -->|injects| UsersRepository
   AuthService -->|injects| PasswordService
   AuthQueryRepository -->|injects| UserModel
+  UsersExternalQueryRepository -->|injects| UserModel
   UsersQueryRepository -->|injects| UserModel
   UsersRepository -->|injects| UserModel
   CreateUserUseCase -->|injects| UsersRepository
@@ -311,7 +338,6 @@ graph LR
   PostsQueryRepository["🔎 PostsQueryRepository"]
   CommandBus["🚌 CommandBus"]
   PostsController["🎮 PostsController"]
-  PostsService["⚙️ PostsService"]
   CommentsQueryRepository["🔎 CommentsQueryRepository"]
   CommentsController["🎮 CommentsController"]
   BlogsRepository["🗄️ BlogsRepository"]
@@ -320,30 +346,109 @@ graph LR
   PostModel["⚙️ PostModel"]
   PostLikeModel["⚙️ PostLikeModel"]
   CommentModel["⚙️ CommentModel"]
+  CommentsRepository["🗄️ CommentsRepository"]
   CreateBlogUseCase["🧩 CreateBlogUseCase"]
   UpdateBlogUseCase["🧩 UpdateBlogUseCase"]
   DeleteBlogUseCase["🧩 DeleteBlogUseCase"]
   CreatePostForBlogUseCase["🧩 CreatePostForBlogUseCase"]
+  CreatePostUseCase["🧩 CreatePostUseCase"]
+  UpdatePostUseCase["🧩 UpdatePostUseCase"]
+  DeletePostUseCase["🧩 DeletePostUseCase"]
+  CreateCommentForPostUseCase["🧩 CreateCommentForPostUseCase"]
+  UsersExternalQueryRepository["🔎 UsersExternalQueryRepository"]
   BlogsController -->|injects| BlogsQueryRepository
   BlogsController -->|injects| PostsQueryRepository
   BlogsController -->|injects| CommandBus
-  PostsController -->|injects| PostsService
+  PostsController -->|injects| CommandBus
   PostsController -->|injects| PostsQueryRepository
   PostsController -->|injects| CommentsQueryRepository
   CommentsController -->|injects| CommentsQueryRepository
+  CommentsController -->|injects| CommandBus
   BlogsRepository -->|injects| BlogModel
   BlogsQueryRepository -->|injects| BlogModel
-  PostsService -->|injects| PostsRepository
-  PostsService -->|injects| BlogsRepository
   PostsRepository -->|injects| PostModel
   PostsQueryRepository -->|injects| PostModel
   PostsQueryRepository -->|injects| PostLikeModel
   CommentsQueryRepository -->|injects| CommentModel
+  CommentsRepository -->|injects| CommentModel
   CreateBlogUseCase -->|injects| BlogsRepository
   UpdateBlogUseCase -->|injects| BlogsRepository
   DeleteBlogUseCase -->|injects| BlogsRepository
   CreatePostForBlogUseCase -->|injects| BlogsRepository
   CreatePostForBlogUseCase -->|injects| PostsRepository
+  CreatePostUseCase -->|injects| BlogsRepository
+  CreatePostUseCase -->|injects| PostsRepository
+  UpdatePostUseCase -->|injects| PostsRepository
+  DeletePostUseCase -->|injects| PostsRepository
+  CreateCommentForPostUseCase -->|injects| UsersExternalQueryRepository
+  CreateCommentForPostUseCase -->|injects| PostsQueryRepository
+  CreateCommentForPostUseCase -->|injects| CommentsRepository
+```
+
+### UserAccountsModule
+
+```mermaid
+graph LR
+  UsersController["🎮 UsersController"]
+  CommandBus["🚌 CommandBus"]
+  UsersQueryRepository["🔎 UsersQueryRepository"]
+  AuthController["🎮 AuthController"]
+  AuthQueryRepository["🔎 AuthQueryRepository"]
+  AuthService["⚙️ AuthService"]
+  UsersRepository["🗄️ UsersRepository"]
+  PasswordService["⚙️ PasswordService"]
+  UserModel["⚙️ UserModel"]
+  UsersExternalQueryRepository["🔎 UsersExternalQueryRepository"]
+  CreateUserUseCase["🧩 CreateUserUseCase"]
+  DeleteUserUseCase["🧩 DeleteUserUseCase"]
+  LoginUserUseCase["🧩 LoginUserUseCase"]
+  JwtAdapter["⚙️ JwtAdapter"]
+  RegisterUserUseCase["🧩 RegisterUserUseCase"]
+  EmailService["⚙️ EmailService"]
+  ConfirmCodeUseCase["🧩 ConfirmCodeUseCase"]
+  RegisterEmailResendingUseCase["🧩 RegisterEmailResendingUseCase"]
+  NewPasswordRecoveryUseCase["🧩 NewPasswordRecoveryUseCase"]
+  PasswordRecoveryUseCase["🧩 PasswordRecoveryUseCase"]
+  LocalStrategy["🔐 LocalStrategy"]
+  JwtStrategy["🔐 JwtStrategy"]
+  JwtService["⚙️ JwtService"]
+  UsersController -->|injects| CommandBus
+  UsersController -->|injects| UsersQueryRepository
+  AuthController -->|injects| AuthQueryRepository
+  AuthController -->|injects| CommandBus
+  AuthService -->|injects| UsersRepository
+  AuthService -->|injects| PasswordService
+  AuthQueryRepository -->|injects| UserModel
+  UsersExternalQueryRepository -->|injects| UserModel
+  UsersQueryRepository -->|injects| UserModel
+  UsersRepository -->|injects| UserModel
+  CreateUserUseCase -->|injects| UsersRepository
+  CreateUserUseCase -->|injects| PasswordService
+  DeleteUserUseCase -->|injects| UsersRepository
+  LoginUserUseCase -->|injects| JwtAdapter
+  RegisterUserUseCase -->|injects| UsersRepository
+  RegisterUserUseCase -->|injects| PasswordService
+  RegisterUserUseCase -->|injects| EmailService
+  ConfirmCodeUseCase -->|injects| UsersRepository
+  RegisterEmailResendingUseCase -->|injects| UsersRepository
+  RegisterEmailResendingUseCase -->|injects| EmailService
+  NewPasswordRecoveryUseCase -->|injects| UsersRepository
+  NewPasswordRecoveryUseCase -->|injects| PasswordService
+  PasswordRecoveryUseCase -->|injects| UsersRepository
+  PasswordRecoveryUseCase -->|injects| EmailService
+  LocalStrategy -->|injects| AuthService
+  JwtAdapter -->|injects| JwtService
+```
+
+### NotificationsModule
+
+```mermaid
+graph LR
+  EmailService["⚙️ EmailService"]
+  MailerService["⚙️ MailerService"]
+  EmailTemplateManager["⚙️ EmailTemplateManager"]
+  EmailService -->|injects| MailerService
+  EmailService -->|injects| EmailTemplateManager
 ```
 
 ### NotificationsModule
@@ -385,6 +490,14 @@ graph LR
   handler_DeleteBlogUseCase["🧩 DeleteBlogUseCase"]
   command_CreatePostForBlogCommand["📨 CreatePostForBlogCommand"]
   handler_CreatePostForBlogUseCase["🧩 CreatePostForBlogUseCase"]
+  command_CreatePostCommand["📨 CreatePostCommand"]
+  handler_CreatePostUseCase["🧩 CreatePostUseCase"]
+  command_UpdatePostCommand["📨 UpdatePostCommand"]
+  handler_UpdatePostUseCase["🧩 UpdatePostUseCase"]
+  command_DeletePostCommand["📨 DeletePostCommand"]
+  handler_DeletePostUseCase["🧩 DeletePostUseCase"]
+  command_CreateCommentForPostCommand["📨 CreateCommentForPostCommand"]
+  handler_CreateCommentForPostUseCase["🧩 CreateCommentForPostUseCase"]
   command_CreateUserCommand -->|handled by| handler_CreateUserUseCase
   command_DeleteUserCommand -->|handled by| handler_DeleteUserUseCase
   command_LoginUserCommand -->|handled by| handler_LoginUserUseCase
@@ -397,6 +510,10 @@ graph LR
   command_UpdateBlogCommand -->|handled by| handler_UpdateBlogUseCase
   command_DeleteBlogCommand -->|handled by| handler_DeleteBlogUseCase
   command_CreatePostForBlogCommand -->|handled by| handler_CreatePostForBlogUseCase
+  command_CreatePostCommand -->|handled by| handler_CreatePostUseCase
+  command_UpdatePostCommand -->|handled by| handler_UpdatePostUseCase
+  command_DeletePostCommand -->|handled by| handler_DeletePostUseCase
+  command_CreateCommentForPostCommand -->|handled by| handler_CreateCommentForPostUseCase
   command_CreateUserCommand -->|handled by| handler_CreateUserUseCase
   command_DeleteUserCommand -->|handled by| handler_DeleteUserUseCase
   command_LoginUserCommand -->|handled by| handler_LoginUserUseCase
@@ -409,4 +526,16 @@ graph LR
   command_UpdateBlogCommand -->|handled by| handler_UpdateBlogUseCase
   command_DeleteBlogCommand -->|handled by| handler_DeleteBlogUseCase
   command_CreatePostForBlogCommand -->|handled by| handler_CreatePostForBlogUseCase
+  command_CreatePostCommand -->|handled by| handler_CreatePostUseCase
+  command_UpdatePostCommand -->|handled by| handler_UpdatePostUseCase
+  command_DeletePostCommand -->|handled by| handler_DeletePostUseCase
+  command_CreateCommentForPostCommand -->|handled by| handler_CreateCommentForPostUseCase
+  command_CreateUserCommand -->|handled by| handler_CreateUserUseCase
+  command_DeleteUserCommand -->|handled by| handler_DeleteUserUseCase
+  command_LoginUserCommand -->|handled by| handler_LoginUserUseCase
+  command_RegisterUserCommand -->|handled by| handler_RegisterUserUseCase
+  command_ConfirmCodeCommand -->|handled by| handler_ConfirmCodeUseCase
+  command_RegisterEmailResendingCommand -->|handled by| handler_RegisterEmailResendingUseCase
+  command_NewPasswordRecoveryCommand -->|handled by| handler_NewPasswordRecoveryUseCase
+  command_PasswordRecoveryCommand -->|handled by| handler_PasswordRecoveryUseCase
 ```

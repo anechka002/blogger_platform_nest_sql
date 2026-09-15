@@ -22,6 +22,7 @@ import { RegisterEmailResendingUseCase } from './users/application/use-cases/reg
 import { NewPasswordRecoveryUseCase } from './users/application/use-cases/new-password-recovery.use-case';
 import { PasswordRecoveryUseCase } from './users/application/use-cases/password-recovery.use-case';
 import { JwtAdapter } from '../../core/jwt/jwt.adapter';
+import { UsersExternalQueryRepository } from './users/infrastructure/external-query/users.external-query-repository';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { JwtAdapter } from '../../core/jwt/jwt.adapter';
     AuthService,
     AuthQueryRepository,
 
+    UsersExternalQueryRepository,
     UsersQueryRepository,
     UsersRepository,
 
@@ -53,5 +55,6 @@ import { JwtAdapter } from '../../core/jwt/jwt.adapter';
     JwtStrategy,
     JwtAdapter,
   ],
+  exports: [UsersExternalQueryRepository],
 })
 export class UserAccountsModule {}

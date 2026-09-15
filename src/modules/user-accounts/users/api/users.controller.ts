@@ -30,12 +30,12 @@ import {
 } from '@nestjs/swagger';
 import { UsersPaginationViewDto } from './view-dto/users-pagination.view-dto';
 import { BasicAuthGuard } from '../guards/basic/basic-auth.guard';
-// import { Public } from '../decorators/public.decorator';
 import { APIErrorResult } from '../../../../core/exceptions/filters/api-error-result';
 import { CommandBus } from '@nestjs/cqrs';
 import { CreateUserCommand } from '../application/use-cases/admin/create-user.use-case';
 import { DeleteUserCommand } from '../application/use-cases/delete-user.use-case';
 import { Types } from 'mongoose';
+// import { Public } from '../guards/decorators/public.decorator';
 
 @Controller('users')
 @UseGuards(BasicAuthGuard)
