@@ -31,10 +31,10 @@ graph LR
   AppModule --> AppModule_AppController
   AppModule_AppService["⚙️ AppService"]
   AppModule --> AppModule_AppService
-  AppModule_APP_FILTER__UUID__4b012d04ea264d988bf50_["⚙️ APP_FILTER (UUID: 4b012d04ea264d988bf50)"]
-  AppModule --> AppModule_APP_FILTER__UUID__4b012d04ea264d988bf50_
-  AppModule_APP_FILTER__UUID__012d04ea264d988bf505c_["⚙️ APP_FILTER (UUID: 012d04ea264d988bf505c)"]
-  AppModule --> AppModule_APP_FILTER__UUID__012d04ea264d988bf505c_
+  AppModule_APP_FILTER__UUID__b986f566399b428205988_["⚙️ APP_FILTER (UUID: b986f566399b428205988)"]
+  AppModule --> AppModule_APP_FILTER__UUID__b986f566399b428205988_
+  AppModule_APP_FILTER__UUID__86f566399b4282059888f_["⚙️ APP_FILTER (UUID: 86f566399b4282059888f)"]
+  AppModule --> AppModule_APP_FILTER__UUID__86f566399b4282059888f_
   UserAccountsModule["📦 UserAccountsModule"]
   UserAccountsModule_UsersController["🎮 UsersController"]
   UserAccountsModule --> UserAccountsModule_UsersController
@@ -114,6 +114,8 @@ graph LR
   BloggersPlatformModule --> BloggersPlatformModule_DeletePostUseCase
   BloggersPlatformModule_CreateCommentForPostUseCase["🧩 CreateCommentForPostUseCase"]
   BloggersPlatformModule --> BloggersPlatformModule_CreateCommentForPostUseCase
+  BloggersPlatformModule_UpdateCommentUseCase["🧩 UpdateCommentUseCase"]
+  BloggersPlatformModule --> BloggersPlatformModule_UpdateCommentUseCase
   TestingModule["📦 TestingModule"]
   TestingModule_TestingController["🎮 TestingController"]
   TestingModule --> TestingModule_TestingController
@@ -225,6 +227,7 @@ graph LR
   DeletePostUseCase["🧩 DeletePostUseCase"]
   CreateCommentForPostUseCase["🧩 CreateCommentForPostUseCase"]
   UsersExternalQueryRepository["🔎 UsersExternalQueryRepository"]
+  UpdateCommentUseCase["🧩 UpdateCommentUseCase"]
   BlogsController -->|injects| BlogsQueryRepository
   BlogsController -->|injects| PostsQueryRepository
   BlogsController -->|injects| CommandBus
@@ -252,6 +255,7 @@ graph LR
   CreateCommentForPostUseCase -->|injects| UsersExternalQueryRepository
   CreateCommentForPostUseCase -->|injects| PostsQueryRepository
   CreateCommentForPostUseCase -->|injects| CommentsRepository
+  UpdateCommentUseCase -->|injects| CommentsRepository
 ```
 
 ### TestingModule
@@ -356,6 +360,7 @@ graph LR
   DeletePostUseCase["🧩 DeletePostUseCase"]
   CreateCommentForPostUseCase["🧩 CreateCommentForPostUseCase"]
   UsersExternalQueryRepository["🔎 UsersExternalQueryRepository"]
+  UpdateCommentUseCase["🧩 UpdateCommentUseCase"]
   BlogsController -->|injects| BlogsQueryRepository
   BlogsController -->|injects| PostsQueryRepository
   BlogsController -->|injects| CommandBus
@@ -383,6 +388,7 @@ graph LR
   CreateCommentForPostUseCase -->|injects| UsersExternalQueryRepository
   CreateCommentForPostUseCase -->|injects| PostsQueryRepository
   CreateCommentForPostUseCase -->|injects| CommentsRepository
+  UpdateCommentUseCase -->|injects| CommentsRepository
 ```
 
 ### UserAccountsModule
@@ -498,6 +504,8 @@ graph LR
   handler_DeletePostUseCase["🧩 DeletePostUseCase"]
   command_CreateCommentForPostCommand["📨 CreateCommentForPostCommand"]
   handler_CreateCommentForPostUseCase["🧩 CreateCommentForPostUseCase"]
+  command_UpdateCommentCommand["📨 UpdateCommentCommand"]
+  handler_UpdateCommentUseCase["🧩 UpdateCommentUseCase"]
   command_CreateUserCommand -->|handled by| handler_CreateUserUseCase
   command_DeleteUserCommand -->|handled by| handler_DeleteUserUseCase
   command_LoginUserCommand -->|handled by| handler_LoginUserUseCase
@@ -514,6 +522,7 @@ graph LR
   command_UpdatePostCommand -->|handled by| handler_UpdatePostUseCase
   command_DeletePostCommand -->|handled by| handler_DeletePostUseCase
   command_CreateCommentForPostCommand -->|handled by| handler_CreateCommentForPostUseCase
+  command_UpdateCommentCommand -->|handled by| handler_UpdateCommentUseCase
   command_CreateUserCommand -->|handled by| handler_CreateUserUseCase
   command_DeleteUserCommand -->|handled by| handler_DeleteUserUseCase
   command_LoginUserCommand -->|handled by| handler_LoginUserUseCase
@@ -530,6 +539,7 @@ graph LR
   command_UpdatePostCommand -->|handled by| handler_UpdatePostUseCase
   command_DeletePostCommand -->|handled by| handler_DeletePostUseCase
   command_CreateCommentForPostCommand -->|handled by| handler_CreateCommentForPostUseCase
+  command_UpdateCommentCommand -->|handled by| handler_UpdateCommentUseCase
   command_CreateUserCommand -->|handled by| handler_CreateUserUseCase
   command_DeleteUserCommand -->|handled by| handler_DeleteUserUseCase
   command_LoginUserCommand -->|handled by| handler_LoginUserUseCase

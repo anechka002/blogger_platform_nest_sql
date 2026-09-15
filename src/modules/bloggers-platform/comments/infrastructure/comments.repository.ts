@@ -16,4 +16,12 @@ export class CommentsRepository {
     await commentDocument.save();
     return commentDocument;
   }
+
+  async findById(id: string): Promise<CommentDocument | null> {
+    return this.CommentModel.findById(id);
+  }
+
+  async saveComment(comment: CommentDocument): Promise<void> {
+    await comment.save();
+  }
 }
