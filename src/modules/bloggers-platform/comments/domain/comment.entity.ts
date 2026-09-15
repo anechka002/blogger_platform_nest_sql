@@ -5,6 +5,7 @@ import {
   CommentatorInfoSchema,
 } from './commentator-info.schema';
 import { CreateCommentDto } from '../dto/create-comment.dto';
+import { LikeStatus } from '../../../../core/enum/like-status';
 
 @Schema({ timestamps: true })
 export class Comment {
@@ -43,6 +44,34 @@ export class Comment {
       throw new Error('Comment is already deleted');
     }
     this.deletedAt = new Date();
+  }
+
+  updateReactionCounters(prevStatus: LikeStatus, newStatus: LikeStatus): void {
+    if (prevStatus === LikeStatus.None && newStatus === LikeStatus.Like) {
+      this.likesCount += 1;
+    }
+
+    if (prevStatus === LikeStatus.None && newStatus === LikeStatus.Dislike) {
+      this.dislikesCount += 1;
+    }
+
+    if (prevStatus === LikeStatus.Like && newStatus === LikeStatus.None) {
+      this.likesCount -= 1;
+    }
+
+    if (prevStatus === LikeStatus.Dislike && newStatus === LikeStatus.None) {
+      this.dislikesCount -= 1;
+    }
+
+    if (prevStatus === LikeStatus.Like && newStatus === LikeStatus.Dislike) {
+      this.likesCount -= 1;
+      this.dislikesCount += 1;
+    }
+
+    if (prevStatus === LikeStatus.Dislike && newStatus === LikeStatus.Like) {
+      this.likesCount += 1;
+      this.dislikesCount -= 1;
+    }
   }
 }
 

@@ -25,6 +25,12 @@ import { UserAccountsModule } from '../user-accounts/user-accounts.module';
 import { CommentsRepository } from './comments/infrastructure/comments.repository';
 import { UpdateCommentUseCase } from './comments/application/use-cases/update-comment.use-case';
 import { DeleteCommentUseCase } from './comments/application/use-cases/delete-comment.use-case';
+import { UpdateLikeStatusUseCase } from './comments/application/use-cases/update-like-status.use-case';
+import {
+  CommentLike,
+  CommentLikeSchema,
+} from './comments/domain/comment-like.entity';
+import { CommentLikesRepository } from './comments/infrastructure/comment-like.repository';
 
 @Module({
   imports: [
@@ -35,6 +41,9 @@ import { DeleteCommentUseCase } from './comments/application/use-cases/delete-co
     MongooseModule.forFeature([{ name: Comment.name, schema: CommentSchema }]),
     MongooseModule.forFeature([
       { name: PostLike.name, schema: PostLikeSchema },
+    ]),
+    MongooseModule.forFeature([
+      { name: CommentLike.name, schema: CommentLikeSchema },
     ]),
   ],
   controllers: [BlogsController, PostsController, CommentsController],
@@ -47,6 +56,7 @@ import { DeleteCommentUseCase } from './comments/application/use-cases/delete-co
 
     CommentsQueryRepository,
     CommentsRepository,
+    CommentLikesRepository,
 
     CreateBlogUseCase,
     UpdateBlogUseCase,
@@ -60,6 +70,8 @@ import { DeleteCommentUseCase } from './comments/application/use-cases/delete-co
     CreateCommentForPostUseCase,
     UpdateCommentUseCase,
     DeleteCommentUseCase,
+
+    UpdateLikeStatusUseCase,
   ],
 })
 export class BloggersPlatformModule {}

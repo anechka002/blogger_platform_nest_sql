@@ -21,6 +21,9 @@ import { JwtAuthGuard } from '../../../user-accounts/users/guards/bearer/jwt-aut
 import { UpdateCommentSwagger } from './swagger/update-comment.swagger.decorator';
 import { DeleteCommentCommand } from '../application/use-cases/delete-comment.use-case';
 import { DeleteCommentSwagger } from './swagger/delete-comment.swagger.decorator';
+import { LikeStatusInputDto } from '../../../../core/dto/like-status.input-dto';
+import { UpdateLikeStatusCommand } from '../application/use-cases/update-like-status.use-case';
+import { LikeStatusForCommentSwagger } from './swagger/like-status-for-comment.swagger.decorator';
 
 @Controller('comments')
 export class CommentsController {
@@ -62,6 +65,20 @@ export class CommentsController {
   ): Promise<void> {
     return this.commandBus.execute<DeleteCommentCommand, void>(
       new DeleteCommentCommand(user.id, commentId),
+    );
+  }
+
+  @LikeStatusForCommentSwagger()
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @UseGuards(JwtAuthGuard)
+  @Put(':commentId/like-status')
+  async updateLikeStatus(
+    @Param('commentId') commentId: string,
+    @Body() body: LikeStatusInputDto,
+    @ExtractUserFromRequest() user: UserContextDto,
+  ): Promise<void> {
+    return this.commandBus.execute<UpdateLikeStatusCommand, void>(
+      new UpdateLikeStatusCommand(user.id, commentId, body),
     );
   }
 }
