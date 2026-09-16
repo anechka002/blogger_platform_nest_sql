@@ -2,6 +2,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Model } from 'mongoose';
 import { CreatePostDomainDto } from './dto/create-post.domain.dto';
 import { UpdatePostDto } from '../dto/create-post.dto';
+import { LikeStatus } from '../../../../core/enum/like-status';
 
 @Schema({ timestamps: true })
 export class Post {
@@ -52,6 +53,34 @@ export class Post {
       throw new Error('Post is already deleted');
     }
     this.deletedAt = new Date();
+  }
+
+  updateReactionCounters(prevStatus: LikeStatus, newStatus: LikeStatus): void {
+    if (prevStatus === LikeStatus.None && newStatus === LikeStatus.Like) {
+      this.likesCount += 1;
+    }
+
+    if (prevStatus === LikeStatus.None && newStatus === LikeStatus.Dislike) {
+      this.dislikesCount += 1;
+    }
+
+    if (prevStatus === LikeStatus.Like && newStatus === LikeStatus.None) {
+      this.likesCount -= 1;
+    }
+
+    if (prevStatus === LikeStatus.Dislike && newStatus === LikeStatus.None) {
+      this.dislikesCount -= 1;
+    }
+
+    if (prevStatus === LikeStatus.Like && newStatus === LikeStatus.Dislike) {
+      this.likesCount -= 1;
+      this.dislikesCount += 1;
+    }
+
+    if (prevStatus === LikeStatus.Dislike && newStatus === LikeStatus.Like) {
+      this.likesCount += 1;
+      this.dislikesCount -= 1;
+    }
   }
 }
 

@@ -36,6 +36,9 @@ import { CreateCommentForPostCommand } from '../../comments/application/use-case
 import { UserContextDto } from '../../../user-accounts/users/guards/dto/user-context.dto';
 import { JwtAuthGuard } from '../../../user-accounts/users/guards/bearer/jwt-auth.guard';
 import { CreateCommentForPostSwagger } from '../../comments/api/swagger/create-comment-for-blog.swagger.decorator';
+import { LikeStatusInputDto } from '../../../../core/dto/like-status.input-dto';
+import { UpdatePostLikeStatusCommand } from '../application/use-cases/update-post-like-status.use-case';
+import { LikeStatusForPostSwagger } from './swagger/like-status-for-post.swagger.decorator';
 
 @Controller('posts')
 export class PostsController {
@@ -123,5 +126,19 @@ export class PostsController {
     >(new CreateCommentForPostCommand(user.id, postId, body));
 
     return this.commentsQueryRepository.getByIdOrNotFoundFail(result);
+  }
+
+  @LikeStatusForPostSwagger()
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @UseGuards(JwtAuthGuard)
+  @Put(':postId/like-status')
+  async updatePostLikeStatus(
+    @Param('postId') postId: string,
+    @ExtractUserFromRequest() user: UserContextDto,
+    @Body() body: LikeStatusInputDto,
+  ): Promise<void> {
+    return this.commandBus.execute<UpdatePostLikeStatusCommand, void>(
+      new UpdatePostLikeStatusCommand(user.id, postId, body),
+    );
   }
 }

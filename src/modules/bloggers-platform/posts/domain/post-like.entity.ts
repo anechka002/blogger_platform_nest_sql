@@ -1,6 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Model } from 'mongoose';
-import { CreatePostDomainDto } from './dto/create-post.domain.dto';
 import { LikeStatus } from '../../../../core/enum/like-status';
 
 @Schema({ timestamps: true })
@@ -9,34 +8,42 @@ export class PostLike {
   post_id: string;
   @Prop({ type: String, required: true })
   user_id: string;
-  @Prop({ type: String, required: true })
+  @Prop({ type: String })
   user_login: string;
   @Prop({
     type: String,
     required: true,
     enum: [LikeStatus.Like, LikeStatus.Dislike],
   })
-  status: string;
+  status: LikeStatus;
 
-  @Prop({ type: Date, required: true })
+  @Prop({ type: Date })
   updatedAt: Date;
-  @Prop({ type: Date, required: true })
+  @Prop({ type: Date })
   createdAt: Date;
   @Prop({ type: Date, default: null })
   deletedAt: Date | null;
 
-  static createInstancePostLike(dto: CreatePostDomainDto): PostLike {
-    const post = new this();
+  static createReaction({
+    postId,
+    userId,
+    status,
+  }: {
+    postId: string;
+    userId: string;
+    status: LikeStatus;
+  }): PostLike {
+    const reaction = new this();
 
-    // post.title = dto.title;
-    // post.content = dto.content;
-    // post.blogId = dto.blogId;
-    // post.shortDescription = dto.shortDescription;
-    // post.blogName = dto.blogName;
-    post.createdAt = new Date();
-    post.deletedAt = null;
+    reaction.post_id = postId;
+    reaction.user_id = userId;
+    reaction.status = status;
 
-    return post;
+    return reaction;
+  }
+
+  changeStatus(status: LikeStatus): void {
+    this.status = status;
   }
 }
 

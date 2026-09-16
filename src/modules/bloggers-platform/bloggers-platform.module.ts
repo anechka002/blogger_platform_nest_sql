@@ -31,6 +31,8 @@ import {
   CommentLikeSchema,
 } from './comments/domain/comment-like.entity';
 import { CommentLikesRepository } from './comments/infrastructure/comment-like.repository';
+import { UpdatePostLikeStatusUseCase } from './posts/application/use-cases/update-post-like-status.use-case';
+import { PostLikesRepository } from './posts/infrastructure/post-like.repository';
 
 @Module({
   imports: [
@@ -53,6 +55,7 @@ import { CommentLikesRepository } from './comments/infrastructure/comment-like.r
 
     PostsRepository,
     PostsQueryRepository,
+    PostLikesRepository,
 
     CommentsQueryRepository,
     CommentsRepository,
@@ -72,6 +75,7 @@ import { CommentLikesRepository } from './comments/infrastructure/comment-like.r
     DeleteCommentUseCase,
 
     UpdateLikeStatusUseCase,
+    UpdatePostLikeStatusUseCase,
   ],
 })
 export class BloggersPlatformModule {}
