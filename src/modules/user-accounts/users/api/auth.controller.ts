@@ -8,16 +8,6 @@ import {
   Res,
   UseGuards,
 } from '@nestjs/common';
-import {
-  ApiBadRequestResponse,
-  ApiBearerAuth,
-  ApiBody,
-  ApiNoContentResponse,
-  ApiOkResponse,
-  ApiOperation,
-  ApiTooManyRequestsResponse,
-  ApiUnauthorizedResponse,
-} from '@nestjs/swagger';
 import type { Response } from 'express';
 import { MeViewDto } from './view-dto/me.view.dto';
 import { ExtractUserFromRequest } from '../guards/decorators/param/extract-user-from-request.decorator';
@@ -26,7 +16,6 @@ import { AuthQueryRepository } from '../infrastructure/query/auth.query-reposito
 import { JwtAuthGuard } from '../../../../core/guards/bearer/jwt-auth.guard';
 import { CreateUserInputDto } from './input-dto/users.input-dto';
 import { ThrottlerGuard } from '@nestjs/throttler';
-import { APIErrorResult } from '../../../../core/exceptions/filters/api-error-result';
 import { RegistrationConfirmationCodeInputDto } from './input-dto/registration-confirmation-code.input-dto';
 import { RegistrationEmailResendingInputDto } from './input-dto/registration-email-resending.input-dto';
 import { NewPasswordRecoveryInputDto } from './input-dto/new-password-recovery.input-dto';
@@ -42,6 +31,13 @@ import { PasswordRecoveryCommand } from '../application/use-cases/password-recov
 import { NewPasswordRecoveryCommand } from '../application/use-cases/new-password-recovery.use-case';
 import { LoginUserCommand } from '../application/use-cases/login-user.use-case';
 import { TokensPairType } from '../../../../core/types/tokens-pair.type';
+import { RegisterSwagger } from './swagger/auth/register.swagger.decorator';
+import { ConfirmSwagger } from './swagger/auth/confirm.swagger.decorator';
+import { RegistrationEmailResendingSwagger } from './swagger/auth/registration-email-resending.swagger.decorator';
+import { PasswordRecoverySwagger } from './swagger/auth/password-recovery.swagger.decorator';
+import { NewPasswordRecoverySwagger } from './swagger/auth/new-password-recovery.swagger.decorator';
+import { LoginSwagger } from './swagger/auth/login.swagger.decorator';
+import { MeSwagger } from './swagger/auth/me.swagger.decorator';
 
 @Controller('auth')
 export class AuthController {
@@ -52,26 +48,7 @@ export class AuthController {
     console.log('AuthController created');
   }
 
-  @ApiOperation({
-    summary:
-      'Registration in the system. Email with confirmation code will be send to passed email address',
-  })
-  @ApiBody({
-    description: 'Data for registration',
-    type: CreateUserInputDto,
-  })
-  @ApiNoContentResponse({
-    description:
-      'Input data is accepted. Email with confirmation code will be send to passed email address',
-  })
-  @ApiBadRequestResponse({
-    description:
-      'If the inputModel has incorrect values (in particular if the user with the given email or login already exists)',
-    type: APIErrorResult,
-  })
-  @ApiTooManyRequestsResponse({
-    description: 'More than 5 attempts from one IP-address during 10 seconds',
-  })
+  @RegisterSwagger()
   @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(ThrottlerGuard)
   @Post('registration')
@@ -81,23 +58,7 @@ export class AuthController {
     );
   }
 
-  @ApiOperation({
-    summary: 'Confirm registration',
-  })
-  @ApiBody({
-    type: RegistrationConfirmationCodeInputDto,
-  })
-  @ApiNoContentResponse({
-    description: 'Email was verified. Account was activated',
-  })
-  @ApiBadRequestResponse({
-    description:
-      'If the confirmation code is incorrect, expired or already been applied',
-    type: APIErrorResult,
-  })
-  @ApiTooManyRequestsResponse({
-    description: 'More than 5 attempts from one IP-address during 10 seconds',
-  })
+  @ConfirmSwagger()
   @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(ThrottlerGuard)
   @Post('registration-confirmation')
@@ -109,20 +70,7 @@ export class AuthController {
     );
   }
 
-  @ApiOperation({
-    summary: 'Resend confirmation registration Email if user exists',
-  })
-  @ApiNoContentResponse({
-    description:
-      'Input data is accepted.Email with confirmation code will be send to passed email address.Confirmation code should be inside link as query param, for example: https://some-front.com/confirm-registration?code=youtcodehere',
-  })
-  @ApiBadRequestResponse({
-    description: 'If the inputModel has incorrect values',
-    type: APIErrorResult,
-  })
-  @ApiTooManyRequestsResponse({
-    description: 'More than 5 attempts from one IP-address during 10 seconds',
-  })
+  @RegistrationEmailResendingSwagger()
   @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(ThrottlerGuard)
   @Post('registration-email-resending')
@@ -134,22 +82,7 @@ export class AuthController {
     );
   }
 
-  @ApiOperation({
-    summary:
-      'Password recovery via Email confirmation. Email should be sent with RecoveryCode inside',
-  })
-  @ApiNoContentResponse({
-    description:
-      "Even if current email is not registered (for prevent user's email detection)",
-  })
-  @ApiBadRequestResponse({
-    description:
-      'If the inputModel has invalid email (for example 222^gmail.com)',
-    type: APIErrorResult,
-  })
-  @ApiTooManyRequestsResponse({
-    description: 'More than 5 attempts from one IP-address during 10 seconds',
-  })
+  @PasswordRecoverySwagger()
   @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(ThrottlerGuard)
   @Post('password-recovery')
@@ -161,20 +94,7 @@ export class AuthController {
     );
   }
 
-  @ApiOperation({
-    summary: 'Confirm Password recovery',
-  })
-  @ApiNoContentResponse({
-    description: 'If code is valid and new password is accepted',
-  })
-  @ApiBadRequestResponse({
-    description:
-      'If the inputModel has incorrect value (for incorrect password length) or RecoveryCode is incorrect or expired',
-    type: APIErrorResult,
-  })
-  @ApiTooManyRequestsResponse({
-    description: 'More than 5 attempts from one IP-address during 10 seconds',
-  })
+  @NewPasswordRecoverySwagger()
   @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(ThrottlerGuard)
   @Post('new-password')
@@ -186,35 +106,14 @@ export class AuthController {
     );
   }
 
-  @ApiBearerAuth('bearer')
-  @ApiOperation({
-    summary: 'Get information about current user',
-  })
-  @ApiOkResponse({
-    description: 'Success',
-    type: MeViewDto,
-  })
-  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @MeSwagger()
   @UseGuards(JwtAuthGuard)
   @Get('me')
   async me(@ExtractUserFromRequest() user: UserContextDto): Promise<MeViewDto> {
     return this.authQueryRepository.meOrNotFoundFail(user.id);
   }
 
-  @ApiOperation({
-    summary: 'Try login user to the system',
-  })
-  @ApiOkResponse({
-    description: 'Returns JWT accessToken (expired after 5 minutes) in body.',
-    type: AccessTokenViewDto,
-  })
-  @ApiBadRequestResponse({
-    description: 'If the inputModel has incorrect values',
-    type: APIErrorResult,
-  })
-  @ApiUnauthorizedResponse({
-    description: 'If the password or login or email is wrong',
-  })
+  @LoginSwagger()
   @HttpCode(HttpStatus.OK)
   @UseGuards(LocalAuthGuard)
   @Post('login')
