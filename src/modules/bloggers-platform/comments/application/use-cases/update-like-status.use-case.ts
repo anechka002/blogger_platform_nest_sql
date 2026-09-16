@@ -1,7 +1,7 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { DomainException } from '../../../../../core/exceptions/domain-exceptions';
 import { DomainExceptionCode } from '../../../../../core/exceptions/domain-exception-codes';
-import { LikeStatusDto } from '../../dto/like-status.dto';
+import { LikeStatusDto } from '../../../../../core/dto/like-status.dto';
 import { CommentLikesRepository } from '../../infrastructure/comment-like.repository';
 import { CommentsRepository } from '../../infrastructure/comments.repository';
 import { LikeStatus } from '../../../../../core/enum/like-status';
