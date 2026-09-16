@@ -23,7 +23,7 @@ import { MeViewDto } from './view-dto/me.view.dto';
 import { ExtractUserFromRequest } from '../guards/decorators/param/extract-user-from-request.decorator';
 import { UserContextDto } from '../guards/dto/user-context.dto';
 import { AuthQueryRepository } from '../infrastructure/query/auth.query-repository';
-import { JwtAuthGuard } from '../guards/bearer/jwt-auth.guard';
+import { JwtAuthGuard } from '../../../../core/guards/bearer/jwt-auth.guard';
 import { CreateUserInputDto } from './input-dto/users.input-dto';
 import { ThrottlerGuard } from '@nestjs/throttler';
 import { APIErrorResult } from '../../../../core/exceptions/filters/api-error-result';
@@ -31,7 +31,7 @@ import { RegistrationConfirmationCodeInputDto } from './input-dto/registration-c
 import { RegistrationEmailResendingInputDto } from './input-dto/registration-email-resending.input-dto';
 import { NewPasswordRecoveryInputDto } from './input-dto/new-password-recovery.input-dto';
 import { PasswordRecoveryInputDto } from './input-dto/password-recovery.input-dto';
-import { LocalAuthGuard } from '../guards/local/local-auth.guard';
+import { LocalAuthGuard } from '../../../../core/guards/local/local-auth.guard';
 import { AccessTokenViewDto } from './view-dto/login.view-dto';
 import { LoginInputDto } from './input-dto/login.input-dto';
 import { CommandBus } from '@nestjs/cqrs';

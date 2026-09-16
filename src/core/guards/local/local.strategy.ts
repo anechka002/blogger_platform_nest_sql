@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
-import { AuthService } from '../../application/services/auth.service';
-import { UserContextDto } from '../dto/user-context.dto';
-import { DomainException } from '../../../../../core/exceptions/domain-exceptions';
-import { DomainExceptionCode } from '../../../../../core/exceptions/domain-exception-codes';
+import { AuthService } from '../../../modules/user-accounts/users/application/services/auth.service';
+import { UserContextDto } from '../../../modules/user-accounts/users/guards/dto/user-context.dto';
+import { DomainException } from '../../exceptions/domain-exceptions';
+import { DomainExceptionCode } from '../../exceptions/domain-exception-codes';
 import { Strategy } from 'passport-local';
 
 @Injectable()

@@ -8,7 +8,7 @@ export class PostLike {
   post_id: string;
   @Prop({ type: String, required: true })
   user_id: string;
-  @Prop({ type: String })
+  @Prop({ type: String, required: true })
   user_login: string;
   @Prop({
     type: String,
@@ -27,16 +27,19 @@ export class PostLike {
   static createReaction({
     postId,
     userId,
+    userLogin,
     status,
   }: {
     postId: string;
     userId: string;
+    userLogin: string;
     status: LikeStatus;
   }): PostLike {
     const reaction = new this();
 
     reaction.post_id = postId;
     reaction.user_id = userId;
+    reaction.user_login = userLogin;
     reaction.status = status;
 
     return reaction;

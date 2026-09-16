@@ -31,10 +31,10 @@ graph LR
   AppModule --> AppModule_AppController
   AppModule_AppService["⚙️ AppService"]
   AppModule --> AppModule_AppService
-  AppModule_APP_FILTER__UUID__2f346570afdd1a9d5f2bc_["⚙️ APP_FILTER (UUID: 2f346570afdd1a9d5f2bc)"]
-  AppModule --> AppModule_APP_FILTER__UUID__2f346570afdd1a9d5f2bc_
-  AppModule_APP_FILTER__UUID__346570afdd1a9d5f2bc11_["⚙️ APP_FILTER (UUID: 346570afdd1a9d5f2bc11)"]
-  AppModule --> AppModule_APP_FILTER__UUID__346570afdd1a9d5f2bc11_
+  AppModule_APP_FILTER__UUID__d3c36c44bbe4254fa95e6_["⚙️ APP_FILTER (UUID: d3c36c44bbe4254fa95e6)"]
+  AppModule --> AppModule_APP_FILTER__UUID__d3c36c44bbe4254fa95e6_
+  AppModule_APP_FILTER__UUID__c36c44bbe4254fa95e6a7_["⚙️ APP_FILTER (UUID: c36c44bbe4254fa95e6a7)"]
+  AppModule --> AppModule_APP_FILTER__UUID__c36c44bbe4254fa95e6a7_
   UserAccountsModule["📦 UserAccountsModule"]
   UserAccountsModule_UsersController["🎮 UsersController"]
   UserAccountsModule --> UserAccountsModule_UsersController
@@ -228,9 +228,9 @@ graph LR
   PostLikeModel["⚙️ PostLikeModel"]
   PostLikesRepository["🗄️ PostLikesRepository"]
   CommentModel["⚙️ CommentModel"]
+  CommentLikeModel["⚙️ CommentLikeModel"]
   CommentsRepository["🗄️ CommentsRepository"]
   CommentLikesRepository["🗄️ CommentLikesRepository"]
-  CommentLikeModel["⚙️ CommentLikeModel"]
   CreateBlogUseCase["🧩 CreateBlogUseCase"]
   UpdateBlogUseCase["🧩 UpdateBlogUseCase"]
   DeleteBlogUseCase["🧩 DeleteBlogUseCase"]
@@ -259,6 +259,7 @@ graph LR
   PostsQueryRepository -->|injects| PostLikeModel
   PostLikesRepository -->|injects| PostLikeModel
   CommentsQueryRepository -->|injects| CommentModel
+  CommentsQueryRepository -->|injects| CommentLikeModel
   CommentsRepository -->|injects| CommentModel
   CommentLikesRepository -->|injects| CommentLikeModel
   CreateBlogUseCase -->|injects| BlogsRepository
@@ -279,6 +280,7 @@ graph LR
   UpdateLikeStatusUseCase -->|injects| CommentsRepository
   UpdatePostLikeStatusUseCase -->|injects| PostsRepository
   UpdatePostLikeStatusUseCase -->|injects| PostLikesRepository
+  UpdatePostLikeStatusUseCase -->|injects| UsersExternalQueryRepository
 ```
 
 ### TestingModule
@@ -374,9 +376,9 @@ graph LR
   PostLikeModel["⚙️ PostLikeModel"]
   PostLikesRepository["🗄️ PostLikesRepository"]
   CommentModel["⚙️ CommentModel"]
+  CommentLikeModel["⚙️ CommentLikeModel"]
   CommentsRepository["🗄️ CommentsRepository"]
   CommentLikesRepository["🗄️ CommentLikesRepository"]
-  CommentLikeModel["⚙️ CommentLikeModel"]
   CreateBlogUseCase["🧩 CreateBlogUseCase"]
   UpdateBlogUseCase["🧩 UpdateBlogUseCase"]
   DeleteBlogUseCase["🧩 DeleteBlogUseCase"]
@@ -405,6 +407,7 @@ graph LR
   PostsQueryRepository -->|injects| PostLikeModel
   PostLikesRepository -->|injects| PostLikeModel
   CommentsQueryRepository -->|injects| CommentModel
+  CommentsQueryRepository -->|injects| CommentLikeModel
   CommentsRepository -->|injects| CommentModel
   CommentLikesRepository -->|injects| CommentLikeModel
   CreateBlogUseCase -->|injects| BlogsRepository
@@ -425,6 +428,7 @@ graph LR
   UpdateLikeStatusUseCase -->|injects| CommentsRepository
   UpdatePostLikeStatusUseCase -->|injects| PostsRepository
   UpdatePostLikeStatusUseCase -->|injects| PostLikesRepository
+  UpdatePostLikeStatusUseCase -->|injects| UsersExternalQueryRepository
 ```
 
 ### UserAccountsModule

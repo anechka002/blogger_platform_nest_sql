@@ -22,7 +22,7 @@ import { ExtendedPostViewDto } from './view-dto/extended-post.view-dto';
 import { CommandBus } from '@nestjs/cqrs';
 import { CreatePostCommand } from '../application/use-cases/create-post.use-case';
 import { CreatePostSwagger } from './swagger/create-post.swagger.decorator';
-import { BasicAuthGuard } from '../../../user-accounts/users/guards/basic/basic-auth.guard';
+import { BasicAuthGuard } from '../../../../core/guards/basic/basic-auth.guard';
 import { UpdatePostCommand } from '../application/use-cases/update-post.use-case';
 import { UpdatePostSwagger } from './swagger/update-post.swagger.decorator';
 import { DeletePostCommand } from '../application/use-cases/delete-post.use-case';
@@ -34,11 +34,13 @@ import { CommentForPostInputDto } from '../../comments/api/input-dto/comment-for
 import { ExtractUserFromRequest } from '../../../user-accounts/users/guards/decorators/param/extract-user-from-request.decorator';
 import { CreateCommentForPostCommand } from '../../comments/application/use-cases/create-comment-for-post.use-case';
 import { UserContextDto } from '../../../user-accounts/users/guards/dto/user-context.dto';
-import { JwtAuthGuard } from '../../../user-accounts/users/guards/bearer/jwt-auth.guard';
+import { JwtAuthGuard } from '../../../../core/guards/bearer/jwt-auth.guard';
 import { CreateCommentForPostSwagger } from '../../comments/api/swagger/create-comment-for-blog.swagger.decorator';
 import { LikeStatusInputDto } from '../../../../core/dto/like-status.input-dto';
 import { UpdatePostLikeStatusCommand } from '../application/use-cases/update-post-like-status.use-case';
 import { LikeStatusForPostSwagger } from './swagger/like-status-for-post.swagger.decorator';
+import { JwtOptionalAuthGuard } from '../../../../core/guards/bearer/jwt-optional-auth.guard';
+import { ExtractUserFromRequestOptional } from '../../../user-accounts/users/guards/decorators/param/extract-user-from-request-optional.decorator';
 
 @Controller('posts')
 export class PostsController {
@@ -47,22 +49,28 @@ export class PostsController {
     private postsQueryRepository: PostsQueryRepository,
     private commentsQueryRepository: CommentsQueryRepository,
   ) {
-    console.log('BlogsController');
+    console.log('PostsController');
   }
 
   @GetPostByIdSwagger()
+  @UseGuards(JwtOptionalAuthGuard)
   @Get(':id')
-  async getById(@Param('id') id: string): Promise<ExtendedPostViewDto> {
+  async getById(
+    @Param('id') id: string,
+    @ExtractUserFromRequestOptional() user: UserContextDto | null,
+  ): Promise<ExtendedPostViewDto> {
     // NestJS будет дожидаться, когда промис зарезолвится и затем NestJS вернёт результат клиенту
-    return this.postsQueryRepository.getByIdOrNotFoundFail(id);
+    return this.postsQueryRepository.getByIdOrNotFoundFail(id, user?.id);
   }
 
   @GetPostsSwagger()
+  @UseGuards(JwtOptionalAuthGuard)
   @Get()
   async getAll(
     @Query() query: GetPostsQueryParams,
+    @ExtractUserFromRequestOptional() user: UserContextDto | null,
   ): Promise<PaginationViewDto<ExtendedPostViewDto>> {
-    return this.postsQueryRepository.findAllPosts(query);
+    return this.postsQueryRepository.findAllPosts(query, user?.id);
   }
 
   @CreatePostSwagger()
@@ -103,13 +111,19 @@ export class PostsController {
   }
 
   @GetCommentsForPostSwagger()
+  @UseGuards(JwtOptionalAuthGuard)
   @Get(':postId/comments')
   async getCommentsForPost(
     @Param('postId') postId: string,
     @Query() query: GetPostsQueryParams,
+    @ExtractUserFromRequestOptional() user: UserContextDto | null,
   ): Promise<PaginationViewDto<CommentViewDto>> {
     await this.postsQueryRepository.getByIdOrNotFoundFail(postId);
-    return this.commentsQueryRepository.findCommentsByPostId(postId, query);
+    return this.commentsQueryRepository.findCommentsByPostId(
+      postId,
+      query,
+      user?.id,
+    );
   }
 
   @CreateCommentForPostSwagger()

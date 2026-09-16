@@ -17,13 +17,15 @@ import { UpdateCommentCommand } from '../application/use-cases/update-comment.us
 import { CommentForPostInputDto } from './input-dto/comment-for-post.input-dto';
 import { ExtractUserFromRequest } from '../../../user-accounts/users/guards/decorators/param/extract-user-from-request.decorator';
 import { UserContextDto } from '../../../user-accounts/users/guards/dto/user-context.dto';
-import { JwtAuthGuard } from '../../../user-accounts/users/guards/bearer/jwt-auth.guard';
+import { JwtAuthGuard } from '../../../../core/guards/bearer/jwt-auth.guard';
 import { UpdateCommentSwagger } from './swagger/update-comment.swagger.decorator';
 import { DeleteCommentCommand } from '../application/use-cases/delete-comment.use-case';
 import { DeleteCommentSwagger } from './swagger/delete-comment.swagger.decorator';
 import { LikeStatusInputDto } from '../../../../core/dto/like-status.input-dto';
 import { UpdateLikeStatusCommand } from '../application/use-cases/update-like-status.use-case';
 import { LikeStatusForCommentSwagger } from './swagger/like-status-for-comment.swagger.decorator';
+import { JwtOptionalAuthGuard } from '../../../../core/guards/bearer/jwt-optional-auth.guard';
+import { ExtractUserFromRequestOptional } from '../../../user-accounts/users/guards/decorators/param/extract-user-from-request-optional.decorator';
 
 @Controller('comments')
 export class CommentsController {
@@ -35,10 +37,14 @@ export class CommentsController {
   }
 
   @GetCommentByIdSwagger()
+  @UseGuards(JwtOptionalAuthGuard)
   @Get(':id')
-  async getById(@Param('id') id: string): Promise<CommentViewDto> {
+  async getById(
+    @Param('id') id: string,
+    @ExtractUserFromRequestOptional() user: UserContextDto | null,
+  ): Promise<CommentViewDto> {
     // NestJS будет дожидаться, когда промис зарезолвится и затем NestJS вернёт результат клиенту
-    return this.commentsQueryRepository.getByIdOrNotFoundFail(id);
+    return this.commentsQueryRepository.getByIdOrNotFoundFail(id, user?.id);
   }
 
   @UpdateCommentSwagger()

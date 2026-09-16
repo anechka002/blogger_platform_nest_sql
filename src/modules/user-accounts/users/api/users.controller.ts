@@ -29,7 +29,7 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { UsersPaginationViewDto } from './view-dto/users-pagination.view-dto';
-import { BasicAuthGuard } from '../guards/basic/basic-auth.guard';
+import { BasicAuthGuard } from '../../../../core/guards/basic/basic-auth.guard';
 import { APIErrorResult } from '../../../../core/exceptions/filters/api-error-result';
 import { CommandBus } from '@nestjs/cqrs';
 import { CreateUserCommand } from '../application/use-cases/admin/create-user.use-case';

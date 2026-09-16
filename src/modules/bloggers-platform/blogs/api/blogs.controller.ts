@@ -26,7 +26,7 @@ import { CreateBlogCommand } from '../application/use-cases/create-blog.use-case
 import { UpdateBlogCommand } from '../application/use-cases/update-blog.use-case';
 import { DeleteBlogCommand } from '../application/use-cases/delete-blog.use-case';
 import { CreatePostForBlogCommand } from '../application/use-cases/create-post-for-blog.use-case';
-import { BasicAuthGuard } from '../../../user-accounts/users/guards/basic/basic-auth.guard';
+import { BasicAuthGuard } from '../../../../core/guards/basic/basic-auth.guard';
 import { CreateBlogSwagger } from './swagger/create-blog.swagger.decorator';
 import { UpdateBlogSwagger } from './swagger/update-blog.swagger.decorator';
 import { DeleteBlogSwagger } from './swagger/delete-blog.swagger.decorator';
@@ -35,6 +35,9 @@ import { GetBlogsSwagger } from './swagger/get-blogs.swagger.decorator';
 import { GetBlogByIdSwagger } from './swagger/get-blog-by-id.swagger.decorator';
 import { GetPostsForBlogSwagger } from './swagger/get-posts-for-blog.swagger.decorator';
 import { Public } from '../../../user-accounts/users/guards/decorators/public.decorator';
+import { JwtOptionalAuthGuard } from '../../../../core/guards/bearer/jwt-optional-auth.guard';
+import { ExtractUserFromRequestOptional } from '../../../user-accounts/users/guards/decorators/param/extract-user-from-request-optional.decorator';
+import { UserContextDto } from '../../../user-accounts/users/guards/dto/user-context.dto';
 
 @UseGuards(BasicAuthGuard)
 @Controller('blogs')
@@ -66,13 +69,15 @@ export class BlogsController {
 
   @GetPostsForBlogSwagger()
   @Public()
+  @UseGuards(JwtOptionalAuthGuard)
   @Get(':blogId/posts')
   async getPostsForBlog(
     @Param('blogId') blogId: string,
     @Query() query: GetPostsQueryParams,
+    @ExtractUserFromRequestOptional() user: UserContextDto | null,
   ): Promise<PaginationViewDto<ExtendedPostViewDto>> {
     await this.blogsQueryRepository.getByIdOrNotFoundFail(blogId);
-    return this.postsQueryRepository.findPostsByBlogId(blogId, query);
+    return this.postsQueryRepository.findPostsByBlogId(blogId, query, user?.id);
   }
 
   @CreateBlogSwagger()

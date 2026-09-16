@@ -20,6 +20,7 @@ export class PostsQueryRepository {
   }
   async findAllPosts(
     query: GetPostsQueryParams,
+    userId?: string,
   ): Promise<PaginationViewDto<ExtendedPostViewDto>> {
     const filter: QueryFilter<Post> = { deletedAt: null };
 
@@ -40,15 +41,27 @@ export class PostsQueryRepository {
       _id: -1,
     });
 
+    const userReactions = userId
+      ? await this.PostLikeModel.find({
+          post_id: { $in: postsIds },
+          user_id: userId,
+        })
+      : [];
+
     const items = posts.map((post) => {
+      const postId = post._id.toString();
+
       const newestLikes = allLikesForPosts
-        .filter((like) => like.post_id === post._id.toString())
+        .filter((like) => like.post_id === postId)
         .slice(0, 3);
-      return ExtendedPostViewDto.mapExtendedToView(
-        post,
-        LikeStatus.None,
-        newestLikes,
+
+      const userReaction = userReactions.find(
+        (reaction) => reaction.post_id === postId,
       );
+
+      const myStatus = userReaction?.status ?? LikeStatus.None;
+
+      return ExtendedPostViewDto.mapExtendedToView(post, myStatus, newestLikes);
     });
 
     return PaginationViewDto.mapToView({
@@ -59,7 +72,10 @@ export class PostsQueryRepository {
     });
   }
 
-  async getByIdOrNotFoundFail(id: string): Promise<ExtendedPostViewDto> {
+  async getByIdOrNotFoundFail(
+    id: string,
+    userId?: string,
+  ): Promise<ExtendedPostViewDto> {
     const post = await this.PostModel.findOne({
       _id: id,
       deletedAt: null,
@@ -69,12 +85,27 @@ export class PostsQueryRepository {
       throw new NotFoundException('Post not found');
     }
 
-    return ExtendedPostViewDto.mapExtendedToView(post, LikeStatus.None, []);
+    const userReaction = userId
+      ? await this.PostLikeModel.findOne({ post_id: id, user_id: userId })
+      : null;
+
+    const myStatus = userReaction?.status ?? LikeStatus.None;
+
+    // Получаем последние три реакции со статусом Like.
+    const newestLikes = await this.PostLikeModel.find({
+      post_id: id,
+      status: LikeStatus.Like,
+    })
+      .sort({ updatedAt: -1 })
+      .limit(3);
+
+    return ExtendedPostViewDto.mapExtendedToView(post, myStatus, newestLikes);
   }
 
   async findPostsByBlogId(
     blogId: string,
     query: GetPostsQueryParams,
+    userId?: string,
   ): Promise<PaginationViewDto<ExtendedPostViewDto>> {
     const filter: QueryFilter<Post> = {
       blogId,
@@ -87,8 +118,37 @@ export class PostsQueryRepository {
 
     const totalCount = await this.PostModel.countDocuments(filter);
 
+    const postsIds = posts.map((post) => post._id.toString());
+
+    const allLikesForPosts = await this.PostLikeModel.find({
+      post_id: { $in: postsIds },
+      status: LikeStatus.Like,
+    }).sort({
+      updatedAt: -1,
+      _id: -1,
+    });
+
+    const userReactions = userId
+      ? await this.PostLikeModel.find({
+          post_id: { $in: postsIds },
+          user_id: userId,
+        })
+      : [];
+
     const items = posts.map((post) => {
-      return ExtendedPostViewDto.mapExtendedToView(post, LikeStatus.None, []);
+      const postId = post._id.toString();
+
+      const newestLikes = allLikesForPosts
+        .filter((like) => like.post_id === postId)
+        .slice(0, 3);
+
+      const userReaction = userReactions.find(
+        (reaction) => reaction.post_id === postId,
+      );
+
+      const myStatus = userReaction?.status ?? LikeStatus.None;
+
+      return ExtendedPostViewDto.mapExtendedToView(post, myStatus, newestLikes);
     });
 
     return PaginationViewDto.mapToView({

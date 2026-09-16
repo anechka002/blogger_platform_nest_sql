@@ -10,22 +10,14 @@ import { DomainExceptionCode } from '../domain-exception-codes';
 // import { ErrorResponseBody } from './error-response-body.type';
 import { APIErrorResult } from './api-error-result';
 
-//https://docs.nestjs.com/exception-filters#exception-filters-1
-// Этот фильтр обрабатывает только ошибки типа DomainException.
-// То есть Nest вызовет его, если где-то будет выброшен:
-// throw new DomainException(...)
+// Обрабатывает только DomainException
 @Catch(DomainException)
 export class DomainHttpExceptionsFilter implements ExceptionFilter {
   catch(exception: DomainException, host: ArgumentsHost): void {
-    // host — это общий контекст выполнения Nest.
-    // Nest может работать не только с HTTP, но и, например, с WebSocket/RPC.
-    //
-    // switchToHttp() говорит:
-    // "Нас сейчас интересует именно HTTP-контекст".
+    // Переключаемся на HTTP-контекст
     const ctx = host.switchToHttp();
 
     // Получаем HTTP-response.
-    // Через него потом отправим клиенту статус и JSON.
     const response = ctx.getResponse<Response>();
 
     // Получаем текущий HTTP-request.
@@ -33,60 +25,30 @@ export class DomainHttpExceptionsFilter implements ExceptionFilter {
     // const request = ctx.getRequest<Request>();
 
     // Пользователь не аутентифицирован / неверные credentials.
+    // 401 возвращаем без body
     if (exception.code === DomainExceptionCode.Unauthorized) {
       response.status(HttpStatus.UNAUTHORIZED).send();
       return;
     }
 
-    // Ресурс не найден.
+    // 404 возвращаем без body
     if (exception.code === DomainExceptionCode.NotFound) {
       response.status(HttpStatus.NOT_FOUND).send();
       return;
     }
 
-    // exception.code — это наш внутренний код ошибки приложения.
-    //
-    // Например:
-    // DomainExceptionCode.ValidationError = 5
-    //
-    // Но клиенту нужен обычный HTTP status:
-    // ValidationError -> 400
-    // NotFound        -> 404
-    // Unauthorized    -> 401
-    //
-    // Поэтому переводим domain code в HTTP status.
+    // Переводим domain code в HTTP status
     const status = this.mapToHttpStatus(exception.code);
 
-    // Формируем объект, который уйдет клиенту в body ответа.
-    //
-    // Берем данные из exception:
-    // message
-    // code
-    // extensions
-    //
-    // И добавляем данные HTTP-запроса:
-    // request.url
+    // Формируем body ошибки
     const responseBody = this.buildResponseBody(exception);
 
-    // Физически отправляем HTTP-response клиенту.
-    //
-    // Например:
-    // status = 400
-    //
-    // body =
-    // {
-    //   timestamp: "...",
-    //   path: "/app/users",
-    //   message: "Validation failed",
-    //   code: 5,
-    //   extensions: [...]
-    // }
+    // Отправляем ответ клиенту
     response.status(status).json(responseBody);
   }
 
   private mapToHttpStatus(code: DomainExceptionCode): number {
-    // Переводим внутренние коды приложения
-    // в стандартные HTTP status codes.
+    // Переводим внутренние коды приложения в стандартные HTTP status codes.
     switch (code) {
       // Несколько разных domain-ошибок
       // с точки зрения HTTP являются Bad Request.
@@ -101,21 +63,11 @@ export class DomainHttpExceptionsFilter implements ExceptionFilter {
       case DomainExceptionCode.Forbidden:
         return HttpStatus.FORBIDDEN;
 
-      // Ресурс не найден.
-      // case DomainExceptionCode.NotFound:
-      //   return HttpStatus.NOT_FOUND;
-
-      // Пользователь не аутентифицирован / неверные credentials.
-      // case DomainExceptionCode.Unauthorized:
-      //   return HttpStatus.UNAUTHORIZED;
-
       // Внутренняя ошибка сервера.
       case DomainExceptionCode.InternalServerError:
         return HttpStatus.INTERNAL_SERVER_ERROR;
 
-      // Запасной вариант:
-      // если появился неизвестный DomainExceptionCode,
-      // который мы забыли добавить в switch.
+      // Неизвестный domain code
       default:
         return HttpStatus.I_AM_A_TEAPOT;
     }
@@ -125,7 +77,7 @@ export class DomainHttpExceptionsFilter implements ExceptionFilter {
     exception: DomainException,
     // requestUrl: string,
   ): APIErrorResult {
-    // Собираем единый формат ошибки, который будет получать клиент.
+    // Приводим extensions к формату API
     return {
       errorsMessages: exception.extensions.map((e) => {
         return {

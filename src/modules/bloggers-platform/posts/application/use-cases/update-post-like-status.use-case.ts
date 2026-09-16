@@ -4,6 +4,7 @@ import { LikeStatusDto } from '../../../../../core/dto/like-status.dto';
 import { PostLikesRepository } from '../../infrastructure/post-like.repository';
 import { LikeStatus } from '../../../../../core/enum/like-status';
 import { PostLike } from '../../domain/post-like.entity';
+import { UsersExternalQueryRepository } from '../../../../user-accounts/users/infrastructure/external-query/users.external-query-repository';
 
 export class UpdatePostLikeStatusCommand {
   constructor(
@@ -21,6 +22,7 @@ export class UpdatePostLikeStatusUseCase implements ICommandHandler<
   constructor(
     private readonly postsRepository: PostsRepository,
     private readonly postLikesRepository: PostLikesRepository,
+    private readonly usersExternalQueryRepository: UsersExternalQueryRepository,
   ) {}
   async execute({
     userId,
@@ -28,6 +30,9 @@ export class UpdatePostLikeStatusUseCase implements ICommandHandler<
     dto,
   }: UpdatePostLikeStatusCommand): Promise<void> {
     const post = await this.postsRepository.findOrNotFoundFail(postId);
+
+    const user =
+      await this.usersExternalQueryRepository.getByIdOrNotFoundFail(userId);
 
     // Ищем реакцию именно этого пользователя именно на этот post.
     const currentReaction = await this.postLikesRepository.findReaction({
@@ -51,6 +56,7 @@ export class UpdatePostLikeStatusUseCase implements ICommandHandler<
       const reaction = PostLike.createReaction({
         postId,
         userId,
+        userLogin: user.login,
         status: dto.likeStatus,
       });
 
