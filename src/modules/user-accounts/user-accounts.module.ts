@@ -21,7 +21,7 @@ import { ConfirmCodeUseCase } from './users/application/use-cases/confirm-code.u
 import { RegisterEmailResendingUseCase } from './users/application/use-cases/register-email-resending.use-case';
 import { NewPasswordRecoveryUseCase } from './users/application/use-cases/new-password-recovery.use-case';
 import { PasswordRecoveryUseCase } from './users/application/use-cases/password-recovery.use-case';
-import { JwtAdapter } from '../../core/jwt/jwt.adapter';
+import { JwtAdapter } from './users/application/services/jwt/jwt.adapter';
 import { UsersExternalQueryRepository } from './users/infrastructure/external-query/users.external-query-repository';
 
 @Module({

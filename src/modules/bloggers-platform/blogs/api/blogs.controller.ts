@@ -34,9 +34,9 @@ import { CreatePostForBlogSwagger } from './swagger/create-post-for-blog.swagger
 import { GetBlogsSwagger } from './swagger/get-blogs.swagger.decorator';
 import { GetBlogByIdSwagger } from './swagger/get-blog-by-id.swagger.decorator';
 import { GetPostsForBlogSwagger } from './swagger/get-posts-for-blog.swagger.decorator';
-import { Public } from '../../../user-accounts/users/guards/decorators/public.decorator';
+import { Public } from '../../../../core/decorators/user/public.decorator';
 import { JwtOptionalAuthGuard } from '../../../../core/guards/bearer/jwt-optional-auth.guard';
-import { ExtractUserFromRequestOptional } from '../../../user-accounts/users/guards/decorators/param/extract-user-from-request-optional.decorator';
+import { ExtractUserFromRequestOptional } from '../../../../core/decorators/user/param/extract-user-from-request-optional.decorator';
 import { UserContextDto } from '../../../user-accounts/users/guards/dto/user-context.dto';
 
 @UseGuards(BasicAuthGuard)

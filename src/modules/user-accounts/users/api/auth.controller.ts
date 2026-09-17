@@ -10,7 +10,7 @@ import {
 } from '@nestjs/common';
 import type { Response } from 'express';
 import { MeViewDto } from './view-dto/me.view.dto';
-import { ExtractUserFromRequest } from '../guards/decorators/param/extract-user-from-request.decorator';
+import { ExtractUserFromRequest } from '../../../../core/decorators/user/param/extract-user-from-request.decorator';
 import { UserContextDto } from '../guards/dto/user-context.dto';
 import { AuthQueryRepository } from '../infrastructure/query/auth.query-repository';
 import { JwtAuthGuard } from '../../../../core/guards/bearer/jwt-auth.guard';

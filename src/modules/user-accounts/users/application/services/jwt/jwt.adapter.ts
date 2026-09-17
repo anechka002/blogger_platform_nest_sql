@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService, JwtSignOptions } from '@nestjs/jwt';
-import { RefreshTokenPayloadType } from '../types/refresh-token-payload.type';
+import { RefreshTokenPayloadType } from '../../../../../../core/types/refresh-token-payload.type';
 
 // адаптер для работы с jwt
 @Injectable()

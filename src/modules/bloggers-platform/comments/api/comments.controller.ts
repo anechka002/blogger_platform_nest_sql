@@ -15,7 +15,7 @@ import { CommandBus } from '@nestjs/cqrs';
 import { GetCommentByIdSwagger } from './swagger/get-comment-by-id.swagger.decorator';
 import { UpdateCommentCommand } from '../application/use-cases/update-comment.use-case';
 import { CommentForPostInputDto } from './input-dto/comment-for-post.input-dto';
-import { ExtractUserFromRequest } from '../../../user-accounts/users/guards/decorators/param/extract-user-from-request.decorator';
+import { ExtractUserFromRequest } from '../../../../core/decorators/user/param/extract-user-from-request.decorator';
 import { UserContextDto } from '../../../user-accounts/users/guards/dto/user-context.dto';
 import { JwtAuthGuard } from '../../../../core/guards/bearer/jwt-auth.guard';
 import { UpdateCommentSwagger } from './swagger/update-comment.swagger.decorator';
@@ -25,7 +25,7 @@ import { LikeStatusInputDto } from '../../../../core/dto/like-status.input-dto';
 import { UpdateLikeStatusCommand } from '../application/use-cases/update-like-status.use-case';
 import { LikeStatusForCommentSwagger } from './swagger/like-status-for-comment.swagger.decorator';
 import { JwtOptionalAuthGuard } from '../../../../core/guards/bearer/jwt-optional-auth.guard';
-import { ExtractUserFromRequestOptional } from '../../../user-accounts/users/guards/decorators/param/extract-user-from-request-optional.decorator';
+import { ExtractUserFromRequestOptional } from '../../../../core/decorators/user/param/extract-user-from-request-optional.decorator';
 
 @Controller('comments')
 export class CommentsController {

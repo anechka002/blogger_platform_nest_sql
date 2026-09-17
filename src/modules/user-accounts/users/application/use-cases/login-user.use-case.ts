@@ -1,5 +1,5 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { JwtAdapter } from '../../../../../core/jwt/jwt.adapter';
+import { JwtAdapter } from '../services/jwt/jwt.adapter';
 import { randomUUID } from 'node:crypto';
 import { TokensPairType } from '../../../../../core/types/tokens-pair.type';
 

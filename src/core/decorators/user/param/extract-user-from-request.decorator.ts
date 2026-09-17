@@ -1,5 +1,5 @@
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
-import { UserContextDto } from '../../dto/user-context.dto';
+import { UserContextDto } from '../../../../modules/user-accounts/users/guards/dto/user-context.dto';
 import { Request } from 'express';
 
 type RequestWithUser = Request & {

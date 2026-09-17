@@ -31,7 +31,7 @@ import { GetPostsSwagger } from './swagger/get-posts.swagger.decorator';
 import { GetPostByIdSwagger } from './swagger/get-post-by-id.swagger.decorator';
 import { GetCommentsForPostSwagger } from './swagger/get-comments-for-post.swagger.decorator';
 import { CommentForPostInputDto } from '../../comments/api/input-dto/comment-for-post.input-dto';
-import { ExtractUserFromRequest } from '../../../user-accounts/users/guards/decorators/param/extract-user-from-request.decorator';
+import { ExtractUserFromRequest } from '../../../../core/decorators/user/param/extract-user-from-request.decorator';
 import { CreateCommentForPostCommand } from '../../comments/application/use-cases/create-comment-for-post.use-case';
 import { UserContextDto } from '../../../user-accounts/users/guards/dto/user-context.dto';
 import { JwtAuthGuard } from '../../../../core/guards/bearer/jwt-auth.guard';
@@ -40,7 +40,7 @@ import { LikeStatusInputDto } from '../../../../core/dto/like-status.input-dto';
 import { UpdatePostLikeStatusCommand } from '../application/use-cases/update-post-like-status.use-case';
 import { LikeStatusForPostSwagger } from './swagger/like-status-for-post.swagger.decorator';
 import { JwtOptionalAuthGuard } from '../../../../core/guards/bearer/jwt-optional-auth.guard';
-import { ExtractUserFromRequestOptional } from '../../../user-accounts/users/guards/decorators/param/extract-user-from-request-optional.decorator';
+import { ExtractUserFromRequestOptional } from '../../../../core/decorators/user/param/extract-user-from-request-optional.decorator';
 
 @Controller('posts')
 export class PostsController {
