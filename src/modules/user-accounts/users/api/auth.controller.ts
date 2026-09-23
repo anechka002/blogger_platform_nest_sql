@@ -123,7 +123,7 @@ export class AuthController {
 
   @LoginSwagger()
   @HttpCode(HttpStatus.OK)
-  @UseGuards(LocalAuthGuard, ThrottlerGuard)
+  @UseGuards(ThrottlerGuard, LocalAuthGuard)
   @Post('login')
   async login(
     @Body() body: LoginInputDto,
@@ -148,6 +148,7 @@ export class AuthController {
 
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
+      secure: true,
       sameSite: 'strict',
       path: '/',
       maxAge: 2 * 60 * 1000,
@@ -177,6 +178,7 @@ export class AuthController {
 
     res.cookie('refreshToken', result.refreshToken, {
       httpOnly: true,
+      secure: true,
       sameSite: 'strict',
       path: '/',
       maxAge: 2 * 60 * 1000,
