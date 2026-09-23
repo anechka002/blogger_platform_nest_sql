@@ -5,10 +5,11 @@ import {
   HttpCode,
   HttpStatus,
   Post,
+  Req,
   Res,
   UseGuards,
 } from '@nestjs/common';
-import type { Response } from 'express';
+import type { Request, Response } from 'express';
 import { MeViewDto } from './view-dto/me.view.dto';
 import { ExtractUserFromRequest } from '../../../../core/decorators/user/param/extract-user-from-request.decorator';
 import { UserContextDto } from '../guards/dto/user-context.dto';
@@ -38,6 +39,13 @@ import { PasswordRecoverySwagger } from './swagger/auth/password-recovery.swagge
 import { NewPasswordRecoverySwagger } from './swagger/auth/new-password-recovery.swagger.decorator';
 import { LoginSwagger } from './swagger/auth/login.swagger.decorator';
 import { MeSwagger } from './swagger/auth/me.swagger.decorator';
+import { RefreshTokenAuthGuard } from '../../../../core/guards/bearer/refresh-token.auth.guard';
+import { RefreshTokenCommand } from '../application/use-cases/refresh-token.use-case';
+import { RefreshTokenInfo } from './decorators/refresh-token-info.decorator';
+import { RefreshTokenDto } from '../guards/dto/refresh-token.dto';
+import { LogoutUserCommand } from '../application/use-cases/logout-user.use-case';
+import { RefreshTokenSwagger } from './swagger/auth/refresh-token.swagger.decorator';
+import { LogoutSwagger } from './swagger/auth/logout.swagger.decorator';
 
 @Controller('auth')
 export class AuthController {
@@ -115,27 +123,84 @@ export class AuthController {
 
   @LoginSwagger()
   @HttpCode(HttpStatus.OK)
-  @UseGuards(LocalAuthGuard)
+  @UseGuards(LocalAuthGuard, ThrottlerGuard)
   @Post('login')
   async login(
     @Body() body: LoginInputDto,
     @ExtractUserFromRequest() user: UserContextDto,
+    @Req() req: Request,
     // я немного меняю response, но Nest всё ещё сам его отправляет
     @Res({ passthrough: true }) res: Response,
   ): Promise<AccessTokenViewDto> {
+    const deviceName: string = req.headers['user-agent'] ?? 'unknown';
+    const ipAddress: string = req.ip as string;
+
     const { accessToken, refreshToken } = await this.commandBus.execute<
       LoginUserCommand,
       TokensPairType
-    >(new LoginUserCommand(user.id));
+    >(
+      new LoginUserCommand({
+        userId: user.id,
+        deviceName,
+        ipAddress,
+      }),
+    );
 
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
-      secure: true,
       sameSite: 'strict',
       path: '/',
       maxAge: 2 * 60 * 1000,
     });
 
     return { accessToken };
+  }
+
+  @RefreshTokenSwagger()
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(RefreshTokenAuthGuard)
+  @Post('refresh-token')
+  async refreshToken(
+    @RefreshTokenInfo() refreshTokenInfo: RefreshTokenDto,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<AccessTokenViewDto> {
+    const result = await this.commandBus.execute<
+      RefreshTokenCommand,
+      TokensPairType
+    >(
+      new RefreshTokenCommand({
+        userId: refreshTokenInfo.userId,
+        deviceId: refreshTokenInfo.deviceId,
+        iat: refreshTokenInfo.iat,
+      }),
+    );
+
+    res.cookie('refreshToken', result.refreshToken, {
+      httpOnly: true,
+      sameSite: 'strict',
+      path: '/',
+      maxAge: 2 * 60 * 1000,
+    });
+
+    return { accessToken: result.accessToken };
+  }
+
+  @LogoutSwagger()
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @UseGuards(RefreshTokenAuthGuard)
+  @Post('logout')
+  async logout(
+    @RefreshTokenInfo() refreshTokenInfo: RefreshTokenDto,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<void> {
+    await this.commandBus.execute<LogoutUserCommand, void>(
+      new LogoutUserCommand({
+        userId: refreshTokenInfo.userId,
+        deviceId: refreshTokenInfo.deviceId,
+        oldIat: refreshTokenInfo.iat,
+      }),
+    );
+
+    res.clearCookie('refreshToken');
   }
 }

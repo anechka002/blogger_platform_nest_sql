@@ -12,7 +12,6 @@ import { NotificationsModule } from '../notifications/notifications.module';
 import { LocalStrategy } from '../../core/guards/local/local.strategy';
 import { JwtStrategy } from '../../core/guards/bearer/jwt.strategy';
 import { JwtModule } from '@nestjs/jwt';
-import { CqrsModule } from '@nestjs/cqrs';
 import { CreateUserUseCase } from './users/application/use-cases/admin/create-user.use-case';
 import { DeleteUserUseCase } from './users/application/use-cases/delete-user.use-case';
 import { LoginUserUseCase } from './users/application/use-cases/login-user.use-case';
@@ -23,15 +22,27 @@ import { NewPasswordRecoveryUseCase } from './users/application/use-cases/new-pa
 import { PasswordRecoveryUseCase } from './users/application/use-cases/password-recovery.use-case';
 import { JwtAdapter } from './users/application/services/jwt/jwt.adapter';
 import { UsersExternalQueryRepository } from './users/infrastructure/external-query/users.external-query-repository';
+import { UserAccountsConfig } from './users/config/user-accounts.config';
+import { SessionRepository } from './users/infrastructure/session.repository';
+import { SessionEntity, SessionSchema } from './users/domain/session.entity';
+import { DeleteAllDevicesSessionsUseCase } from './users/application/use-cases/devices/delete-all-devices-sessions.use-case';
+import { DeleteDeviceSessionUseCase } from './users/application/use-cases/devices/delete-device-session.use-case';
+import { SessionsQueryRepository } from './users/infrastructure/query/sessions.query-repository';
+import { SecurityDevicesController } from './users/api/security-devices.controller';
+import { RefreshTokenUseCase } from './users/application/use-cases/refresh-token.use-case';
+import { RefreshTokenStrategy } from '../../core/guards/bearer/refresh-token.strategy';
+import { LogoutUserUseCase } from './users/application/use-cases/logout-user.use-case';
 
 @Module({
   imports: [
-    CqrsModule,
     JwtModule.register({}),
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
+    MongooseModule.forFeature([
+      { name: SessionEntity.name, schema: SessionSchema },
+    ]),
     NotificationsModule,
   ],
-  controllers: [UsersController, AuthController],
+  controllers: [UsersController, AuthController, SecurityDevicesController],
   providers: [
     AuthService,
     AuthQueryRepository,
@@ -39,6 +50,9 @@ import { UsersExternalQueryRepository } from './users/infrastructure/external-qu
     UsersExternalQueryRepository,
     UsersQueryRepository,
     UsersRepository,
+
+    SessionRepository,
+    SessionsQueryRepository,
 
     PasswordService,
 
@@ -50,10 +64,18 @@ import { UsersExternalQueryRepository } from './users/infrastructure/external-qu
     RegisterEmailResendingUseCase,
     NewPasswordRecoveryUseCase,
     PasswordRecoveryUseCase,
+    RefreshTokenUseCase,
+    LogoutUserUseCase,
+
+    DeleteAllDevicesSessionsUseCase,
+    DeleteDeviceSessionUseCase,
 
     LocalStrategy,
     JwtStrategy,
     JwtAdapter,
+    RefreshTokenStrategy,
+
+    UserAccountsConfig,
   ],
   exports: [UsersExternalQueryRepository],
 })
