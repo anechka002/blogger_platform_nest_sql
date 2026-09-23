@@ -2,9 +2,17 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { JwtAdapter } from '../services/jwt/jwt.adapter';
 import { randomUUID } from 'node:crypto';
 import { TokensPairType } from '../../../../../core/types/tokens-pair.type';
+import { SessionEntity } from '../../domain/session.entity';
+import { SessionRepository } from '../../infrastructure/session.repository';
+
+type LoginUserCommandParams = {
+  userId: string;
+  deviceName: string;
+  ipAddress: string;
+};
 
 export class LoginUserCommand {
-  constructor(public id: string) {}
+  constructor(public dto: LoginUserCommandParams) {}
 }
 
 @CommandHandler(LoginUserCommand)
@@ -12,18 +20,32 @@ export class LoginUserUseCase implements ICommandHandler<
   LoginUserCommand,
   TokensPairType
 > {
-  constructor(private jwtAdapter: JwtAdapter) {}
+  constructor(
+    private jwtAdapter: JwtAdapter,
+    private sessionRepository: SessionRepository,
+  ) {}
 
   async execute(command: LoginUserCommand): Promise<TokensPairType> {
-    const userId = command.id;
+    const { userId, deviceName, ipAddress } = command.dto;
 
     const deviceId = randomUUID();
 
-    const { accessToken, refreshToken } =
+    const { accessToken, refreshToken, payload } =
       await this.jwtAdapter.createAccessAndRefreshTokens({
         userId,
         deviceId,
       });
+
+    const session = SessionEntity.createSession({
+      deviceId,
+      userId,
+      deviceName,
+      ip: ipAddress,
+      expirationDate: new Date(payload.exp * 1000),
+      issuedAt: new Date(payload.iat * 1000),
+    });
+
+    await this.sessionRepository.createSession(session);
 
     return { accessToken, refreshToken };
   }
