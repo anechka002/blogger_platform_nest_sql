@@ -1,11 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService, JwtSignOptions } from '@nestjs/jwt';
 import { RefreshTokenPayloadType } from '../../../../../../core/types/refresh-token-payload.type';
+import { UserAccountsConfig } from '../../../config/user-accounts.config';
 
 // адаптер для работы с jwt
 @Injectable()
 export class JwtAdapter {
-  public constructor(private readonly jwtService: JwtService) {}
+  public constructor(
+    private readonly userAccountsConfig: UserAccountsConfig,
+    private readonly jwtService: JwtService,
+  ) {}
 
   private async createToken({
     payload,
@@ -29,15 +33,17 @@ export class JwtAdapter {
     const accessToken = await this.createToken({
       payload: { userId },
       // каким секретом подписывать JWT и потом проверять подпись;
-      secret: 'access-token-secret',
+      secret: this.userAccountsConfig.accessTokenSecret,
       // сколько времени токен будет жить.
-      expiresIn: '10m',
+      expiresIn: this.userAccountsConfig
+        .accessTokenExpireIn as JwtSignOptions['expiresIn'],
     });
 
     const refreshToken = await this.createToken({
       payload: { userId, deviceId },
-      secret: 'refresh-token-secret',
-      expiresIn: '30m',
+      secret: this.userAccountsConfig.refreshTokenSecret,
+      expiresIn: this.userAccountsConfig
+        .refreshTokenExpireIn as JwtSignOptions['expiresIn'],
     });
 
     // decode() достаёт payload из токена.

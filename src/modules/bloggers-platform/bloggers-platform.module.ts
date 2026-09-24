@@ -16,7 +16,7 @@ import { CreateBlogUseCase } from './blogs/application/use-cases/create-blog.use
 import { UpdateBlogUseCase } from './blogs/application/use-cases/update-blog.use-case';
 import { DeleteBlogUseCase } from './blogs/application/use-cases/delete-blog.use-case';
 import { CreatePostForBlogUseCase } from './blogs/application/use-cases/create-post-for-blog.use-case';
-import { CqrsModule } from '@nestjs/cqrs';
+// import { CqrsModule } from '@nestjs/cqrs';
 import { CreatePostUseCase } from './posts/application/use-cases/create-post.use-case';
 import { UpdatePostUseCase } from './posts/application/use-cases/update-post.use-case';
 import { DeletePostUseCase } from './posts/application/use-cases/delete-post.use-case';
@@ -36,7 +36,7 @@ import { PostLikesRepository } from './posts/infrastructure/post-like.repository
 
 @Module({
   imports: [
-    CqrsModule,
+    // CqrsModule,
     UserAccountsModule,
     MongooseModule.forFeature([{ name: Blog.name, schema: BlogSchema }]),
     MongooseModule.forFeature([{ name: Post.name, schema: PostSchema }]),

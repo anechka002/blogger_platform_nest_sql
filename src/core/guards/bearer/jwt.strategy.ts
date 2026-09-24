@@ -3,6 +3,7 @@ import { PassportStrategy } from '@nestjs/passport';
 import { Strategy } from 'passport-jwt';
 import { UserContextDto } from '../../../modules/user-accounts/users/guards/dto/user-context.dto';
 import { ExtractJwt } from 'passport-jwt';
+import { UserAccountsConfig } from '../../../modules/user-accounts/users/config/user-accounts.config';
 
 type JwtPayload = {
   userId: string;
@@ -10,11 +11,11 @@ type JwtPayload = {
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-  constructor() {
+  constructor(usersAccountsConfig: UserAccountsConfig) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: 'access-token-secret',
+      secretOrKey: usersAccountsConfig.accessTokenSecret,
     });
   }
 

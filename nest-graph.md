@@ -31,15 +31,17 @@ graph LR
   AppModule --> AppModule_AppController
   AppModule_AppService["⚙️ AppService"]
   AppModule --> AppModule_AppService
-  AppModule_APP_FILTER__UUID__e5a4ea97d0d1016e765f6_["⚙️ APP_FILTER (UUID: e5a4ea97d0d1016e765f6)"]
-  AppModule --> AppModule_APP_FILTER__UUID__e5a4ea97d0d1016e765f6_
-  AppModule_APP_FILTER__UUID__a4ea97d0d1016e765f6db_["⚙️ APP_FILTER (UUID: a4ea97d0d1016e765f6db)"]
-  AppModule --> AppModule_APP_FILTER__UUID__a4ea97d0d1016e765f6db_
+  AppModule_APP_FILTER__UUID__1cddf712b0ffded65619c_["⚙️ APP_FILTER (UUID: 1cddf712b0ffded65619c)"]
+  AppModule --> AppModule_APP_FILTER__UUID__1cddf712b0ffded65619c_
+  AppModule_APP_FILTER__UUID__ddf712b0ffded65619c4f_["⚙️ APP_FILTER (UUID: ddf712b0ffded65619c4f)"]
+  AppModule --> AppModule_APP_FILTER__UUID__ddf712b0ffded65619c4f_
   UserAccountsModule["📦 UserAccountsModule"]
   UserAccountsModule_UsersController["🎮 UsersController"]
   UserAccountsModule --> UserAccountsModule_UsersController
   UserAccountsModule_AuthController["🎮 AuthController"]
   UserAccountsModule --> UserAccountsModule_AuthController
+  UserAccountsModule_SecurityDevicesController["🎮 SecurityDevicesController"]
+  UserAccountsModule --> UserAccountsModule_SecurityDevicesController
   UserAccountsModule_AuthService["⚙️ AuthService"]
   UserAccountsModule --> UserAccountsModule_AuthService
   UserAccountsModule_AuthQueryRepository["🔎 AuthQueryRepository"]
@@ -50,6 +52,10 @@ graph LR
   UserAccountsModule --> UserAccountsModule_UsersQueryRepository
   UserAccountsModule_UsersRepository["🗄️ UsersRepository"]
   UserAccountsModule --> UserAccountsModule_UsersRepository
+  UserAccountsModule_SessionRepository["🗄️ SessionRepository"]
+  UserAccountsModule --> UserAccountsModule_SessionRepository
+  UserAccountsModule_SessionsQueryRepository["🔎 SessionsQueryRepository"]
+  UserAccountsModule --> UserAccountsModule_SessionsQueryRepository
   UserAccountsModule_PasswordService["⚙️ PasswordService"]
   UserAccountsModule --> UserAccountsModule_PasswordService
   UserAccountsModule_CreateUserUseCase["🧩 CreateUserUseCase"]
@@ -68,12 +74,24 @@ graph LR
   UserAccountsModule --> UserAccountsModule_NewPasswordRecoveryUseCase
   UserAccountsModule_PasswordRecoveryUseCase["🧩 PasswordRecoveryUseCase"]
   UserAccountsModule --> UserAccountsModule_PasswordRecoveryUseCase
+  UserAccountsModule_RefreshTokenUseCase["🧩 RefreshTokenUseCase"]
+  UserAccountsModule --> UserAccountsModule_RefreshTokenUseCase
+  UserAccountsModule_LogoutUserUseCase["🧩 LogoutUserUseCase"]
+  UserAccountsModule --> UserAccountsModule_LogoutUserUseCase
+  UserAccountsModule_DeleteAllDevicesSessionsUseCase["🧩 DeleteAllDevicesSessionsUseCase"]
+  UserAccountsModule --> UserAccountsModule_DeleteAllDevicesSessionsUseCase
+  UserAccountsModule_DeleteDeviceSessionUseCase["🧩 DeleteDeviceSessionUseCase"]
+  UserAccountsModule --> UserAccountsModule_DeleteDeviceSessionUseCase
   UserAccountsModule_LocalStrategy["🔐 LocalStrategy"]
   UserAccountsModule --> UserAccountsModule_LocalStrategy
   UserAccountsModule_JwtStrategy["🔐 JwtStrategy"]
   UserAccountsModule --> UserAccountsModule_JwtStrategy
   UserAccountsModule_JwtAdapter["⚙️ JwtAdapter"]
   UserAccountsModule --> UserAccountsModule_JwtAdapter
+  UserAccountsModule_RefreshTokenStrategy["🔐 RefreshTokenStrategy"]
+  UserAccountsModule --> UserAccountsModule_RefreshTokenStrategy
+  UserAccountsModule_UserAccountsConfig["⚙️ UserAccountsConfig"]
+  UserAccountsModule --> UserAccountsModule_UserAccountsConfig
   NotificationsModule["📦 NotificationsModule"]
   NotificationsModule_EmailService["⚙️ EmailService"]
   NotificationsModule --> NotificationsModule_EmailService
@@ -130,6 +148,8 @@ graph LR
   TestingModule_TestingController["🎮 TestingController"]
   TestingModule --> TestingModule_TestingController
   CoreModule["📦 CoreModule"]
+  CoreModule_CoreConfig["⚙️ CoreConfig"]
+  CoreModule --> CoreModule_CoreConfig
 ```
 
 ## 3. Dependency Injection
@@ -141,7 +161,9 @@ graph LR
   AppController["🎮 AppController"]
   AppService["⚙️ AppService"]
   APP_FILTER["⚙️ APP_FILTER"]
+  CoreConfig["⚙️ CoreConfig"]
   AppController -->|injects| AppService
+  APP_FILTER -->|injects| CoreConfig
 ```
 
 ### UserAccountsModule
@@ -153,11 +175,15 @@ graph LR
   UsersQueryRepository["🔎 UsersQueryRepository"]
   AuthController["🎮 AuthController"]
   AuthQueryRepository["🔎 AuthQueryRepository"]
+  SecurityDevicesController["🎮 SecurityDevicesController"]
+  SessionsQueryRepository["🔎 SessionsQueryRepository"]
   AuthService["⚙️ AuthService"]
   UsersRepository["🗄️ UsersRepository"]
   PasswordService["⚙️ PasswordService"]
   UserModel["⚙️ UserModel"]
   UsersExternalQueryRepository["🔎 UsersExternalQueryRepository"]
+  SessionRepository["🗄️ SessionRepository"]
+  SessionEntityModel["⚙️ SessionEntityModel"]
   CreateUserUseCase["🧩 CreateUserUseCase"]
   DeleteUserUseCase["🧩 DeleteUserUseCase"]
   LoginUserUseCase["🧩 LoginUserUseCase"]
@@ -168,23 +194,35 @@ graph LR
   RegisterEmailResendingUseCase["🧩 RegisterEmailResendingUseCase"]
   NewPasswordRecoveryUseCase["🧩 NewPasswordRecoveryUseCase"]
   PasswordRecoveryUseCase["🧩 PasswordRecoveryUseCase"]
+  RefreshTokenUseCase["🧩 RefreshTokenUseCase"]
+  LogoutUserUseCase["🧩 LogoutUserUseCase"]
+  DeleteAllDevicesSessionsUseCase["🧩 DeleteAllDevicesSessionsUseCase"]
+  DeleteDeviceSessionUseCase["🧩 DeleteDeviceSessionUseCase"]
   LocalStrategy["🔐 LocalStrategy"]
   JwtStrategy["🔐 JwtStrategy"]
+  UserAccountsConfig["⚙️ UserAccountsConfig"]
   JwtService["⚙️ JwtService"]
+  RefreshTokenStrategy["🔐 RefreshTokenStrategy"]
+  ConfigService["⚙️ ConfigService"]
   UsersController -->|injects| CommandBus
   UsersController -->|injects| UsersQueryRepository
   AuthController -->|injects| AuthQueryRepository
   AuthController -->|injects| CommandBus
+  SecurityDevicesController -->|injects| CommandBus
+  SecurityDevicesController -->|injects| SessionsQueryRepository
   AuthService -->|injects| UsersRepository
   AuthService -->|injects| PasswordService
   AuthQueryRepository -->|injects| UserModel
   UsersExternalQueryRepository -->|injects| UserModel
   UsersQueryRepository -->|injects| UserModel
   UsersRepository -->|injects| UserModel
+  SessionRepository -->|injects| SessionEntityModel
+  SessionsQueryRepository -->|injects| SessionEntityModel
   CreateUserUseCase -->|injects| UsersRepository
   CreateUserUseCase -->|injects| PasswordService
   DeleteUserUseCase -->|injects| UsersRepository
   LoginUserUseCase -->|injects| JwtAdapter
+  LoginUserUseCase -->|injects| SessionRepository
   RegisterUserUseCase -->|injects| UsersRepository
   RegisterUserUseCase -->|injects| PasswordService
   RegisterUserUseCase -->|injects| EmailService
@@ -195,8 +233,17 @@ graph LR
   NewPasswordRecoveryUseCase -->|injects| PasswordService
   PasswordRecoveryUseCase -->|injects| UsersRepository
   PasswordRecoveryUseCase -->|injects| EmailService
+  RefreshTokenUseCase -->|injects| JwtAdapter
+  RefreshTokenUseCase -->|injects| SessionRepository
+  LogoutUserUseCase -->|injects| SessionRepository
+  DeleteAllDevicesSessionsUseCase -->|injects| SessionRepository
+  DeleteDeviceSessionUseCase -->|injects| SessionRepository
   LocalStrategy -->|injects| AuthService
+  JwtStrategy -->|injects| UserAccountsConfig
+  JwtAdapter -->|injects| UserAccountsConfig
   JwtAdapter -->|injects| JwtService
+  RefreshTokenStrategy -->|injects| UserAccountsConfig
+  UserAccountsConfig -->|injects| ConfigService
 ```
 
 ### NotificationsModule
@@ -292,6 +339,15 @@ graph LR
   TestingController -->|injects| DatabaseConnection
 ```
 
+### CoreModule
+
+```mermaid
+graph LR
+  CoreConfig["⚙️ CoreConfig"]
+  ConfigService["⚙️ ConfigService"]
+  CoreConfig -->|injects| ConfigService
+```
+
 ### UserAccountsModule
 
 ```mermaid
@@ -301,11 +357,15 @@ graph LR
   UsersQueryRepository["🔎 UsersQueryRepository"]
   AuthController["🎮 AuthController"]
   AuthQueryRepository["🔎 AuthQueryRepository"]
+  SecurityDevicesController["🎮 SecurityDevicesController"]
+  SessionsQueryRepository["🔎 SessionsQueryRepository"]
   AuthService["⚙️ AuthService"]
   UsersRepository["🗄️ UsersRepository"]
   PasswordService["⚙️ PasswordService"]
   UserModel["⚙️ UserModel"]
   UsersExternalQueryRepository["🔎 UsersExternalQueryRepository"]
+  SessionRepository["🗄️ SessionRepository"]
+  SessionEntityModel["⚙️ SessionEntityModel"]
   CreateUserUseCase["🧩 CreateUserUseCase"]
   DeleteUserUseCase["🧩 DeleteUserUseCase"]
   LoginUserUseCase["🧩 LoginUserUseCase"]
@@ -316,23 +376,35 @@ graph LR
   RegisterEmailResendingUseCase["🧩 RegisterEmailResendingUseCase"]
   NewPasswordRecoveryUseCase["🧩 NewPasswordRecoveryUseCase"]
   PasswordRecoveryUseCase["🧩 PasswordRecoveryUseCase"]
+  RefreshTokenUseCase["🧩 RefreshTokenUseCase"]
+  LogoutUserUseCase["🧩 LogoutUserUseCase"]
+  DeleteAllDevicesSessionsUseCase["🧩 DeleteAllDevicesSessionsUseCase"]
+  DeleteDeviceSessionUseCase["🧩 DeleteDeviceSessionUseCase"]
   LocalStrategy["🔐 LocalStrategy"]
   JwtStrategy["🔐 JwtStrategy"]
+  UserAccountsConfig["⚙️ UserAccountsConfig"]
   JwtService["⚙️ JwtService"]
+  RefreshTokenStrategy["🔐 RefreshTokenStrategy"]
+  ConfigService["⚙️ ConfigService"]
   UsersController -->|injects| CommandBus
   UsersController -->|injects| UsersQueryRepository
   AuthController -->|injects| AuthQueryRepository
   AuthController -->|injects| CommandBus
+  SecurityDevicesController -->|injects| CommandBus
+  SecurityDevicesController -->|injects| SessionsQueryRepository
   AuthService -->|injects| UsersRepository
   AuthService -->|injects| PasswordService
   AuthQueryRepository -->|injects| UserModel
   UsersExternalQueryRepository -->|injects| UserModel
   UsersQueryRepository -->|injects| UserModel
   UsersRepository -->|injects| UserModel
+  SessionRepository -->|injects| SessionEntityModel
+  SessionsQueryRepository -->|injects| SessionEntityModel
   CreateUserUseCase -->|injects| UsersRepository
   CreateUserUseCase -->|injects| PasswordService
   DeleteUserUseCase -->|injects| UsersRepository
   LoginUserUseCase -->|injects| JwtAdapter
+  LoginUserUseCase -->|injects| SessionRepository
   RegisterUserUseCase -->|injects| UsersRepository
   RegisterUserUseCase -->|injects| PasswordService
   RegisterUserUseCase -->|injects| EmailService
@@ -343,8 +415,17 @@ graph LR
   NewPasswordRecoveryUseCase -->|injects| PasswordService
   PasswordRecoveryUseCase -->|injects| UsersRepository
   PasswordRecoveryUseCase -->|injects| EmailService
+  RefreshTokenUseCase -->|injects| JwtAdapter
+  RefreshTokenUseCase -->|injects| SessionRepository
+  LogoutUserUseCase -->|injects| SessionRepository
+  DeleteAllDevicesSessionsUseCase -->|injects| SessionRepository
+  DeleteDeviceSessionUseCase -->|injects| SessionRepository
   LocalStrategy -->|injects| AuthService
+  JwtStrategy -->|injects| UserAccountsConfig
+  JwtAdapter -->|injects| UserAccountsConfig
   JwtAdapter -->|injects| JwtService
+  RefreshTokenStrategy -->|injects| UserAccountsConfig
+  UserAccountsConfig -->|injects| ConfigService
 ```
 
 ### NotificationsModule
@@ -440,11 +521,15 @@ graph LR
   UsersQueryRepository["🔎 UsersQueryRepository"]
   AuthController["🎮 AuthController"]
   AuthQueryRepository["🔎 AuthQueryRepository"]
+  SecurityDevicesController["🎮 SecurityDevicesController"]
+  SessionsQueryRepository["🔎 SessionsQueryRepository"]
   AuthService["⚙️ AuthService"]
   UsersRepository["🗄️ UsersRepository"]
   PasswordService["⚙️ PasswordService"]
   UserModel["⚙️ UserModel"]
   UsersExternalQueryRepository["🔎 UsersExternalQueryRepository"]
+  SessionRepository["🗄️ SessionRepository"]
+  SessionEntityModel["⚙️ SessionEntityModel"]
   CreateUserUseCase["🧩 CreateUserUseCase"]
   DeleteUserUseCase["🧩 DeleteUserUseCase"]
   LoginUserUseCase["🧩 LoginUserUseCase"]
@@ -455,23 +540,35 @@ graph LR
   RegisterEmailResendingUseCase["🧩 RegisterEmailResendingUseCase"]
   NewPasswordRecoveryUseCase["🧩 NewPasswordRecoveryUseCase"]
   PasswordRecoveryUseCase["🧩 PasswordRecoveryUseCase"]
+  RefreshTokenUseCase["🧩 RefreshTokenUseCase"]
+  LogoutUserUseCase["🧩 LogoutUserUseCase"]
+  DeleteAllDevicesSessionsUseCase["🧩 DeleteAllDevicesSessionsUseCase"]
+  DeleteDeviceSessionUseCase["🧩 DeleteDeviceSessionUseCase"]
   LocalStrategy["🔐 LocalStrategy"]
   JwtStrategy["🔐 JwtStrategy"]
+  UserAccountsConfig["⚙️ UserAccountsConfig"]
   JwtService["⚙️ JwtService"]
+  RefreshTokenStrategy["🔐 RefreshTokenStrategy"]
+  ConfigService["⚙️ ConfigService"]
   UsersController -->|injects| CommandBus
   UsersController -->|injects| UsersQueryRepository
   AuthController -->|injects| AuthQueryRepository
   AuthController -->|injects| CommandBus
+  SecurityDevicesController -->|injects| CommandBus
+  SecurityDevicesController -->|injects| SessionsQueryRepository
   AuthService -->|injects| UsersRepository
   AuthService -->|injects| PasswordService
   AuthQueryRepository -->|injects| UserModel
   UsersExternalQueryRepository -->|injects| UserModel
   UsersQueryRepository -->|injects| UserModel
   UsersRepository -->|injects| UserModel
+  SessionRepository -->|injects| SessionEntityModel
+  SessionsQueryRepository -->|injects| SessionEntityModel
   CreateUserUseCase -->|injects| UsersRepository
   CreateUserUseCase -->|injects| PasswordService
   DeleteUserUseCase -->|injects| UsersRepository
   LoginUserUseCase -->|injects| JwtAdapter
+  LoginUserUseCase -->|injects| SessionRepository
   RegisterUserUseCase -->|injects| UsersRepository
   RegisterUserUseCase -->|injects| PasswordService
   RegisterUserUseCase -->|injects| EmailService
@@ -482,8 +579,17 @@ graph LR
   NewPasswordRecoveryUseCase -->|injects| PasswordService
   PasswordRecoveryUseCase -->|injects| UsersRepository
   PasswordRecoveryUseCase -->|injects| EmailService
+  RefreshTokenUseCase -->|injects| JwtAdapter
+  RefreshTokenUseCase -->|injects| SessionRepository
+  LogoutUserUseCase -->|injects| SessionRepository
+  DeleteAllDevicesSessionsUseCase -->|injects| SessionRepository
+  DeleteDeviceSessionUseCase -->|injects| SessionRepository
   LocalStrategy -->|injects| AuthService
+  JwtStrategy -->|injects| UserAccountsConfig
+  JwtAdapter -->|injects| UserAccountsConfig
   JwtAdapter -->|injects| JwtService
+  RefreshTokenStrategy -->|injects| UserAccountsConfig
+  UserAccountsConfig -->|injects| ConfigService
 ```
 
 ### NotificationsModule
@@ -506,6 +612,15 @@ graph LR
   EmailTemplateManager["⚙️ EmailTemplateManager"]
   EmailService -->|injects| MailerService
   EmailService -->|injects| EmailTemplateManager
+```
+
+### CoreModule
+
+```mermaid
+graph LR
+  CoreConfig["⚙️ CoreConfig"]
+  ConfigService["⚙️ ConfigService"]
+  CoreConfig -->|injects| ConfigService
 ```
 
 ## 4. CQRS
@@ -528,6 +643,14 @@ graph LR
   handler_NewPasswordRecoveryUseCase["🧩 NewPasswordRecoveryUseCase"]
   command_PasswordRecoveryCommand["📨 PasswordRecoveryCommand"]
   handler_PasswordRecoveryUseCase["🧩 PasswordRecoveryUseCase"]
+  command_RefreshTokenCommand["📨 RefreshTokenCommand"]
+  handler_RefreshTokenUseCase["🧩 RefreshTokenUseCase"]
+  command_LogoutUserCommand["📨 LogoutUserCommand"]
+  handler_LogoutUserUseCase["🧩 LogoutUserUseCase"]
+  command_DeleteAllDevicesSessionsCommand["📨 DeleteAllDevicesSessionsCommand"]
+  handler_DeleteAllDevicesSessionsUseCase["🧩 DeleteAllDevicesSessionsUseCase"]
+  command_DeleteDeviceSessionCommand["📨 DeleteDeviceSessionCommand"]
+  handler_DeleteDeviceSessionUseCase["🧩 DeleteDeviceSessionUseCase"]
   command_CreateBlogCommand["📨 CreateBlogCommand"]
   handler_CreateBlogUseCase["🧩 CreateBlogUseCase"]
   command_UpdateBlogCommand["📨 UpdateBlogCommand"]
@@ -560,6 +683,10 @@ graph LR
   command_RegisterEmailResendingCommand -->|handled by| handler_RegisterEmailResendingUseCase
   command_NewPasswordRecoveryCommand -->|handled by| handler_NewPasswordRecoveryUseCase
   command_PasswordRecoveryCommand -->|handled by| handler_PasswordRecoveryUseCase
+  command_RefreshTokenCommand -->|handled by| handler_RefreshTokenUseCase
+  command_LogoutUserCommand -->|handled by| handler_LogoutUserUseCase
+  command_DeleteAllDevicesSessionsCommand -->|handled by| handler_DeleteAllDevicesSessionsUseCase
+  command_DeleteDeviceSessionCommand -->|handled by| handler_DeleteDeviceSessionUseCase
   command_CreateBlogCommand -->|handled by| handler_CreateBlogUseCase
   command_UpdateBlogCommand -->|handled by| handler_UpdateBlogUseCase
   command_DeleteBlogCommand -->|handled by| handler_DeleteBlogUseCase
@@ -580,6 +707,10 @@ graph LR
   command_RegisterEmailResendingCommand -->|handled by| handler_RegisterEmailResendingUseCase
   command_NewPasswordRecoveryCommand -->|handled by| handler_NewPasswordRecoveryUseCase
   command_PasswordRecoveryCommand -->|handled by| handler_PasswordRecoveryUseCase
+  command_RefreshTokenCommand -->|handled by| handler_RefreshTokenUseCase
+  command_LogoutUserCommand -->|handled by| handler_LogoutUserUseCase
+  command_DeleteAllDevicesSessionsCommand -->|handled by| handler_DeleteAllDevicesSessionsUseCase
+  command_DeleteDeviceSessionCommand -->|handled by| handler_DeleteDeviceSessionUseCase
   command_CreateBlogCommand -->|handled by| handler_CreateBlogUseCase
   command_UpdateBlogCommand -->|handled by| handler_UpdateBlogUseCase
   command_DeleteBlogCommand -->|handled by| handler_DeleteBlogUseCase
@@ -600,4 +731,8 @@ graph LR
   command_RegisterEmailResendingCommand -->|handled by| handler_RegisterEmailResendingUseCase
   command_NewPasswordRecoveryCommand -->|handled by| handler_NewPasswordRecoveryUseCase
   command_PasswordRecoveryCommand -->|handled by| handler_PasswordRecoveryUseCase
+  command_RefreshTokenCommand -->|handled by| handler_RefreshTokenUseCase
+  command_LogoutUserCommand -->|handled by| handler_LogoutUserUseCase
+  command_DeleteAllDevicesSessionsCommand -->|handled by| handler_DeleteAllDevicesSessionsUseCase
+  command_DeleteDeviceSessionCommand -->|handled by| handler_DeleteDeviceSessionUseCase
 ```

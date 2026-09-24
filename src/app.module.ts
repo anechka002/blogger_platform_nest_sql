@@ -1,3 +1,4 @@
+import { configModule } from './dynamic-config-module';
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -6,17 +7,23 @@ import { UserAccountsModule } from './modules/user-accounts/user-accounts.module
 import { BloggersPlatformModule } from './modules/bloggers-platform/bloggers-platform.module';
 import { CoreModule } from './core/core.module';
 import { TestingModule } from './modules/testing/testing.module';
-import { configModule } from './dynamic-config-module';
 import { APP_FILTER } from '@nestjs/core';
 import { DomainHttpExceptionsFilter } from './core/exceptions/filters/domain-exceptions.filter';
 import { AllHttpExceptionsFilter } from './core/exceptions/filters/all-exceptions.filter';
 import { ThrottlerModule } from '@nestjs/throttler';
+import { CoreConfig } from './core/core.config';
 
 @Module({
   imports: [
-    MongooseModule.forRoot(
-      'mongodb+srv://root:IxpPPVB4v9UahUlg@clustermongodb.98xltqo.mongodb.net/blogger_platform',
-    ),
+    MongooseModule.forRootAsync({
+      inject: [CoreConfig],
+      useFactory: (coreConfig: CoreConfig) => {
+        const uri = coreConfig.mongoURI;
+        console.log(uri);
+
+        return { uri: uri };
+      },
+    }),
     ThrottlerModule.forRoot([
       {
         ttl: 10000,
@@ -27,7 +34,7 @@ import { ThrottlerModule } from '@nestjs/throttler';
     UserAccountsModule,
     BloggersPlatformModule,
     TestingModule,
-    CoreModule,
+    CoreModule, //вынесли конфигурацию в отдельный файл
   ],
   controllers: [AppController],
   providers: [

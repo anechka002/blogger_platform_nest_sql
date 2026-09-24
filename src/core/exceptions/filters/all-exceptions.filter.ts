@@ -4,14 +4,19 @@ import {
   ExceptionFilter,
   HttpException,
   HttpStatus,
+  Injectable,
 } from '@nestjs/common';
 import { Response } from 'express';
 import { APIErrorResult } from './api-error-result';
+import { CoreConfig, Environments } from '../../core.config';
 
 //https://docs.nestjs.com/exception-filters#exception-filters-1
 //Все ошибки
+@Injectable()
 @Catch()
 export class AllHttpExceptionsFilter implements ExceptionFilter {
+  constructor(private readonly coreConfig: CoreConfig) {}
+
   catch(exception: unknown, host: ArgumentsHost): void {
     console.error('ALL HTTP EXCEPTION:', exception);
     //ctx нужен, чтобы получить request и response (express). Это из документации, делаем по аналогии
@@ -49,8 +54,7 @@ export class AllHttpExceptionsFilter implements ExceptionFilter {
   }
 
   private buildResponseBody(message: string): APIErrorResult {
-    //TODO: Replace with getter from configService. will be in the following lessons
-    const isProduction = process.env.NODE_ENV === 'production';
+    const isProduction = this.coreConfig.env === Environments.PRODUCTION;
 
     if (isProduction) {
       return {
