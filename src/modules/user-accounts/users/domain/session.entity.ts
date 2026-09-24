@@ -20,7 +20,7 @@ export class SessionEntity {
   issuedAt: Date;
 
   // Когда текущая session должна протухнуть
-  @Prop({ type: Date, required: true })
+  @Prop({ type: Date, required: true, expires: 0 })
   expirationDate: Date;
 
   @Prop({ type: Date, default: null })
