@@ -12,6 +12,7 @@ import { DomainHttpExceptionsFilter } from './core/exceptions/filters/domain-exc
 import { AllHttpExceptionsFilter } from './core/exceptions/filters/all-exceptions.filter';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { CoreConfig } from './core/core.config';
+import { TypeOrmModule } from '@nestjs/typeorm';
 
 @Module({
   imports: [
@@ -23,6 +24,16 @@ import { CoreConfig } from './core/core.config';
 
         return { uri: uri };
       },
+    }),
+    TypeOrmModule.forRoot({
+      type: 'postgres',
+      host: 'localhost',
+      port: 5432,
+      username: 'annablinova',
+      password: 'root',
+      database: 'startUser',
+      autoLoadEntities: true,
+      synchronize: true,
     }),
     ThrottlerModule.forRoot([
       {

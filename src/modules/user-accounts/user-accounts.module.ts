@@ -32,6 +32,9 @@ import { SecurityDevicesController } from './users/api/security-devices.controll
 import { RefreshTokenUseCase } from './users/application/use-cases/refresh-token.use-case';
 import { RefreshTokenStrategy } from '../../core/guards/bearer/refresh-token.strategy';
 import { LogoutUserUseCase } from './users/application/use-cases/logout-user.use-case';
+import { UsersSqlQueryRepository } from './users/infrastructure/query/users-sql.query-repository';
+import { UserMapper } from './users/api/mappers/user.mapper';
+import { UsersSqlRepository } from './users/infrastructure/users-sql.repository';
 
 @Module({
   imports: [
@@ -50,6 +53,10 @@ import { LogoutUserUseCase } from './users/application/use-cases/logout-user.use
     UsersExternalQueryRepository,
     UsersQueryRepository,
     UsersRepository,
+    UsersSqlQueryRepository,
+    UsersSqlRepository,
+
+    UserMapper,
 
     SessionRepository,
     SessionsQueryRepository,

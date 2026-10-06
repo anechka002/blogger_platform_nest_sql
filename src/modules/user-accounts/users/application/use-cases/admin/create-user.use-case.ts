@@ -1,10 +1,10 @@
-import { UsersRepository } from '../../../infrastructure/users.repository';
 import { PasswordService } from '../../services/password.service';
 import { CreateUserDto } from '../../../dto/create-user.dto';
 import { DomainException } from '../../../../../../core/exceptions/domain-exceptions';
 import { DomainExceptionCode } from '../../../../../../core/exceptions/domain-exception-codes';
 import { User } from '../../../domain/user.entity';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
+import { UsersSqlRepository } from '../../../infrastructure/users-sql.repository';
 
 export class CreateUserCommand {
   constructor(public dto: CreateUserDto) {}
@@ -13,12 +13,12 @@ export class CreateUserCommand {
 @CommandHandler(CreateUserCommand)
 export class CreateUserUseCase implements ICommandHandler<CreateUserCommand> {
   constructor(
-    private readonly usersRepository: UsersRepository,
+    private readonly usersSqlRepository: UsersSqlRepository,
     private readonly passwordService: PasswordService,
   ) {}
   async execute({ dto }: CreateUserCommand): Promise<string> {
     const { login, email, password } = dto;
-    const userWithEmail = await this.usersRepository.findByEmail(email);
+    const userWithEmail = await this.usersSqlRepository.findByEmail(email);
     if (userWithEmail) {
       throw new DomainException({
         code: DomainExceptionCode.BadRequest,
@@ -32,11 +32,25 @@ export class CreateUserUseCase implements ICommandHandler<CreateUserCommand> {
       });
     }
 
+    const userWithLogin = await this.usersSqlRepository.findByLogin(login);
+    if (userWithLogin) {
+      throw new DomainException({
+        code: DomainExceptionCode.BadRequest,
+        message: 'Login already exists',
+        extensions: [
+          {
+            message: 'The login is not unique',
+            key: 'login',
+          },
+        ],
+      });
+    }
+
     const passwordHash: string =
       await this.passwordService.generateHash(password);
 
     const user = User.createUser({ login, email, passwordHash });
-    const savedUser = await this.usersRepository.create(user);
-    return savedUser._id.toString();
+    const savedUser = await this.usersSqlRepository.create(user);
+    return savedUser.userId;
   }
 }

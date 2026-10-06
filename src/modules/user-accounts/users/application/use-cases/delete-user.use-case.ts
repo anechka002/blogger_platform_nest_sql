@@ -1,9 +1,10 @@
-import { Types } from 'mongoose';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { UsersRepository } from '../../infrastructure/users.repository';
+import { UsersSqlRepository } from '../../infrastructure/users-sql.repository';
+import { DomainException } from '../../../../../core/exceptions/domain-exceptions';
+import { DomainExceptionCode } from '../../../../../core/exceptions/domain-exception-codes';
 
 export class DeleteUserCommand {
-  constructor(public id: Types.ObjectId) {}
+  constructor(public id: string) {}
 }
 
 @CommandHandler(DeleteUserCommand)
@@ -11,14 +12,19 @@ export class DeleteUserUseCase implements ICommandHandler<
   DeleteUserCommand,
   void
 > {
-  constructor(public usersRepository: UsersRepository) {}
+  constructor(public usersSqlRepository: UsersSqlRepository) {}
 
   async execute(command: DeleteUserCommand): Promise<void> {
     const id = command.id;
-    const user = await this.usersRepository.findOrNotFoundFail(id);
 
-    user.makeDeleted();
+    const user = await this.usersSqlRepository.findById(id);
+    if (!user) {
+      throw new DomainException({
+        code: DomainExceptionCode.NotFound,
+        message: 'User not found',
+      });
+    }
 
-    await this.usersRepository.save(user);
+    await this.usersSqlRepository.delete(id);
   }
 }
