@@ -2,10 +2,11 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { CreateUserDto } from '../../dto/create-user.dto';
 import { DomainException } from '../../../../../core/exceptions/domain-exceptions';
 import { DomainExceptionCode } from '../../../../../core/exceptions/domain-exception-codes';
-import { UsersRepository } from '../../infrastructure/users.repository';
-import { User } from '../../domain/user.entity';
 import { PasswordService } from '../services/password.service';
 import { EmailService } from '../../../../notifications/email.service';
+import { UsersSqlRepository } from '../../infrastructure/users-sql.repository';
+import { randomUUID } from 'node:crypto';
+import { addHours } from 'date-fns';
 
 export class RegisterUserCommand {
   constructor(public dto: CreateUserDto) {}
@@ -17,7 +18,7 @@ export class RegisterUserUseCase implements ICommandHandler<
   void
 > {
   constructor(
-    private readonly usersRepository: UsersRepository,
+    private readonly usersSqlRepository: UsersSqlRepository,
     private readonly passwordService: PasswordService,
     private readonly emailService: EmailService,
   ) {}
@@ -25,7 +26,7 @@ export class RegisterUserUseCase implements ICommandHandler<
   async execute({ dto }: RegisterUserCommand): Promise<void> {
     const { login, email, password } = dto;
 
-    const userByEmail = await this.usersRepository.findByEmail(email);
+    const userByEmail = await this.usersSqlRepository.findByEmail(email);
     if (userByEmail) {
       throw new DomainException({
         code: DomainExceptionCode.BadRequest,
@@ -39,7 +40,7 @@ export class RegisterUserUseCase implements ICommandHandler<
       });
     }
 
-    const userByLogin = await this.usersRepository.findByLogin(login);
+    const userByLogin = await this.usersSqlRepository.findByLogin(login);
     if (userByLogin) {
       throw new DomainException({
         code: DomainExceptionCode.BadRequest,
@@ -56,19 +57,19 @@ export class RegisterUserUseCase implements ICommandHandler<
     const passwordHash: string =
       await this.passwordService.generateHash(password);
 
-    const user = User.createForRegistration({
-      login,
-      email,
-      passwordHash,
-    });
+    const confirmationCode = randomUUID();
+    const confirmationExpirationDate = addHours(new Date(), 1);
+    const isConfirmed = false;
 
-    const createdUser = await this.usersRepository.create(user);
+    await this.usersSqlRepository.createUserWithAccountState(
+      { login, email, passwordHash },
+      isConfirmed,
+      confirmationCode,
+      confirmationExpirationDate,
+    );
 
     this.emailService
-      .sendRegistrationConfirmationEmail(
-        createdUser.email,
-        createdUser.emailConfirmation.confirmationCode,
-      )
+      .sendRegistrationConfirmationEmail(email, confirmationCode)
       .catch((error) =>
         console.log('Failed to send registration confirmation email', error),
       );

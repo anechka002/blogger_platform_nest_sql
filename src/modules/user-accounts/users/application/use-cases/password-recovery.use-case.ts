@@ -1,10 +1,10 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { UsersRepository } from '../../infrastructure/users.repository';
 import { EmailService } from '../../../../notifications/email.service';
-import { DomainException } from '../../../../../core/exceptions/domain-exceptions';
-import { DomainExceptionCode } from '../../../../../core/exceptions/domain-exception-codes';
 import { randomUUID } from 'node:crypto';
 import { addHours } from 'date-fns';
+import { UsersSqlRepository } from '../../infrastructure/users-sql.repository';
+import { DomainException } from '../../../../../core/exceptions/domain-exceptions';
+import { DomainExceptionCode } from '../../../../../core/exceptions/domain-exception-codes';
 
 export class PasswordRecoveryCommand {
   constructor(public email: string) {}
@@ -16,20 +16,21 @@ export class PasswordRecoveryUseCase implements ICommandHandler<
   void
 > {
   constructor(
-    private readonly usersRepository: UsersRepository,
+    private readonly usersSqlRepository: UsersSqlRepository,
     private readonly emailService: EmailService,
   ) {}
 
   async execute({ email }: PasswordRecoveryCommand): Promise<void> {
-    // нашли user по email
-    const user = await this.usersRepository.findByEmail(email);
+    // Находим пользователя вместе с подтверждением одним запросом
+    const user =
+      await this.usersSqlRepository.findUserWithEmailConfirmationByEmail(email);
     // Если пользователя нет — просто молча выходим (как будто всё ок)
     if (!user) {
       return;
     }
 
     // Дополнительно проверяем, подтверждён ли email
-    if (!user.emailConfirmation.isConfirmed) {
+    if (!user.isConfirmed) {
       throw new DomainException({
         code: DomainExceptionCode.EmailNotConfirmed,
         message: 'Email is not confirmed',
@@ -38,17 +39,19 @@ export class PasswordRecoveryUseCase implements ICommandHandler<
     }
 
     // создали recoveryCode
-    const recoveryCode = randomUUID();
+    const newRecoveryCode = randomUUID();
     // создали expirationDate
-    const expirationDate = addHours(new Date(), 1);
+    const newRecoveryExpirationDate = addHours(new Date(), 1);
 
-    user.setPasswordRecovery(recoveryCode, expirationDate);
-
-    await this.usersRepository.save(user);
+    await this.usersSqlRepository.refreshRecoveryCode(
+      user.id,
+      newRecoveryCode,
+      newRecoveryExpirationDate,
+    );
 
     // отправили письмо со ссылкой
     this.emailService
-      .sendPasswordRecoveryEmail(user.email, recoveryCode)
+      .sendPasswordRecoveryEmail(user.email, newRecoveryCode)
       .catch((error) => console.log('error in send email', error));
   }
 }

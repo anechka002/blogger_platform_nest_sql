@@ -2,7 +2,30 @@ import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { UserRow } from './query/users-sql.query-repository';
-import { User } from '../domain/user.entity';
+import { CreateUserDomainDto } from '../domain/dto/create-user.domain.dto';
+
+type EmailConfirmationRow = {
+  userId: string;
+  confirmationCode: string;
+  confirmationExpirationDate: Date;
+  isConfirmed: boolean;
+};
+
+type UserWithEmailConfirmationRow = UserRow & {
+  confirmationCode: string;
+  confirmationExpirationDate: Date;
+  isConfirmed: boolean;
+};
+
+type UserAccountStateRow = {
+  id: string;
+  userId: string;
+  confirmationCode: string;
+  confirmationExpirationDate: Date;
+  isConfirmed: boolean;
+  recoveryCode: string;
+  recoveryExpirationDate: Date;
+};
 
 @Injectable()
 export class UsersSqlRepository {
@@ -14,13 +37,12 @@ export class UsersSqlRepository {
       `
       SELECT *
       FROM public.users as u
-      WHERE u."userId" = $1
+      WHERE u.id = $1
         AND u."deletedAt" IS NULL
     `,
       [id],
     );
 
-    console.log(result[0]);
     return result[0] ?? null;
   }
 
@@ -35,7 +57,6 @@ export class UsersSqlRepository {
       [email],
     );
 
-    console.log(result[0]);
     return result[0] ?? null;
   }
 
@@ -53,88 +74,203 @@ export class UsersSqlRepository {
     return result[0] ?? null;
   }
 
-  async create(user: User): Promise<UserRow> {
-    const result = await this.dataSource.query<UserRow[]>(
-      `
-        INSERT INTO users (login, email, "passwordHash")
-        VALUES ($1, $2, $3)
-          RETURNING *;
-    `,
-      [user.login, user.email, user.passwordHash],
-    );
-    return result[0];
+  async createUserWithAccountState(
+    user: CreateUserDomainDto,
+    isConfirmed: boolean = false,
+    confirmationCode: string | null = null,
+    confirmationExpirationDate: Date | null = null,
+  ): Promise<UserRow> {
+    return this.dataSource.transaction(async (manager) => {
+      // Создаём пользователя
+      const result = await manager.query<UserRow[]>(
+        `
+          INSERT INTO users (login, email, "passwordHash")
+          VALUES ($1, $2, $3)
+            RETURNING *;
+        `,
+        [user.login, user.email, user.passwordHash],
+      );
+
+      const createdUser = result[0];
+
+      // Создаём связанное состояние аккаунта
+      await manager.query(
+        `
+          INSERT INTO user_account_state ("userId", "isConfirmed", "confirmationCode", "confirmationExpirationDate")
+          VALUES ($1, $2, $3, $4)
+        `,
+        [
+          createdUser.id,
+          isConfirmed,
+          confirmationCode,
+          confirmationExpirationDate,
+        ],
+      );
+      return createdUser;
+    });
   }
 
   async delete(id: string): Promise<void> {
-    await this.dataSource.query(
-      `
+    await this.dataSource.transaction(async (manager) => {
+      // Помечаем пользователя удалённым
+      await manager.query(
+        `
       -- измени запись в users
       UPDATE public.users 
       -- поставь текущее время в deletedAt.
-      SET "deletedAt" = NOW(),
-      "updatedAt" = NOW()
+      SET "deletedAt" = NOW(), "updatedAt" = NOW()
       -- только пользователю с нужным id.
-      WHERE "userId" = $1
+      WHERE id = $1
       -- и только если он ещё не удалён.
       AND "deletedAt" IS NULL
       `,
-      [id],
+        [id],
+      );
+
+      // Очищаем коды и сроки их действия
+      await manager.query(
+        `
+        UPDATE public.user_account_state 
+        SET "confirmationCode" = NULL, 
+            "confirmationExpirationDate" = NULL,
+            "recoveryCode" = NULL,
+            "recoveryExpirationDate" = NULL
+        WHERE "userId" = $1
+        `,
+        [id],
+      );
+    });
+  }
+
+  // Находим активного пользователя по email вместе с данными подтверждения.
+  // Возвращает null, если пользователь или запись состояния аккаунта не найдены.
+  async findUserWithEmailConfirmationByEmail(
+    email: string,
+  ): Promise<UserWithEmailConfirmationRow | null> {
+    const result = await this.dataSource.query<UserWithEmailConfirmationRow[]>(
+      `
+      SELECT u.*, uas."confirmationCode", uas."confirmationExpirationDate", uas."isConfirmed"
+      FROM public.users as u
+      INNER JOIN public.user_account_state as uas
+      ON u.id = uas."userId"
+      WHERE u.email = $1
+        AND u."deletedAt" IS NULL
+    `,
+      [email],
+    );
+
+    console.log('user: ', result[0]);
+    return result[0] ?? null;
+  }
+
+  async findByConfirmationCode(
+    code: string,
+  ): Promise<EmailConfirmationRow | null> {
+    const result: EmailConfirmationRow[] = await this.dataSource.query(
+      `
+      SELECT *
+      FROM public.user_account_state as uas
+      WHERE uas."confirmationCode" = $1
+      `,
+      [code],
+    );
+    return result[0] ?? null;
+  }
+
+  async confirmEmail(code: string): Promise<void> {
+    await this.dataSource.query(
+      `
+      UPDATE public.user_account_state 
+      SET "isConfirmed" = true
+      WHERE "confirmationCode" = $1
+      `,
+      [code],
     );
   }
 
-  // async findById(id: Types.ObjectId): Promise<UserDocument | null> {
-  //   // Найди документ с этим id, но только если он не помечен как удалённый.
-  //   return this.UserModel.findOne({
-  //     _id: id,
-  //     deletedAt: null,
-  //   });
-  // }
-  //
-  // async save(user: UserDocument) {
-  //   await user.save();
-  // }
-  //
-  // async findByConfirmationCode(code: string): Promise<UserDocument | null> {
-  //   return this.UserModel.findOne({
-  //     'emailConfirmation.confirmationCode': code,
-  //   });
-  // }
-  //
-  // async findByRecoveryCode(code: string): Promise<UserDocument | null> {
-  //   return this.UserModel.findOne({
-  //     'passwordRecovery.recoveryCode': code,
-  //   });
-  // }
-  //
-  // async create(user: User): Promise<UserDocument> {
-  //   const userDocument = new this.UserModel(user);
-  //   await userDocument.save();
-  //   return userDocument;
-  // }
-  //
-  // async findByEmail(email: string): Promise<UserDocument | null> {
-  //   return this.UserModel.findOne({ email });
-  // }
-  //
-  // async findByLogin(login: string): Promise<UserDocument | null> {
-  //   return this.UserModel.findOne({ login });
-  // }
-  //
-  // async findByLoginOrEmail(loginOrEmail: string): Promise<UserDocument | null> {
-  //   return this.UserModel.findOne({
-  //     $or: [{ login: loginOrEmail }, { email: loginOrEmail }],
-  //     deletedAt: null,
-  //   });
-  // }
-  //
-  // async findOrNotFoundFail(id: Types.ObjectId): Promise<UserDocument> {
-  //   const user = await this.findById(id);
-  //   if (!user) {
-  //     throw new DomainException({
-  //       code: DomainExceptionCode.NotFound,
-  //       message: 'User not found',
-  //     });
-  //   }
-  //   return user;
-  // }
+  async refreshEmailConfirmation(
+    userId: string,
+    newConfirmationCode: string,
+    newExpirationDate: Date,
+  ): Promise<void> {
+    await this.dataSource.query(
+      `
+      UPDATE public.user_account_state as uas
+      SET "confirmationCode" = $1,
+          "confirmationExpirationDate" = $2
+      WHERE uas."userId" = $3
+      `,
+      [newConfirmationCode, newExpirationDate, userId],
+    );
+  }
+
+  async refreshRecoveryCode(
+    userId: string,
+    newRecoveryCode: string,
+    newRecoveryExpirationDate: Date,
+  ): Promise<void> {
+    await this.dataSource.query(
+      `
+      UPDATE public.user_account_state as uas
+      SET "recoveryCode" = $1,
+          "recoveryExpirationDate" = $2
+      WHERE uas."userId" = $3
+      `,
+      [newRecoveryCode, newRecoveryExpirationDate, userId],
+    );
+  }
+
+  async findByRecoveryCode(code: string): Promise<UserAccountStateRow | null> {
+    const result: UserAccountStateRow[] = await this.dataSource.query(
+      `
+      SELECT *
+      FROM public.user_account_state as uas
+      WHERE uas."recoveryCode" = $1
+      `,
+      [code],
+    );
+    return result[0] ?? null;
+  }
+
+  async completePasswordRecovery(
+    userId: string,
+    newPasswordHash: string,
+  ): Promise<void> {
+    // Меняем пароль пользователя
+    await this.dataSource.transaction(async (manager) => {
+      await manager.query(
+        `
+          UPDATE public.users
+          SET "passwordHash" = $1
+          WHERE id = $2
+        `,
+        [newPasswordHash, userId],
+      );
+
+      // Делаем код восстановления недействительным
+      // Очищаем использованный код и дату
+      await manager.query(
+        `
+      UPDATE public.user_account_state
+      SET "recoveryCode" = NULL,
+          "recoveryExpirationDate" = NULL
+      WHERE "userId" = $1
+      `,
+        [userId],
+      );
+    });
+  }
+
+  async findByLoginOrEmail(loginOrEmail: string): Promise<UserRow | null> {
+    const result = await this.dataSource.query<UserRow[]>(
+      `
+     SELECT *
+     FROM public.users as u
+     WHERE (u.login = $1 OR u.email = $1)
+     AND "deletedAt" IS NULL
+     `,
+      [loginOrEmail],
+    );
+    return result[0] ?? null;
+  }
 }

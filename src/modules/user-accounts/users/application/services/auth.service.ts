@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { UserContextDto } from '../../guards/dto/user-context.dto';
-import { UsersRepository } from '../../infrastructure/users.repository';
 import { PasswordService } from './password.service';
+import { UsersSqlRepository } from '../../infrastructure/users-sql.repository';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private usersRepository: UsersRepository,
+    private usersSqlRepository: UsersSqlRepository,
     private bcryptService: PasswordService,
   ) {}
 
@@ -14,7 +14,7 @@ export class AuthService {
     loginOrEmail: string,
     password: string,
   ): Promise<UserContextDto | null> {
-    const user = await this.usersRepository.findByLoginOrEmail(loginOrEmail);
+    const user = await this.usersSqlRepository.findByLoginOrEmail(loginOrEmail);
 
     if (!user) {
       return null;

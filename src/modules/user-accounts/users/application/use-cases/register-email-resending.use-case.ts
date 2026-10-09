@@ -1,10 +1,10 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { UsersRepository } from '../../infrastructure/users.repository';
 import { EmailService } from '../../../../notifications/email.service';
 import { DomainException } from '../../../../../core/exceptions/domain-exceptions';
 import { DomainExceptionCode } from '../../../../../core/exceptions/domain-exception-codes';
 import { randomUUID } from 'node:crypto';
 import { addHours } from 'date-fns';
+import { UsersSqlRepository } from '../../infrastructure/users-sql.repository';
 
 export class RegisterEmailResendingCommand {
   constructor(public email: string) {}
@@ -17,24 +17,28 @@ export class RegisterEmailResendingUseCase implements ICommandHandler<
   void
 > {
   constructor(
-    private readonly usersRepository: UsersRepository,
+    private readonly usersSqlRepository: UsersSqlRepository,
     private readonly emailService: EmailService,
   ) {}
 
   async execute({ email }: RegisterEmailResendingCommand): Promise<void> {
-    const user = await this.usersRepository.findByEmail(email);
+    // Находим пользователя вместе с подтверждением одним запросом
+    const user =
+      await this.usersSqlRepository.findUserWithEmailConfirmationByEmail(email);
 
-    // Если user не найден → 400
+    // Пользователь или запись подтверждения не найдены → 400
     if (!user) {
       throw new DomainException({
         code: DomainExceptionCode.BadRequest,
-        message: 'Email is not registered',
-        extensions: [{ message: 'Email is not registered', key: 'email' }],
+        message: 'User or Email confirmation not found',
+        extensions: [
+          { message: 'User or Email confirmation not found', key: 'email' },
+        ],
       });
     }
 
-    // Если user уже подтверждён → 400
-    if (user.emailConfirmation.isConfirmed) {
+    // Email уже подтверждён → 400
+    if (user.isConfirmed) {
       throw new DomainException({
         code: DomainExceptionCode.BadRequest,
         message: 'Email already confirmed',
@@ -48,13 +52,14 @@ export class RegisterEmailResendingUseCase implements ICommandHandler<
     // Генерируем новую expirationDate
     const newExpirationDate = addHours(new Date(), 1);
 
-    // Обновляем код подтверждения и срок его действия у найденного пользователя в памяти
-    user.refreshEmailConfirmation(newConfirmationCode, newExpirationDate);
+    // Сохраняем новый код и срок действия в PostgreSQL
+    await this.usersSqlRepository.refreshEmailConfirmation(
+      user.id,
+      newConfirmationCode,
+      newExpirationDate,
+    );
 
-    // Сохраняем обновлённый confirmationCode и новую expirationDate в MongoDB
-    await this.usersRepository.save(user);
-
-    // Отправляем новое письмо
+    // Отправляем письмо с новым кодом
     this.emailService
       .sendRegistrationConfirmationEmail(user.email, newConfirmationCode)
       .catch((error) =>

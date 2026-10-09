@@ -6,7 +6,7 @@ import { DomainException } from '../../../../../core/exceptions/domain-exception
 import { DomainExceptionCode } from '../../../../../core/exceptions/domain-exception-codes';
 
 export type UserRow = {
-  userId: string;
+  id: string;
   login: string;
   email: string;
   passwordHash: string;
@@ -28,7 +28,7 @@ export class UsersSqlQueryRepository {
       `
       SELECT *
       FROM public.users as u
-      WHERE u."userId" = $1
+      WHERE u.id = $1
         AND u."deletedAt" IS NULL
     `,
       [id],
@@ -62,7 +62,7 @@ export class UsersSqlQueryRepository {
     // Получаем пользователей, подходящих под фильтры.
     const users = await this.dataSource.query<UserRow[]>(
       `
-        SELECT "userId", login, email, "createdAt"
+        SELECT id, login, email, "createdAt"
         FROM public.users as u
         -- Берём только неудалённых пользователей.
         WHERE u."deletedAt" IS NULL
@@ -113,60 +113,4 @@ export class UsersSqlQueryRepository {
 
     return { users, totalCount };
   }
-
-  // Найти user по id
-  // async getByIdOrNotFoundFail(id: string): Promise<UserViewDto> {
-  //   const user = await this.UserModel.findOne({
-  //     _id: id,
-  //     deletedAt: null,
-  //   });
-  //
-  //   if (!user) {
-  //     throw new NotFoundException('User not found');
-  //   }
-  //
-  //   return UserViewDto.mapToView(user);
-  // }
-
-  // Найти список пользователей согласно переданным параметрам.
-  // async findAllUsers(
-  //   query: GetUsersQueryParams,
-  // ): Promise<PaginationViewDto<UserViewDto>> {
-  //   // мы хотим найти только пользователей, которые не удалены.
-  //   const filter: QueryFilter<User> = { deletedAt: null };
-  //
-  //   if (query.searchLoginTerm) {
-  //     // Мы проверяем, существует ли в фильтре массив $or. Если существует — используем его, если нет — создаём пустой массив.
-  //     filter.$or = filter.$or || [];
-  //     filter.$or.push({
-  //       login: { $regex: query.searchLoginTerm, $options: 'i' },
-  //     });
-  //   }
-  //
-  //   if (query.searchEmailTerm) {
-  //     filter.$or = filter.$or || [];
-  //     filter.$or.push({
-  //       email: { $regex: query.searchEmailTerm, $options: 'i' },
-  //     });
-  //   }
-  //
-  //   const users = await this.UserModel.find(filter)
-  //     .skip(query.calculateSkip())
-  //     .sort({ [query.sortBy]: query.sortDirection })
-  //     .limit(query.pageSize);
-  //
-  //   const totalCount = await this.UserModel.countDocuments(filter);
-  //
-  //   const items = users.map((user) => {
-  //     return UserViewDto.mapToView(user);
-  //   });
-  //
-  //   // Мы передаём данные, из которых можно посчитать количество страниц, а сам расчёт прячем внутри mapToView.
-  //   return PaginationViewDto.mapToView({
-  //     items,
-  //     totalCount,
-  //     pageSize: query.pageSize,
-  //     page: query.pageNumber,
-  //   });
-  // }
 }

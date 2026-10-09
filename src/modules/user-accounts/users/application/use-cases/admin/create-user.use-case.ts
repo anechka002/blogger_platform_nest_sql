@@ -2,7 +2,6 @@ import { PasswordService } from '../../services/password.service';
 import { CreateUserDto } from '../../../dto/create-user.dto';
 import { DomainException } from '../../../../../../core/exceptions/domain-exceptions';
 import { DomainExceptionCode } from '../../../../../../core/exceptions/domain-exception-codes';
-import { User } from '../../../domain/user.entity';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { UsersSqlRepository } from '../../../infrastructure/users-sql.repository';
 
@@ -49,8 +48,14 @@ export class CreateUserUseCase implements ICommandHandler<CreateUserCommand> {
     const passwordHash: string =
       await this.passwordService.generateHash(password);
 
-    const user = User.createUser({ login, email, passwordHash });
-    const savedUser = await this.usersSqlRepository.create(user);
-    return savedUser.userId;
+    const isConfirmed = true;
+
+    const createdUser =
+      await this.usersSqlRepository.createUserWithAccountState(
+        { login, email, passwordHash },
+        isConfirmed,
+      );
+
+    return createdUser.id;
   }
 }

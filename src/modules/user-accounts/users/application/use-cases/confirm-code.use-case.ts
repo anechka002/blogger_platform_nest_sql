@@ -1,9 +1,7 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { UsersRepository } from '../../infrastructure/users.repository';
-import { PasswordService } from '../services/password.service';
-import { EmailService } from '../../../../notifications/email.service';
 import { DomainException } from '../../../../../core/exceptions/domain-exceptions';
 import { DomainExceptionCode } from '../../../../../core/exceptions/domain-exception-codes';
+import { UsersSqlRepository } from '../../infrastructure/users-sql.repository';
 
 export class ConfirmCodeCommand {
   constructor(public code: string) {}
@@ -15,13 +13,15 @@ export class ConfirmCodeUseCase implements ICommandHandler<
   ConfirmCodeCommand,
   void
 > {
-  constructor(private readonly usersRepository: UsersRepository) {}
+  constructor(private readonly usersSqlRepository: UsersSqlRepository) {}
 
   async execute({ code }: ConfirmCodeCommand): Promise<void> {
-    const user = await this.usersRepository.findByConfirmationCode(code);
+    // const user = await this.usersRepository.findByConfirmationCode(code);
+    const confirmation =
+      await this.usersSqlRepository.findByConfirmationCode(code);
 
     // код не найден → 400
-    if (!user) {
+    if (!confirmation) {
       throw new DomainException({
         code: DomainExceptionCode.BadRequest,
         message: 'Invalid confirmation code',
@@ -32,7 +32,7 @@ export class ConfirmCodeUseCase implements ICommandHandler<
     }
 
     // email уже подтверждён → 400
-    if (user.emailConfirmation.isConfirmed) {
+    if (confirmation.isConfirmed) {
       throw new DomainException({
         code: DomainExceptionCode.BadRequest,
         message: 'Email is already confirmed',
@@ -42,8 +42,8 @@ export class ConfirmCodeUseCase implements ICommandHandler<
 
     // код истёк → 400
     if (
-      !user.emailConfirmation.expirationDate ||
-      user.emailConfirmation.expirationDate < new Date()
+      !confirmation.confirmationExpirationDate ||
+      confirmation.confirmationExpirationDate < new Date()
     ) {
       throw new DomainException({
         code: DomainExceptionCode.ConfirmationCodeExpired,
@@ -52,10 +52,7 @@ export class ConfirmCodeUseCase implements ICommandHandler<
       });
     }
 
-    // После успешных проверок меняем состояние пользователя
-    user.confirmEmail();
-
-    // сохраняем изменения в MongoDB
-    await this.usersRepository.save(user);
+    // UPDATE: устанавливаем isConfirmed = true
+    await this.usersSqlRepository.confirmEmail(code);
   }
 }
