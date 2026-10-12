@@ -1,7 +1,7 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { SessionRepository } from '../../../infrastructure/session.repository';
 import { DomainException } from '../../../../../../core/exceptions/domain-exceptions';
 import { DomainExceptionCode } from '../../../../../../core/exceptions/domain-exception-codes';
+import { SessionSqlRepository } from '../../../infrastructure/session-sql.repository';
 
 export class DeleteDeviceSessionCommand {
   constructor(
@@ -15,10 +15,10 @@ export class DeleteDeviceSessionUseCase implements ICommandHandler<
   DeleteDeviceSessionCommand,
   void
 > {
-  constructor(public sessionRepository: SessionRepository) {}
+  constructor(private readonly sessionSqlRepository: SessionSqlRepository) {}
 
   async execute(dto: DeleteDeviceSessionCommand): Promise<void> {
-    const session = await this.sessionRepository.findByDeviceId(
+    const session = await this.sessionSqlRepository.findActiveByDeviceId(
       dto.targetDeviceId,
     );
 
@@ -36,8 +36,6 @@ export class DeleteDeviceSessionUseCase implements ICommandHandler<
       });
     }
 
-    session.makeDeleted();
-
-    await this.sessionRepository.saveSession(session);
+    await this.sessionSqlRepository.deleteSession(session.deviceId);
   }
 }

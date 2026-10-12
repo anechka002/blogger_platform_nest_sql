@@ -10,7 +10,7 @@ type RequestWithRefreshTokenInfo = Request & {
   };
 };
 
-// декоратор для обработки refresh token текущего пользователя
+// декоратор извлекает данные refresh-токена, подготовленные guard/стратегией
 export const RefreshTokenInfo = createParamDecorator(
   (data: unknown, context: ExecutionContext): RefreshTokenDto => {
     // Переключаемся именно на HTTP-контекст и получаем текущий request.

@@ -47,6 +47,9 @@ export class User {
   @Prop({ type: Date, required: true })
   createdAt: Date;
 
+  @Prop({ type: Date, required: true })
+  updatedAt: Date;
+
   @Prop({ type: Date, default: null })
   deletedAt: Date | null;
 

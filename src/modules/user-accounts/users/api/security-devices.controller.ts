@@ -10,7 +10,6 @@ import {
 import { CommandBus } from '@nestjs/cqrs';
 import { RefreshTokenAuthGuard } from '../../../../core/guards/bearer/refresh-token.auth.guard';
 import { DeviceSessionViewDto } from './view-dto/device-session.view-dto';
-import { SessionsQueryRepository } from '../infrastructure/query/sessions.query-repository';
 import { RefreshTokenInfo } from './decorators/refresh-token-info.decorator';
 import { RefreshTokenDto } from '../guards/dto/refresh-token.dto';
 import { DeleteDeviceSessionCommand } from '../application/use-cases/devices/delete-device-session.use-case';
@@ -18,13 +17,14 @@ import { DeleteAllDevicesSessionsCommand } from '../application/use-cases/device
 import { GetDevicesWithActiveSessionsSwagger } from './swagger/devices/get-all-devices.swagger.decorator';
 import { DeleteAllDevicesSwagger } from './swagger/devices/delete-all-devices.swagger.decorator';
 import { DeleteDeviceSessionSwagger } from './swagger/devices/delete-device-session.swagger.decorator';
+import { SessionsSqlQueryRepository } from '../infrastructure/query/sessions-sql.query-repository';
 
 @Controller('security/devices')
 @UseGuards(RefreshTokenAuthGuard)
 export class SecurityDevicesController {
   constructor(
     private readonly commandBus: CommandBus,
-    private sessionQueryRepository: SessionsQueryRepository,
+    private sessionSqlQueryRepository: SessionsSqlQueryRepository,
   ) {
     console.log('SecurityDevicesController created');
   }
@@ -34,7 +34,9 @@ export class SecurityDevicesController {
   async getAll(
     @RefreshTokenInfo() refreshTokenInfo: RefreshTokenDto,
   ): Promise<DeviceSessionViewDto[]> {
-    return this.sessionQueryRepository.getAllDevices(refreshTokenInfo.userId);
+    return this.sessionSqlQueryRepository.getAllDevices(
+      refreshTokenInfo.userId,
+    );
   }
 
   @DeleteDeviceSessionSwagger()

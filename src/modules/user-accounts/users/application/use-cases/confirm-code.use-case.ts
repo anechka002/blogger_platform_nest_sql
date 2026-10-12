@@ -36,7 +36,7 @@ export class ConfirmCodeUseCase implements ICommandHandler<
       throw new DomainException({
         code: DomainExceptionCode.BadRequest,
         message: 'Email is already confirmed',
-        extensions: [{ message: 'Email is already confirmed', key: 'email' }],
+        extensions: [{ message: 'Email is already confirmed', key: 'code' }],
       });
     }
 

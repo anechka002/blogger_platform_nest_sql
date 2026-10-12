@@ -4,6 +4,7 @@ import { DataSource } from 'typeorm';
 import { GetUsersQueryParams } from '../../api/input-dto/get-users-query-params.input-dto';
 import { DomainException } from '../../../../../core/exceptions/domain-exceptions';
 import { DomainExceptionCode } from '../../../../../core/exceptions/domain-exception-codes';
+import { UserSortBy } from '../../api/input-dto/user-sort-by';
 
 export type UserRow = {
   id: string;
@@ -59,6 +60,12 @@ export class UsersSqlQueryRepository {
       ? `%${query.searchEmailTerm}%`
       : null;
 
+    // Правило сортировки для текстовых полей.
+    const collation =
+      query.sortBy === UserSortBy.Login || query.sortBy === UserSortBy.Email
+        ? ' COLLATE "C"'
+        : '';
+
     // Получаем пользователей, подходящих под фильтры.
     const users = await this.dataSource.query<UserRow[]>(
       `
@@ -77,7 +84,7 @@ export class UsersSqlQueryRepository {
             ($1::text IS NULL AND $2::text IS NULL)
         )
         -- Сортируем по выбранному полю и направлению.
-        ORDER BY "${query.sortBy}" ${query.sortDirection}
+        ORDER BY "${query.sortBy}"${collation} ${query.sortDirection}
         -- Ограничиваем количество пользователей на странице.
         LIMIT $3
         -- Пропускаем пользователей с предыдущих страниц.

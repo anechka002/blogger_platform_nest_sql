@@ -35,6 +35,9 @@ import { LogoutUserUseCase } from './users/application/use-cases/logout-user.use
 import { UsersSqlQueryRepository } from './users/infrastructure/query/users-sql.query-repository';
 import { UserMapper } from './users/api/mappers/user.mapper';
 import { UsersSqlRepository } from './users/infrastructure/users-sql.repository';
+import { SessionSqlRepository } from './users/infrastructure/session-sql.repository';
+import { SessionsSqlQueryRepository } from './users/infrastructure/query/sessions-sql.query-repository';
+import { AuthSqlQueryRepository } from './users/infrastructure/query/auth-sql.query-repository';
 
 @Module({
   imports: [
@@ -49,6 +52,7 @@ import { UsersSqlRepository } from './users/infrastructure/users-sql.repository'
   providers: [
     AuthService,
     AuthQueryRepository,
+    AuthSqlQueryRepository,
 
     UsersExternalQueryRepository,
     UsersQueryRepository,
@@ -60,6 +64,8 @@ import { UsersSqlRepository } from './users/infrastructure/users-sql.repository'
 
     SessionRepository,
     SessionsQueryRepository,
+    SessionSqlRepository,
+    SessionsSqlQueryRepository,
 
     PasswordService,
 

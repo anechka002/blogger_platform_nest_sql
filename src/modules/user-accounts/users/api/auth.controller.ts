@@ -13,7 +13,6 @@ import type { Request, Response } from 'express';
 import { MeViewDto } from './view-dto/me.view.dto';
 import { ExtractUserFromRequest } from '../../../../core/decorators/user/param/extract-user-from-request.decorator';
 import { UserContextDto } from '../guards/dto/user-context.dto';
-import { AuthQueryRepository } from '../infrastructure/query/auth.query-repository';
 import { JwtAuthGuard } from '../../../../core/guards/bearer/jwt-auth.guard';
 import { CreateUserInputDto } from './input-dto/users.input-dto';
 import { ThrottlerGuard } from '@nestjs/throttler';
@@ -46,11 +45,12 @@ import { RefreshTokenDto } from '../guards/dto/refresh-token.dto';
 import { LogoutUserCommand } from '../application/use-cases/logout-user.use-case';
 import { RefreshTokenSwagger } from './swagger/auth/refresh-token.swagger.decorator';
 import { LogoutSwagger } from './swagger/auth/logout.swagger.decorator';
+import { AuthSqlQueryRepository } from '../infrastructure/query/auth-sql.query-repository';
 
 @Controller('auth')
 export class AuthController {
   constructor(
-    private authQueryRepository: AuthQueryRepository,
+    private authSqlQueryRepository: AuthSqlQueryRepository,
     private readonly commandBus: CommandBus,
   ) {
     console.log('AuthController created');
@@ -118,7 +118,7 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @Get('me')
   async me(@ExtractUserFromRequest() user: UserContextDto): Promise<MeViewDto> {
-    return this.authQueryRepository.meOrNotFoundFail(user.id);
+    return this.authSqlQueryRepository.meOrNotFoundFail(user.id);
   }
 
   @LoginSwagger()

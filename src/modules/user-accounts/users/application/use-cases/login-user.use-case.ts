@@ -2,8 +2,7 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { JwtAdapter } from '../services/jwt/jwt.adapter';
 import { randomUUID } from 'node:crypto';
 import { TokensPairType } from '../../../../../core/types/tokens-pair.type';
-import { SessionEntity } from '../../domain/session.entity';
-import { SessionRepository } from '../../infrastructure/session.repository';
+import { SessionSqlRepository } from '../../infrastructure/session-sql.repository';
 
 type LoginUserCommandParams = {
   userId: string;
@@ -22,7 +21,7 @@ export class LoginUserUseCase implements ICommandHandler<
 > {
   constructor(
     private jwtAdapter: JwtAdapter,
-    private sessionRepository: SessionRepository,
+    private sessionSqlRepository: SessionSqlRepository,
   ) {}
 
   async execute(command: LoginUserCommand): Promise<TokensPairType> {
@@ -36,16 +35,16 @@ export class LoginUserUseCase implements ICommandHandler<
         deviceId,
       });
 
-    const session = SessionEntity.createSession({
+    const session = {
       deviceId,
       userId,
       deviceName,
       ip: ipAddress,
       expirationDate: new Date(payload.exp * 1000),
       issuedAt: new Date(payload.iat * 1000),
-    });
+    };
 
-    await this.sessionRepository.createSession(session);
+    await this.sessionSqlRepository.createSession(session);
 
     return { accessToken, refreshToken };
   }

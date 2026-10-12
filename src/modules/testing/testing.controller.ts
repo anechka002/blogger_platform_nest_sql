@@ -1,13 +1,11 @@
 import { Controller, Delete, HttpCode, HttpStatus } from '@nestjs/common';
-import { InjectConnection } from '@nestjs/mongoose';
-import { Connection } from 'mongoose';
 import { ApiNoContentResponse, ApiOperation } from '@nestjs/swagger';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
 
 @Controller('testing')
 export class TestingController {
-  constructor(
-    @InjectConnection() private readonly databaseConnection: Connection,
-  ) {}
+  constructor(@InjectDataSource() private readonly dataSource: DataSource) {}
 
   @Delete('all-data')
   @HttpCode(HttpStatus.NO_CONTENT)
@@ -18,14 +16,13 @@ export class TestingController {
     description: 'All data is deleted',
   })
   async deleteAll() {
-    const collections = await this.databaseConnection.listCollections();
+    await this.dataSource.transaction(async (manager) => {
+      // Сначала удаляем связанные записи
+      await manager.query('DELETE FROM public.devices');
+      await manager.query('DELETE FROM public.user_account_state');
 
-    const promises = collections.map((collection) =>
-      this.databaseConnection.collection(collection.name).deleteMany({}),
-    );
-    await Promise.all(promises);
-    return {
-      status: 'success',
-    };
+      // Затем пользователей
+      await manager.query('DELETE FROM public.users');
+    });
   }
 }

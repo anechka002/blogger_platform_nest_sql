@@ -1,9 +1,9 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { JwtAdapter } from '../services/jwt/jwt.adapter';
 import { TokensPairType } from '../../../../../core/types/tokens-pair.type';
-import { SessionRepository } from '../../infrastructure/session.repository';
 import { DomainException } from '../../../../../core/exceptions/domain-exceptions';
 import { DomainExceptionCode } from '../../../../../core/exceptions/domain-exception-codes';
+import { SessionSqlRepository } from '../../infrastructure/session-sql.repository';
 
 export class RefreshTokenCommand {
   constructor(public dto: { userId: string; deviceId: string; iat: number }) {}
@@ -16,14 +16,15 @@ export class RefreshTokenUseCase implements ICommandHandler<
 > {
   constructor(
     private jwtAdapter: JwtAdapter,
-    private sessionRepository: SessionRepository,
+    private sessionSqlRepository: SessionSqlRepository,
   ) {}
 
   async execute(command: RefreshTokenCommand): Promise<TokensPairType> {
     const { userId, deviceId, iat } = command.dto;
 
     // Ищем активную session текущего устройства.
-    const session = await this.sessionRepository.findByDeviceId(deviceId);
+    const session =
+      await this.sessionSqlRepository.findActiveByDeviceId(deviceId);
 
     if (!session) {
       throw new DomainException({
@@ -61,9 +62,11 @@ export class RefreshTokenUseCase implements ICommandHandler<
     const issuedAt = new Date(payload.iat * 1000);
     const expirationDate = new Date(payload.exp * 1000);
 
-    session.updateRefreshToken({ issuedAt, expirationDate });
-
-    await this.sessionRepository.saveSession(session);
+    await this.sessionSqlRepository.updateRefreshToken(
+      session.deviceId,
+      issuedAt,
+      expirationDate,
+    );
 
     return { accessToken, refreshToken };
   }
