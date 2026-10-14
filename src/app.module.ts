@@ -13,6 +13,7 @@ import { AllHttpExceptionsFilter } from './core/exceptions/filters/all-exception
 import { ThrottlerModule } from '@nestjs/throttler';
 import { CoreConfig } from './core/core.config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
@@ -46,6 +47,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
     BloggersPlatformModule,
     TestingModule,
     CoreModule, //вынесли конфигурацию в отдельный файл
+    ScheduleModule.forRoot(), // планировщик: он запускает функцию по расписанию
   ],
   controllers: [AppController],
   providers: [

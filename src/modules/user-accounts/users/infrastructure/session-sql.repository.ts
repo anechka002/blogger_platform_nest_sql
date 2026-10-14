@@ -119,4 +119,15 @@ export class SessionSqlRepository {
       [userId, deviceId],
     );
   }
+
+  // Полностью удаляет завершённые и истёкшие сессии.
+  async deleteInactiveSessions(): Promise<void> {
+    await this.dataSource.query(
+      `
+      DELETE FROM public.devices
+      WHERE "deletedAt" IS NOT NULL
+      OR "expirationDate" <= NOW()
+      `,
+    );
+  }
 }

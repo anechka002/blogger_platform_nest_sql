@@ -38,6 +38,7 @@ import { UsersSqlRepository } from './users/infrastructure/users-sql.repository'
 import { SessionSqlRepository } from './users/infrastructure/session-sql.repository';
 import { SessionsSqlQueryRepository } from './users/infrastructure/query/sessions-sql.query-repository';
 import { AuthSqlQueryRepository } from './users/infrastructure/query/auth-sql.query-repository';
+import { SessionsCleanupJob } from './users/infrastructure/jobs/session-cleanup.job';
 
 @Module({
   imports: [
@@ -66,6 +67,8 @@ import { AuthSqlQueryRepository } from './users/infrastructure/query/auth-sql.qu
     SessionsQueryRepository,
     SessionSqlRepository,
     SessionsSqlQueryRepository,
+
+    SessionsCleanupJob,
 
     PasswordService,
 

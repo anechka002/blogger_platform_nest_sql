@@ -1,7 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { appSetup } from './setup/app.setup';
-import { generateNestGraph } from './core/dev/nest-graph';
 import { CoreConfig } from './core/core.config';
 
 async function bootstrap() {
@@ -11,8 +10,6 @@ async function bootstrap() {
   const port = coreConfig.port;
 
   appSetup(app); //глобальные настройки приложения
-
-  generateNestGraph(app);
 
   await app.listen(port, () => {
     console.log(`Я завелся на ${port} порту`);
