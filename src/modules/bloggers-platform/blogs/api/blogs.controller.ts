@@ -13,7 +13,6 @@ import {
 } from '@nestjs/common';
 import { CreateBlogInputDto } from './input-dto/blogs.input-dto';
 import { BlogViewDto } from './view-dto/blog.view-dto';
-import { BlogsQueryRepository } from '../infrastructure/query/blogs.query-repository';
 import { PaginationViewDto } from '../../../../core/dto/base.paginated.view-dto';
 import { GetBlogsQueryParams } from './input-dto/get-blogs-query-params.input-dto';
 import { UpdateBlogInputDto } from './input-dto/update-blog.input-dto';
@@ -38,14 +37,22 @@ import { Public } from '../../../../core/decorators/user/public.decorator';
 import { JwtOptionalAuthGuard } from '../../../../core/guards/bearer/jwt-optional-auth.guard';
 import { ExtractUserFromRequestOptional } from '../../../../core/decorators/user/param/extract-user-from-request-optional.decorator';
 import { UserContextDto } from '../../../user-accounts/users/guards/dto/user-context.dto';
+import { BlogsSqlQueryRepository } from '../infrastructure/query/blogs-sql.query-repository';
+import { BlogMapper } from './mappers/blog.mapper';
+import { PostsSqlQueryRepository } from '../../posts/infrastructure/query/posts-sql.query-repository';
+import { PostMapper } from '../../posts/api/mappers/post.mapper';
+import { LikeStatus } from '../../../../core/enum/like-status';
 
 @UseGuards(BasicAuthGuard)
 @Controller('blogs')
 export class BlogsController {
   constructor(
-    private blogsQueryRepository: BlogsQueryRepository,
+    private blogsSqlQueryRepository: BlogsSqlQueryRepository,
+    private postsSqlQueryRepository: PostsSqlQueryRepository,
     private postsQueryRepository: PostsQueryRepository,
     private readonly commandBus: CommandBus,
+    private readonly blogMapper: BlogMapper,
+    private readonly postMapper: PostMapper,
   ) {
     console.log('BlogsController');
   }
@@ -55,7 +62,8 @@ export class BlogsController {
   @Get(':id')
   async getById(@Param('id') id: string): Promise<BlogViewDto> {
     // NestJS будет дожидаться, когда промис зарезолвится и затем NestJS вернёт результат клиенту
-    return this.blogsQueryRepository.getByIdOrNotFoundFail(id);
+    const blog = await this.blogsSqlQueryRepository.getByIdOrNotFoundFail(id);
+    return this.blogMapper.toCurrentBlogsViewModel(blog);
   }
 
   @GetBlogsSwagger()
@@ -64,7 +72,17 @@ export class BlogsController {
   async getAll(
     @Query() query: GetBlogsQueryParams,
   ): Promise<PaginationViewDto<BlogViewDto>> {
-    return this.blogsQueryRepository.findAllBlogs(query);
+    const result = await this.blogsSqlQueryRepository.findAllBlogs(query);
+    console.log('blogs result:', result);
+    const items = result.blogs.map((blog) => {
+      return this.blogMapper.toCurrentBlogsViewModel(blog);
+    });
+    return PaginationViewDto.mapToView({
+      items,
+      totalCount: result.totalCount,
+      pageSize: query.pageSize,
+      page: query.pageNumber,
+    });
   }
 
   @GetPostsForBlogSwagger()
@@ -76,8 +94,42 @@ export class BlogsController {
     @Query() query: GetPostsQueryParams,
     @ExtractUserFromRequestOptional() user: UserContextDto | null,
   ): Promise<PaginationViewDto<ExtendedPostViewDto>> {
-    await this.blogsQueryRepository.getByIdOrNotFoundFail(blogId);
-    return this.postsQueryRepository.findPostsByBlogId(blogId, query, user?.id);
+    await this.blogsSqlQueryRepository.getByIdOrNotFoundFail(blogId);
+
+    const result = await this.postsSqlQueryRepository.findPostsByBlogId(
+      blogId,
+      query,
+      user?.id,
+    );
+
+    // console.log('getPostsForBlog:', result);
+
+    // const items = result.posts.map((post) => {
+    //   return this.postMapper.toCurrentPostsViewModel(post);
+    // });
+
+    const items: ExtendedPostViewDto[] = result.posts.map((post) => ({
+      id: post.id,
+      title: post.title,
+      shortDescription: post.shortDescription,
+      content: post.content,
+      blogId: post.blogId,
+      blogName: post.blogName,
+      createdAt: post.createdAt,
+      extendedLikesInfo: {
+        likesCount: post.likesCount,
+        dislikesCount: post.dislikesCount,
+        myStatus: LikeStatus.None,
+        newestLikes: [],
+      },
+    }));
+
+    return PaginationViewDto.mapToView({
+      items,
+      totalCount: result.totalCount,
+      pageSize: query.pageSize,
+      page: query.pageNumber,
+    });
   }
 
   @CreateBlogSwagger()
@@ -86,7 +138,7 @@ export class BlogsController {
     const blogId = await this.commandBus.execute<CreateBlogCommand, string>(
       new CreateBlogCommand(body),
     );
-    return this.blogsQueryRepository.getByIdOrNotFoundFail(blogId);
+    return this.blogsSqlQueryRepository.getByIdOrNotFoundFail(blogId);
   }
 
   @UpdateBlogSwagger()
@@ -100,7 +152,7 @@ export class BlogsController {
       new UpdateBlogCommand(id, body),
     );
 
-    return this.blogsQueryRepository.getByIdOrNotFoundFail(blogId);
+    return this.blogsSqlQueryRepository.getByIdOrNotFoundFail(blogId);
   }
 
   @DeleteBlogSwagger()

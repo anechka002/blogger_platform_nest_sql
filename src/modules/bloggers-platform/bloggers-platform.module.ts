@@ -33,6 +33,11 @@ import {
 import { CommentLikesRepository } from './comments/infrastructure/comment-like.repository';
 import { UpdatePostLikeStatusUseCase } from './posts/application/use-cases/update-post-like-status.use-case';
 import { PostLikesRepository } from './posts/infrastructure/post-like.repository';
+import { BlogsSqlQueryRepository } from './blogs/infrastructure/query/blogs-sql.query-repository';
+import { BlogsSqlRepository } from './blogs/infrastructure/blogs-sql.repository';
+import { BlogMapper } from './blogs/api/mappers/blog.mapper';
+import { PostsSqlQueryRepository } from './posts/infrastructure/query/posts-sql.query-repository';
+import { PostMapper } from './posts/api/mappers/post.mapper';
 
 @Module({
   imports: [
@@ -52,10 +57,17 @@ import { PostLikesRepository } from './posts/infrastructure/post-like.repository
   providers: [
     BlogsRepository,
     BlogsQueryRepository,
+    BlogsSqlRepository,
+    BlogsSqlQueryRepository,
+
+    BlogMapper,
+    PostMapper,
 
     PostsRepository,
     PostsQueryRepository,
     PostLikesRepository,
+
+    PostsSqlQueryRepository,
 
     CommentsQueryRepository,
     CommentsRepository,
