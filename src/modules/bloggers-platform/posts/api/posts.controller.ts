@@ -41,13 +41,18 @@ import { UpdatePostLikeStatusCommand } from '../application/use-cases/update-pos
 import { LikeStatusForPostSwagger } from './swagger/like-status-for-post.swagger.decorator';
 import { JwtOptionalAuthGuard } from '../../../../core/guards/bearer/jwt-optional-auth.guard';
 import { ExtractUserFromRequestOptional } from '../../../../core/decorators/user/param/extract-user-from-request-optional.decorator';
+import { PostsSqlQueryRepository } from '../infrastructure/query/posts-sql.query-repository';
+import { PostMapper } from './mappers/post.mapper';
+import { LikeStatus } from '../../../../core/enum/like-status';
 
 @Controller('posts')
 export class PostsController {
   constructor(
     private readonly commandBus: CommandBus,
     private postsQueryRepository: PostsQueryRepository,
+    private postsSqlQueryRepository: PostsSqlQueryRepository,
     private commentsQueryRepository: CommentsQueryRepository,
+    private readonly postMapper: PostMapper,
   ) {
     console.log('PostsController');
   }
@@ -60,7 +65,12 @@ export class PostsController {
     @ExtractUserFromRequestOptional() user: UserContextDto | null,
   ): Promise<ExtendedPostViewDto> {
     // NestJS будет дожидаться, когда промис зарезолвится и затем NestJS вернёт результат клиенту
-    return this.postsQueryRepository.getByIdOrNotFoundFail(id, user?.id);
+    // return this.postsQueryRepository.getByIdOrNotFoundFail(id, user?.id);
+    const post = await this.postsSqlQueryRepository.getByIdOrNotFoundFail(
+      id,
+      user?.id,
+    );
+    return this.postMapper.toCurrentPostsViewModel(post);
   }
 
   @GetPostsSwagger()
@@ -70,7 +80,35 @@ export class PostsController {
     @Query() query: GetPostsQueryParams,
     @ExtractUserFromRequestOptional() user: UserContextDto | null,
   ): Promise<PaginationViewDto<ExtendedPostViewDto>> {
-    return this.postsQueryRepository.findAllPosts(query, user?.id);
+    const result = await this.postsSqlQueryRepository.findAllPosts(
+      query,
+      user?.id,
+    );
+
+    const items: ExtendedPostViewDto[] = result.posts.map((post) => {
+      return {
+        id: post.id,
+        title: post.title,
+        shortDescription: post.shortDescription,
+        content: post.content,
+        blogId: post.blogId,
+        blogName: post.blogName,
+        createdAt: post.createdAt,
+        extendedLikesInfo: {
+          likesCount: post.likesCount,
+          dislikesCount: post.dislikesCount,
+          myStatus: LikeStatus.None,
+          newestLikes: [],
+        },
+      };
+    });
+
+    return PaginationViewDto.mapToView({
+      items,
+      totalCount: result.totalCount,
+      pageSize: query.pageSize,
+      page: query.pageNumber,
+    });
   }
 
   @CreatePostSwagger()

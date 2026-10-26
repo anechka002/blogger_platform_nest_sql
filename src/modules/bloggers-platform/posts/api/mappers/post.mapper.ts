@@ -1,10 +1,9 @@
-import { PostWithBlogNameRow } from '../../infrastructure/query/posts-sql.query-repository';
-import { CurrentPostViewModel } from '../view-dto/current-post.view-model';
+import { PostWithLikesRow } from '../../infrastructure/query/posts-sql.query-repository';
+import { ExtendedPostViewDto } from '../view-dto/extended-post.view-dto';
+import { LikeStatus } from '../../../../../core/enum/like-status';
 
 export class PostMapper {
-  public toCurrentPostsViewModel(
-    post: PostWithBlogNameRow,
-  ): CurrentPostViewModel {
+  public toCurrentPostsViewModel(post: PostWithLikesRow): ExtendedPostViewDto {
     return {
       id: post.id.toString(),
       title: post.title,
@@ -13,6 +12,12 @@ export class PostMapper {
       blogId: post.blogId,
       blogName: post.blogName,
       createdAt: post.createdAt,
+      extendedLikesInfo: {
+        likesCount: post.likesCount,
+        dislikesCount: post.dislikesCount,
+        myStatus: LikeStatus.None,
+        newestLikes: [],
+      },
     };
   }
 }
