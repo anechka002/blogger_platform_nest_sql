@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { BlogsController } from './blogs/api/blogs.controller';
+import { BlogsController } from './blogs/controllers/blogs.controller';
 import { BlogsRepository } from './blogs/infrastructure/blogs.repository';
 import { BlogsQueryRepository } from './blogs/infrastructure/query/blogs.query-repository';
 import { MongooseModule } from '@nestjs/mongoose';
@@ -38,6 +38,10 @@ import { BlogsSqlRepository } from './blogs/infrastructure/blogs-sql.repository'
 import { BlogMapper } from './blogs/api/mappers/blog.mapper';
 import { PostsSqlQueryRepository } from './posts/infrastructure/query/posts-sql.query-repository';
 import { PostMapper } from './posts/api/mappers/post.mapper';
+import { AdminBlogsController } from './blogs/controllers/blogs.admin.controller';
+import { PostsSqlRepository } from './posts/infrastructure/posts-sql.repository';
+import { UpdatePostForBlogUseCase } from './blogs/application/use-cases/update-post-for-blog.use-case';
+import { DeletePostForBlogUseCase } from './blogs/application/use-cases/delete-post-for-blog.use-case';
 
 @Module({
   imports: [
@@ -53,7 +57,12 @@ import { PostMapper } from './posts/api/mappers/post.mapper';
       { name: CommentLike.name, schema: CommentLikeSchema },
     ]),
   ],
-  controllers: [BlogsController, PostsController, CommentsController],
+  controllers: [
+    BlogsController,
+    PostsController,
+    CommentsController,
+    AdminBlogsController,
+  ],
   providers: [
     BlogsRepository,
     BlogsQueryRepository,
@@ -68,6 +77,7 @@ import { PostMapper } from './posts/api/mappers/post.mapper';
     PostLikesRepository,
 
     PostsSqlQueryRepository,
+    PostsSqlRepository,
 
     CommentsQueryRepository,
     CommentsRepository,
@@ -77,6 +87,8 @@ import { PostMapper } from './posts/api/mappers/post.mapper';
     UpdateBlogUseCase,
     DeleteBlogUseCase,
     CreatePostForBlogUseCase,
+    UpdatePostForBlogUseCase,
+    DeletePostForBlogUseCase,
 
     CreatePostUseCase,
     UpdatePostUseCase,

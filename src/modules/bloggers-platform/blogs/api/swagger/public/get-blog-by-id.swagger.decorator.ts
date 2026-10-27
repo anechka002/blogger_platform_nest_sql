@@ -6,7 +6,7 @@ import {
   ApiParam,
 } from '@nestjs/swagger';
 
-import { BlogViewDto } from '../view-dto/blog.view-dto';
+import { BlogViewDto } from '../../view-dto/blog.view-dto';
 
 export function GetBlogByIdSwagger() {
   return applyDecorators(

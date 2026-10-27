@@ -58,7 +58,7 @@ export class AuthController {
 
   @RegisterSwagger()
   @HttpCode(HttpStatus.NO_CONTENT)
-  @UseGuards(ThrottlerGuard)
+  // @UseGuards(ThrottlerGuard)
   @Post('registration')
   async register(@Body() body: CreateUserInputDto): Promise<void> {
     return this.commandBus.execute<RegisterUserCommand, void>(
@@ -68,7 +68,7 @@ export class AuthController {
 
   @ConfirmSwagger()
   @HttpCode(HttpStatus.NO_CONTENT)
-  @UseGuards(ThrottlerGuard)
+  // @UseGuards(ThrottlerGuard)
   @Post('registration-confirmation')
   async confirm(
     @Body() body: RegistrationConfirmationCodeInputDto,
@@ -80,7 +80,7 @@ export class AuthController {
 
   @RegistrationEmailResendingSwagger()
   @HttpCode(HttpStatus.NO_CONTENT)
-  @UseGuards(ThrottlerGuard)
+  // @UseGuards(ThrottlerGuard)
   @Post('registration-email-resending')
   async registrationEmailResending(
     @Body() body: RegistrationEmailResendingInputDto,
@@ -92,7 +92,7 @@ export class AuthController {
 
   @PasswordRecoverySwagger()
   @HttpCode(HttpStatus.NO_CONTENT)
-  @UseGuards(ThrottlerGuard)
+  // @UseGuards(ThrottlerGuard)
   @Post('password-recovery')
   async passwordRecovery(
     @Body() body: PasswordRecoveryInputDto,
@@ -104,7 +104,7 @@ export class AuthController {
 
   @NewPasswordRecoverySwagger()
   @HttpCode(HttpStatus.NO_CONTENT)
-  @UseGuards(ThrottlerGuard)
+  // @UseGuards(ThrottlerGuard)
   @Post('new-password')
   async newPasswordRecovery(
     @Body() body: NewPasswordRecoveryInputDto,
@@ -123,7 +123,7 @@ export class AuthController {
 
   @LoginSwagger()
   @HttpCode(HttpStatus.OK)
-  @UseGuards(ThrottlerGuard, LocalAuthGuard)
+  @UseGuards(LocalAuthGuard) // ThrottlerGuard, LocalAuthGuard
   @Post('login')
   async login(
     @Body() body: LoginInputDto,

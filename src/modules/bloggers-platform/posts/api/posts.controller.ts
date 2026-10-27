@@ -43,7 +43,6 @@ import { JwtOptionalAuthGuard } from '../../../../core/guards/bearer/jwt-optiona
 import { ExtractUserFromRequestOptional } from '../../../../core/decorators/user/param/extract-user-from-request-optional.decorator';
 import { PostsSqlQueryRepository } from '../infrastructure/query/posts-sql.query-repository';
 import { PostMapper } from './mappers/post.mapper';
-import { LikeStatus } from '../../../../core/enum/like-status';
 
 @Controller('posts')
 export class PostsController {
@@ -58,23 +57,21 @@ export class PostsController {
   }
 
   @GetPostByIdSwagger()
-  @UseGuards(JwtOptionalAuthGuard)
+  // @UseGuards(JwtOptionalAuthGuard)
   @Get(':id')
   async getById(
     @Param('id') id: string,
     @ExtractUserFromRequestOptional() user: UserContextDto | null,
   ): Promise<ExtendedPostViewDto> {
-    // NestJS будет дожидаться, когда промис зарезолвится и затем NestJS вернёт результат клиенту
-    // return this.postsQueryRepository.getByIdOrNotFoundFail(id, user?.id);
     const post = await this.postsSqlQueryRepository.getByIdOrNotFoundFail(
       id,
       user?.id,
     );
-    return this.postMapper.toCurrentPostsViewModel(post);
+    return this.postMapper.toExtendedPostViewModel(post);
   }
 
   @GetPostsSwagger()
-  @UseGuards(JwtOptionalAuthGuard)
+  // @UseGuards(JwtOptionalAuthGuard)
   @Get()
   async getAll(
     @Query() query: GetPostsQueryParams,
@@ -85,23 +82,9 @@ export class PostsController {
       user?.id,
     );
 
-    const items: ExtendedPostViewDto[] = result.posts.map((post) => {
-      return {
-        id: post.id,
-        title: post.title,
-        shortDescription: post.shortDescription,
-        content: post.content,
-        blogId: post.blogId,
-        blogName: post.blogName,
-        createdAt: post.createdAt,
-        extendedLikesInfo: {
-          likesCount: post.likesCount,
-          dislikesCount: post.dislikesCount,
-          myStatus: LikeStatus.None,
-          newestLikes: [],
-        },
-      };
-    });
+    const items: ExtendedPostViewDto[] = result.posts.map((post) =>
+      this.postMapper.toExtendedPostViewModel(post),
+    );
 
     return PaginationViewDto.mapToView({
       items,
@@ -111,86 +94,86 @@ export class PostsController {
     });
   }
 
-  @CreatePostSwagger()
-  @UseGuards(BasicAuthGuard)
-  @Post()
-  async createPost(
-    @Body() body: CreatePostInputDto,
-  ): Promise<ExtendedPostViewDto> {
-    const postId = await this.commandBus.execute<CreatePostCommand, string>(
-      new CreatePostCommand(body),
-    );
-    return this.postsQueryRepository.getByIdOrNotFoundFail(postId);
-  }
+  // @CreatePostSwagger()
+  // @UseGuards(BasicAuthGuard)
+  // @Post()
+  // async createPost(
+  //   @Body() body: CreatePostInputDto,
+  // ): Promise<ExtendedPostViewDto> {
+  //   const postId = await this.commandBus.execute<CreatePostCommand, string>(
+  //     new CreatePostCommand(body),
+  //   );
+  //   return this.postsQueryRepository.getByIdOrNotFoundFail(postId);
+  // }
 
-  @UpdatePostSwagger()
-  @HttpCode(HttpStatus.NO_CONTENT)
-  @UseGuards(BasicAuthGuard)
-  @Put(':id')
-  async updatePost(
-    @Param('id') id: string,
-    @Body() body: UpdatePostInputDto,
-  ): Promise<ExtendedPostViewDto> {
-    const postId = await this.commandBus.execute<UpdatePostCommand, string>(
-      new UpdatePostCommand(id, body),
-    );
+  // @UpdatePostSwagger()
+  // @HttpCode(HttpStatus.NO_CONTENT)
+  // @UseGuards(BasicAuthGuard)
+  // @Put(':id')
+  // async updatePost(
+  //   @Param('id') id: string,
+  //   @Body() body: UpdatePostInputDto,
+  // ): Promise<ExtendedPostViewDto> {
+  //   const postId = await this.commandBus.execute<UpdatePostCommand, string>(
+  //     new UpdatePostCommand(id, body),
+  //   );
+  //
+  //   return this.postsQueryRepository.getByIdOrNotFoundFail(postId);
+  // }
 
-    return this.postsQueryRepository.getByIdOrNotFoundFail(postId);
-  }
+  // @DeletePostSwagger()
+  // @HttpCode(HttpStatus.NO_CONTENT)
+  // @UseGuards(BasicAuthGuard)
+  // @Delete(':id')
+  // async deletePost(@Param('id') id: string): Promise<void> {
+  //   return this.commandBus.execute<DeletePostCommand, void>(
+  //     new DeletePostCommand(id),
+  //   );
+  // }
 
-  @DeletePostSwagger()
-  @HttpCode(HttpStatus.NO_CONTENT)
-  @UseGuards(BasicAuthGuard)
-  @Delete(':id')
-  async deletePost(@Param('id') id: string): Promise<void> {
-    return this.commandBus.execute<DeletePostCommand, void>(
-      new DeletePostCommand(id),
-    );
-  }
+  // @GetCommentsForPostSwagger()
+  // @UseGuards(JwtOptionalAuthGuard)
+  // @Get(':postId/comments')
+  // async getCommentsForPost(
+  //   @Param('postId') postId: string,
+  //   @Query() query: GetPostsQueryParams,
+  //   @ExtractUserFromRequestOptional() user: UserContextDto | null,
+  // ): Promise<PaginationViewDto<CommentViewDto>> {
+  //   await this.postsQueryRepository.getByIdOrNotFoundFail(postId);
+  //   return this.commentsQueryRepository.findCommentsByPostId(
+  //     postId,
+  //     query,
+  //     user?.id,
+  //   );
+  // }
 
-  @GetCommentsForPostSwagger()
-  @UseGuards(JwtOptionalAuthGuard)
-  @Get(':postId/comments')
-  async getCommentsForPost(
-    @Param('postId') postId: string,
-    @Query() query: GetPostsQueryParams,
-    @ExtractUserFromRequestOptional() user: UserContextDto | null,
-  ): Promise<PaginationViewDto<CommentViewDto>> {
-    await this.postsQueryRepository.getByIdOrNotFoundFail(postId);
-    return this.commentsQueryRepository.findCommentsByPostId(
-      postId,
-      query,
-      user?.id,
-    );
-  }
+  // @CreateCommentForPostSwagger()
+  // @UseGuards(JwtAuthGuard)
+  // @Post(':postId/comments')
+  // async createCommentForPost(
+  //   @Param('postId') postId: string,
+  //   @Body() body: CommentForPostInputDto,
+  //   @ExtractUserFromRequest() user: UserContextDto,
+  // ): Promise<CommentViewDto> {
+  //   const result = await this.commandBus.execute<
+  //     CreateCommentForPostCommand,
+  //     string
+  //   >(new CreateCommentForPostCommand(user.id, postId, body));
+  //
+  //   return this.commentsQueryRepository.getByIdOrNotFoundFail(result);
+  // }
 
-  @CreateCommentForPostSwagger()
-  @UseGuards(JwtAuthGuard)
-  @Post(':postId/comments')
-  async createCommentForPost(
-    @Param('postId') postId: string,
-    @Body() body: CommentForPostInputDto,
-    @ExtractUserFromRequest() user: UserContextDto,
-  ): Promise<CommentViewDto> {
-    const result = await this.commandBus.execute<
-      CreateCommentForPostCommand,
-      string
-    >(new CreateCommentForPostCommand(user.id, postId, body));
-
-    return this.commentsQueryRepository.getByIdOrNotFoundFail(result);
-  }
-
-  @LikeStatusForPostSwagger()
-  @HttpCode(HttpStatus.NO_CONTENT)
-  @UseGuards(JwtAuthGuard)
-  @Put(':postId/like-status')
-  async updatePostLikeStatus(
-    @Param('postId') postId: string,
-    @ExtractUserFromRequest() user: UserContextDto,
-    @Body() body: LikeStatusInputDto,
-  ): Promise<void> {
-    return this.commandBus.execute<UpdatePostLikeStatusCommand, void>(
-      new UpdatePostLikeStatusCommand(user.id, postId, body),
-    );
-  }
+  // @LikeStatusForPostSwagger()
+  // @HttpCode(HttpStatus.NO_CONTENT)
+  // @UseGuards(JwtAuthGuard)
+  // @Put(':postId/like-status')
+  // async updatePostLikeStatus(
+  //   @Param('postId') postId: string,
+  //   @ExtractUserFromRequest() user: UserContextDto,
+  //   @Body() body: LikeStatusInputDto,
+  // ): Promise<void> {
+  //   return this.commandBus.execute<UpdatePostLikeStatusCommand, void>(
+  //     new UpdatePostLikeStatusCommand(user.id, postId, body),
+  //   );
+  // }
 }

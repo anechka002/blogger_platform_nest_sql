@@ -4,6 +4,7 @@ import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { DomainException } from '../../../../../core/exceptions/domain-exceptions';
 import { DomainExceptionCode } from '../../../../../core/exceptions/domain-exception-codes';
+import { BlogSortBy } from '../../api/input-dto/blog-sort-by';
 
 export type BlogRow = {
   id: string;
@@ -26,6 +27,9 @@ export class BlogsSqlQueryRepository {
   async findAllBlogs(query: GetBlogsQueryParams): Promise<BlogsQueryResult> {
     const nameTerm = query.searchNameTerm ? `%${query.searchNameTerm}%` : null;
 
+    // Для имени задаём порядок сортировки с учётом регистра.
+    const collation = query.sortBy === BlogSortBy.Name ? ' COLLATE "C"' : '';
+
     const blogs = await this.dataSource.query<BlogRow[]>(
       `
       SELECT id, name, description, "websiteUrl", "createdAt", "isMembership" 
@@ -36,7 +40,7 @@ export class BlogsSqlQueryRepository {
         ($1::text IS NULL OR b.name ILIKE $1)
       )
       -- Сортируем по выбранному полю и направлению.
-      ORDER BY "${query.sortBy}" ${query.sortDirection}
+      ORDER BY b."${query.sortBy}"${collation} ${query.sortDirection}
       -- Ограничиваем количество пользователей на странице.
       LIMIT $2
       -- Пропускаем пользователей с предыдущих страниц.

@@ -1,16 +1,15 @@
 import { applyDecorators } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
-  ApiBasicAuth,
   ApiBody,
   ApiCreatedResponse,
   ApiOperation,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 
-import { CreateBlogInputDto } from '../input-dto/blogs.input-dto';
-import { BlogViewDto } from '../view-dto/blog.view-dto';
-import { APIErrorResult } from '../../../../../core/exceptions/filters/api-error-result';
+import { CreateBlogInputDto } from '../../input-dto/blogs.input-dto';
+import { BlogViewDto } from '../../view-dto/blog.view-dto';
+import { APIErrorResult } from '../../../../../../core/exceptions/filters/api-error-result';
 
 export function CreateBlogSwagger() {
   return applyDecorators(
@@ -27,8 +26,6 @@ export function CreateBlogSwagger() {
       description: 'Returns the newly created blog',
       type: BlogViewDto,
     }),
-
-    ApiBasicAuth('basicAuth'),
 
     ApiBadRequestResponse({
       description: 'If the inputModel has incorrect values',

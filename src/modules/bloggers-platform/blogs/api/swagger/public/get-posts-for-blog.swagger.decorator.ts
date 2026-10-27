@@ -5,7 +5,7 @@ import {
   ApiOperation,
 } from '@nestjs/swagger';
 
-import { PostsPaginationViewDto } from '../../../posts/api/view-dto/posts-pagination.view-dto';
+import { PostsPaginationViewDto } from '../../../../posts/api/view-dto/posts-pagination.view-dto';
 
 export function GetPostsForBlogSwagger() {
   return applyDecorators(

@@ -5,6 +5,7 @@ import { DataSource } from 'typeorm';
 import { BlogRow } from '../../../blogs/infrastructure/query/blogs-sql.query-repository';
 import { DomainException } from '../../../../../core/exceptions/domain-exceptions';
 import { DomainExceptionCode } from '../../../../../core/exceptions/domain-exception-codes';
+import { PostSortBy } from '../../api/input-dto/post-sort-by';
 
 export type PostRow = {
   id: string;
@@ -38,6 +39,10 @@ export class PostsSqlQueryRepository {
     query: GetPostsQueryParams,
     userId?: string,
   ): Promise<PostsQueryResult> {
+    // Название блога берём из blogs, остальные поля — из posts.
+    const sortColumn =
+      query.sortBy === PostSortBy.BlogName ? 'b.name' : `p."${query.sortBy}"`;
+
     const posts = await this.dataSource.query<PostWithBlogNameRow[]>(
       `
       SELECT p.id, p.title, p."shortDescription", p.content, p."createdAt", p."blogId", b.name as "blogName"
@@ -46,7 +51,7 @@ export class PostsSqlQueryRepository {
       WHERE p."deletedAt" IS NULL
         AND b."deletedAt" IS NULL
       -- Сортируем по выбранному полю и направлению.
-      ORDER BY p."${query.sortBy}" ${query.sortDirection}
+      ORDER BY ${sortColumn} ${query.sortDirection}
       LIMIT $1
       OFFSET $2
       `,

@@ -159,7 +159,6 @@ export class UsersSqlRepository {
       [email],
     );
 
-    console.log('user: ', result[0]);
     return result[0] ?? null;
   }
 

@@ -1,7 +1,7 @@
 import { applyDecorators } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation } from '@nestjs/swagger';
 
-import { BlogsPaginationViewDto } from '../view-dto/blogs-pagination.view-dto';
+import { BlogsPaginationViewDto } from '../../view-dto/blogs-pagination.view-dto';
 
 export function GetBlogsSwagger() {
   return applyDecorators(

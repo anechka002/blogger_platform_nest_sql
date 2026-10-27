@@ -1,8 +1,7 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { BlogsRepository } from '../../infrastructure/blogs.repository';
 import { CreatePostForBlogDto } from '../../dto/create-post-for-blog.dto';
-import { Post } from '../../../posts/domain/post.entity';
-import { PostsRepository } from '../../../posts/infrastructure/posts.repository';
+import { BlogsSqlRepository } from '../../infrastructure/blogs-sql.repository';
+import { PostsSqlRepository } from '../../../posts/infrastructure/posts-sql.repository';
 
 export class CreatePostForBlogCommand {
   constructor(
@@ -14,21 +13,19 @@ export class CreatePostForBlogCommand {
 @CommandHandler(CreatePostForBlogCommand)
 export class CreatePostForBlogUseCase implements ICommandHandler<CreatePostForBlogCommand> {
   constructor(
-    private readonly blogsRepository: BlogsRepository,
-    private readonly postsRepository: PostsRepository,
+    private readonly blogsSqlRepository: BlogsSqlRepository,
+    private readonly postsSqlRepository: PostsSqlRepository,
   ) {}
   async execute({ blogId, body }: CreatePostForBlogCommand): Promise<string> {
-    const blog = await this.blogsRepository.findOrNotFoundFail(blogId);
+    // Проверяем, что блог существует и не удалён.
+    await this.blogsSqlRepository.findOrNotFoundFail(blogId);
 
-    const newPost = Post.createInstancePost({
-      title: body.title,
-      shortDescription: body.shortDescription,
-      content: body.content,
+    // Создаём пост в PostgreSQL.
+    const postId = await this.postsSqlRepository.createPostForBlog(
       blogId,
-      blogName: blog.name,
-    });
+      body,
+    );
 
-    const savedPost = await this.postsRepository.create(newPost);
-    return savedPost._id.toString();
+    return postId;
   }
 }

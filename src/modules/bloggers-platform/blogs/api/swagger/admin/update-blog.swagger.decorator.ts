@@ -1,23 +1,17 @@
 import { applyDecorators } from '@nestjs/common';
 import {
-  ApiBasicAuth,
+  ApiBadRequestResponse,
   ApiNoContentResponse,
   ApiNotFoundResponse,
   ApiOperation,
-  ApiParam,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
+import { APIErrorResult } from '../../../../../../core/exceptions/filters/api-error-result';
 
-export function DeleteBlogSwagger() {
+export function UpdateBlogSwagger() {
   return applyDecorators(
     ApiOperation({
-      summary: 'Delete blog specified by id',
-    }),
-
-    ApiParam({
-      name: 'id',
-      description: 'Blog id',
-      type: String,
+      summary: 'Update existing Blog by id with InputModel',
     }),
 
     ApiNoContentResponse({
@@ -28,7 +22,10 @@ export function DeleteBlogSwagger() {
       description: 'Not Found',
     }),
 
-    ApiBasicAuth('basicAuth'),
+    ApiBadRequestResponse({
+      description: 'If the inputModel has incorrect values',
+      type: APIErrorResult,
+    }),
 
     ApiUnauthorizedResponse({
       description: 'Unauthorized',

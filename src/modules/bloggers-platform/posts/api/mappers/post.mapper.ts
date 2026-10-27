@@ -3,7 +3,7 @@ import { ExtendedPostViewDto } from '../view-dto/extended-post.view-dto';
 import { LikeStatus } from '../../../../../core/enum/like-status';
 
 export class PostMapper {
-  public toCurrentPostsViewModel(post: PostWithLikesRow): ExtendedPostViewDto {
+  public toExtendedPostViewModel(post: PostWithLikesRow): ExtendedPostViewDto {
     return {
       id: post.id.toString(),
       title: post.title,
