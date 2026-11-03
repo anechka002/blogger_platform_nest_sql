@@ -2,10 +2,9 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { DomainException } from '../../../../../core/exceptions/domain-exceptions';
 import { DomainExceptionCode } from '../../../../../core/exceptions/domain-exception-codes';
 import { LikeStatusDto } from '../../../../../core/dto/like-status.dto';
-import { CommentLikesRepository } from '../../infrastructure/comment-like.repository';
-import { CommentsRepository } from '../../infrastructure/comments.repository';
 import { LikeStatus } from '../../../../../core/enum/like-status';
-import { CommentLike } from '../../domain/comment-like.entity';
+import { CommentsSqlRepository } from '../../infrastructure/comments-sql.repository';
+import { CommentLikesSqlRepository } from '../../infrastructure/comment-like-sql.repository';
 
 export class UpdateLikeStatusCommand {
   constructor(
@@ -21,15 +20,15 @@ export class UpdateLikeStatusUseCase implements ICommandHandler<
   void
 > {
   constructor(
-    private readonly commentLikesRepository: CommentLikesRepository,
-    private readonly commentsRepository: CommentsRepository,
+    private readonly commentLikesSqlRepository: CommentLikesSqlRepository,
+    private readonly commentsSqlRepository: CommentsSqlRepository,
   ) {}
   async execute({
     userId,
     commentId,
     dto,
   }: UpdateLikeStatusCommand): Promise<void> {
-    const comment = await this.commentsRepository.findById(commentId);
+    const comment = await this.commentsSqlRepository.findById(commentId);
     if (!comment) {
       throw new DomainException({
         code: DomainExceptionCode.NotFound,
@@ -38,7 +37,7 @@ export class UpdateLikeStatusUseCase implements ICommandHandler<
     }
 
     // Ищем реакцию именно этого пользователя именно на этот комментарий.
-    const currentReaction = await this.commentLikesRepository.findReaction({
+    const currentReaction = await this.commentLikesSqlRepository.findReaction({
       commentId,
       userId,
     });
@@ -50,32 +49,32 @@ export class UpdateLikeStatusUseCase implements ICommandHandler<
       return;
     }
 
-    // обновляем counters самого Comment
-    comment.updateReactionCounters(prevStatus, dto.likeStatus);
-
     // None → Like/Dislike
     if (!currentReaction && dto.likeStatus !== LikeStatus.None) {
-      const reaction = CommentLike.createReaction({
+      await this.commentLikesSqlRepository.createReaction({
         commentId,
         userId,
         status: dto.likeStatus,
       });
-
-      await this.commentLikesRepository.createReaction(reaction);
+      return;
     }
 
     // Like/Dislike → None
     if (currentReaction && dto.likeStatus === LikeStatus.None) {
-      await this.commentLikesRepository.deleteReaction({ commentId, userId });
+      await this.commentLikesSqlRepository.deleteReaction({
+        commentId,
+        userId,
+      });
+      return;
     }
 
     // Like ↔ Dislike
     if (currentReaction && dto.likeStatus !== LikeStatus.None) {
-      currentReaction.changeStatus(dto.likeStatus);
-
-      await this.commentLikesRepository.updateReaction(currentReaction);
+      await this.commentLikesSqlRepository.updateReaction({
+        commentId,
+        userId,
+        status: dto.likeStatus,
+      });
     }
-
-    await this.commentsRepository.saveComment(comment);
   }
 }

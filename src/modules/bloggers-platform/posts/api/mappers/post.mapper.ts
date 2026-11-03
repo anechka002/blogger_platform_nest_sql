@@ -1,6 +1,5 @@
 import { PostWithLikesRow } from '../../infrastructure/query/posts-sql.query-repository';
 import { ExtendedPostViewDto } from '../view-dto/extended-post.view-dto';
-import { LikeStatus } from '../../../../../core/enum/like-status';
 
 export class PostMapper {
   public toExtendedPostViewModel(post: PostWithLikesRow): ExtendedPostViewDto {
@@ -15,8 +14,8 @@ export class PostMapper {
       extendedLikesInfo: {
         likesCount: post.likesCount,
         dislikesCount: post.dislikesCount,
-        myStatus: LikeStatus.None,
-        newestLikes: [],
+        myStatus: post.myStatus,
+        newestLikes: post.newestLikes,
       },
     };
   }

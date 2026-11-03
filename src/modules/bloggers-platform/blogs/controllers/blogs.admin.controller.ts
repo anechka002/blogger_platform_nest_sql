@@ -54,9 +54,7 @@ export class AdminBlogsController {
     private readonly commandBus: CommandBus,
     private readonly blogMapper: BlogMapper,
     private readonly postMapper: PostMapper,
-  ) {
-    console.log('AdminBlogsController');
-  }
+  ) {}
 
   @GetAdminBlogsSwagger()
   @Get()

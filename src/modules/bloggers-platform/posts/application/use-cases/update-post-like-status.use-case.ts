@@ -1,10 +1,9 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { PostsRepository } from '../../infrastructure/posts.repository';
 import { LikeStatusDto } from '../../../../../core/dto/like-status.dto';
-import { PostLikesRepository } from '../../infrastructure/post-like.repository';
 import { LikeStatus } from '../../../../../core/enum/like-status';
-import { PostLike } from '../../domain/post-like.entity';
 import { UsersExternalQueryRepository } from '../../../../user-accounts/users/infrastructure/external-query/users.external-query-repository';
+import { PostsSqlRepository } from '../../infrastructure/posts-sql.repository';
+import { PostLikesSqlRepository } from '../../infrastructure/post-like-sql.repository';
 
 export class UpdatePostLikeStatusCommand {
   constructor(
@@ -20,8 +19,8 @@ export class UpdatePostLikeStatusUseCase implements ICommandHandler<
   void
 > {
   constructor(
-    private readonly postsRepository: PostsRepository,
-    private readonly postLikesRepository: PostLikesRepository,
+    private readonly postsSqlRepository: PostsSqlRepository,
+    private readonly postLikesSqlRepository: PostLikesSqlRepository,
     private readonly usersExternalQueryRepository: UsersExternalQueryRepository,
   ) {}
   async execute({
@@ -29,13 +28,12 @@ export class UpdatePostLikeStatusUseCase implements ICommandHandler<
     postId,
     dto,
   }: UpdatePostLikeStatusCommand): Promise<void> {
-    const post = await this.postsRepository.findOrNotFoundFail(postId);
+    await this.postsSqlRepository.findOrNotFoundFail(postId);
 
-    const user =
-      await this.usersExternalQueryRepository.getByIdOrNotFoundFail(userId);
+    await this.usersExternalQueryRepository.getByIdOrNotFoundFail(userId);
 
     // Ищем реакцию именно этого пользователя именно на этот post.
-    const currentReaction = await this.postLikesRepository.findReaction({
+    const currentReaction = await this.postLikesSqlRepository.findReaction({
       postId,
       userId,
     });
@@ -48,33 +46,30 @@ export class UpdatePostLikeStatusUseCase implements ICommandHandler<
       return;
     }
 
-    // обновляем counters самого Post
-    post.updateReactionCounters(prevStatus, dto.likeStatus);
-
     // None → Like/Dislike
     if (!currentReaction && dto.likeStatus !== LikeStatus.None) {
-      const reaction = PostLike.createReaction({
+      await this.postLikesSqlRepository.createReaction({
         postId,
         userId,
-        userLogin: user.login,
         status: dto.likeStatus,
       });
 
-      await this.postLikesRepository.createReaction(reaction);
+      return;
     }
 
     // Like/Dislike → None
     if (currentReaction && dto.likeStatus === LikeStatus.None) {
-      await this.postLikesRepository.deleteReaction({ postId, userId });
+      await this.postLikesSqlRepository.deleteReaction({ postId, userId });
+      return;
     }
 
     // Like ↔ Dislike
     if (currentReaction && dto.likeStatus !== LikeStatus.None) {
-      currentReaction.changeStatus(dto.likeStatus);
-
-      await this.postLikesRepository.updateReaction(currentReaction);
+      await this.postLikesSqlRepository.updateReaction({
+        postId,
+        userId,
+        status: dto.likeStatus,
+      });
     }
-
-    await this.postsRepository.save(post);
   }
 }

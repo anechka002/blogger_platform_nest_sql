@@ -1,7 +1,7 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { CommentsRepository } from '../../infrastructure/comments.repository';
 import { DomainException } from '../../../../../core/exceptions/domain-exceptions';
 import { DomainExceptionCode } from '../../../../../core/exceptions/domain-exception-codes';
+import { CommentsSqlRepository } from '../../infrastructure/comments-sql.repository';
 
 export class DeleteCommentCommand {
   constructor(
@@ -15,9 +15,9 @@ export class DeleteCommentUseCase implements ICommandHandler<
   DeleteCommentCommand,
   void
 > {
-  constructor(private readonly commentsRepository: CommentsRepository) {}
+  constructor(private readonly commentsSqlRepository: CommentsSqlRepository) {}
   async execute({ userId, commentId }: DeleteCommentCommand): Promise<void> {
-    const comment = await this.commentsRepository.findById(commentId);
+    const comment = await this.commentsSqlRepository.findById(commentId);
     if (!comment) {
       throw new DomainException({
         code: DomainExceptionCode.NotFound,
@@ -25,15 +25,13 @@ export class DeleteCommentUseCase implements ICommandHandler<
       });
     }
 
-    if (comment.commentatorInfo.userId !== userId) {
+    if (comment.userId !== userId) {
       throw new DomainException({
         code: DomainExceptionCode.Forbidden,
         message: 'Forbidden',
       });
     }
 
-    comment.makeDeleted();
-
-    await this.commentsRepository.saveComment(comment);
+    await this.commentsSqlRepository.deleteComment(comment.id);
   }
 }

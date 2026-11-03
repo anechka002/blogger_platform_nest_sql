@@ -6,6 +6,7 @@ import { BlogRow } from '../../../blogs/infrastructure/query/blogs-sql.query-rep
 import { DomainException } from '../../../../../core/exceptions/domain-exceptions';
 import { DomainExceptionCode } from '../../../../../core/exceptions/domain-exception-codes';
 import { PostSortBy } from '../../api/input-dto/post-sort-by';
+import { LikeStatus } from '../../../../../core/enum/like-status';
 
 export type PostRow = {
   id: string;
@@ -17,13 +18,26 @@ export type PostRow = {
   updatedAt: Date;
 };
 
+export type NewestLikeRow = {
+  addedAt: Date;
+  login: string;
+  userId: string;
+};
+
+type PostWithStatusRow = PostRow & { myStatus: LikeStatus };
+
 export type PostWithBlogNameRow = PostRow & {
   blogName: string;
 };
 
-export type PostWithLikesRow = PostWithBlogNameRow & {
+export type PostWithBlogNameAndStatusRow = PostWithBlogNameRow & {
+  myStatus: LikeStatus;
+};
+
+export type PostWithLikesRow = PostWithBlogNameAndStatusRow & {
   likesCount: number;
   dislikesCount: number;
+  newestLikes: NewestLikeRow[];
 };
 
 export type PostsQueryResult = {
@@ -43,11 +57,12 @@ export class PostsSqlQueryRepository {
     const sortColumn =
       query.sortBy === PostSortBy.BlogName ? 'b.name' : `p."${query.sortBy}"`;
 
-    const posts = await this.dataSource.query<PostWithBlogNameRow[]>(
+    const posts = await this.dataSource.query<PostWithBlogNameAndStatusRow[]>(
       `
-      SELECT p.id, p.title, p."shortDescription", p.content, p."createdAt", p."blogId", b.name as "blogName"
+      SELECT p.id, p.title, p."shortDescription", p.content, p."createdAt", p."blogId", b.name as "blogName", COALESCE(pl.status::text, 'None') AS "myStatus"
       FROM public.posts as p
       JOIN public.blogs as b ON b.id = p."blogId"
+      LEFT JOIN public.post_likes as pl ON pl."postId" = p.id AND pl."userId" = $3
       WHERE p."deletedAt" IS NULL
         AND b."deletedAt" IS NULL
       -- Сортируем по выбранному полю и направлению.
@@ -55,7 +70,7 @@ export class PostsSqlQueryRepository {
       LIMIT $1
       OFFSET $2
       `,
-      [query.pageSize, query.calculateSkip()],
+      [query.pageSize, query.calculateSkip(), userId ?? null],
     );
 
     // Считаем все посты с теми же условиями, без пагинации.
@@ -100,6 +115,32 @@ export class PostsSqlQueryRepository {
     // ANY выбирает реакции на любой ID из переданного массива.
     // GROUP BY считает реакции отдельно для каждого поста.
 
+    const newestLikes = await this.dataSource.query<
+      (NewestLikeRow & { postId: string })[]
+    >(
+      `
+      WITH ranked_likes AS (
+        SELECT pl."postId",
+               pl."updatedAt" AS "addedAt",
+               pl."userId",
+               u.login,
+               ROW_NUMBER() OVER (
+                 PARTITION BY pl."postId"
+                 ORDER BY pl."updatedAt" DESC, pl.id DESC
+               ) AS position
+        FROM public.post_likes AS pl
+        JOIN public.users AS u ON u.id = pl."userId"
+        WHERE pl."postId" = ANY($1::uuid[])
+          AND pl.status = 'Like'
+      )
+      SELECT "postId", "addedAt", "userId", login
+      FROM ranked_likes
+      WHERE position <= 3
+      ORDER BY "postId", position
+  `,
+      [postIds],
+    );
+
     // Добавляем к каждому посту название блога и его счётчики реакций.
     const postsWithLikes = posts.map((post) => {
       // Находим результат подсчёта именно для этого поста.
@@ -110,6 +151,9 @@ export class PostsSqlQueryRepository {
         // Если реакций нет, строки в likesCounts не будет — используем 0.
         likesCount: Number(counts?.likesCount ?? 0),
         dislikesCount: Number(counts?.dislikesCount ?? 0),
+        newestLikes: newestLikes
+          .filter((like) => like.postId === post.id)
+          .map(({ addedAt, userId, login }) => ({ addedAt, userId, login })),
       };
     });
 
@@ -121,16 +165,17 @@ export class PostsSqlQueryRepository {
     userId?: string,
   ): Promise<PostWithLikesRow> {
     // Получаем пост вместе с названием блога.
-    const result = await this.dataSource.query<PostWithBlogNameRow[]>(
+    const result = await this.dataSource.query<PostWithBlogNameAndStatusRow[]>(
       `
-      SELECT p.*, b.name as "blogName"
+      SELECT p.*, b.name as "blogName", COALESCE(pl.status::text, 'None') AS "myStatus"
       FROM public.posts as p
       JOIN public.blogs as b ON b.id = p."blogId"
+      LEFT JOIN public.post_likes as pl ON pl."postId" = p.id AND pl."userId" = $2
       WHERE p.id = $1
         AND p."deletedAt" IS NULL
         AND b."deletedAt" IS NULL
       `,
-      [id],
+      [id, userId ?? null],
     );
 
     const post = result[0];
@@ -157,101 +202,32 @@ export class PostsSqlQueryRepository {
       `,
       [id],
     );
+
+    const newestLikes = await this.dataSource.query<NewestLikeRow[]>(
+      `
+      SELECT pl."updatedAt" as "addedAt", pl."userId", u.login
+      FROM public.post_likes as pl 
+      JOIN public.users as u ON u.id = pl."userId"
+      WHERE pl."postId" = $1
+      AND pl.status = 'Like'
+      ORDER BY pl."updatedAt" DESC, pl.id DESC
+      LIMIT 3
+      `,
+      [id],
+    );
+
     return {
       ...post,
       likesCount: Number(counts[0].likesCount),
       dislikesCount: Number(counts[0].dislikesCount),
+      newestLikes,
     };
   }
-
-  // async findAllPosts(
-  //   query: GetPostsQueryParams,
-  //   userId?: string,
-  // ): Promise<PaginationViewDto<ExtendedPostViewDto>> {
-  //   const filter: QueryFilter<Post> = { deletedAt: null };
-  //
-  //   const posts = await this.PostModel.find(filter)
-  //     .skip(query.calculateSkip())
-  //     .sort({ [query.sortBy]: query.sortDirection })
-  //     .limit(query.pageSize);
-  //
-  //   const totalCount = await this.PostModel.countDocuments(filter);
-  //
-  //   const postsIds = posts.map((post) => post._id.toString());
-  //
-  //   const allLikesForPosts = await this.PostLikeModel.find({
-  //     post_id: { $in: postsIds },
-  //     status: LikeStatus.Like,
-  //   }).sort({
-  //     updatedAt: -1,
-  //     _id: -1,
-  //   });
-  //
-  //   const userReactions = userId
-  //     ? await this.PostLikeModel.find({
-  //         post_id: { $in: postsIds },
-  //         user_id: userId,
-  //       })
-  //     : [];
-  //
-  //   const items = posts.map((post) => {
-  //     const postId = post._id.toString();
-  //
-  //     const newestLikes = allLikesForPosts
-  //       .filter((like) => like.post_id === postId)
-  //       .slice(0, 3);
-  //
-  //     const userReaction = userReactions.find(
-  //       (reaction) => reaction.post_id === postId,
-  //     );
-  //
-  //     const myStatus = userReaction?.status ?? LikeStatus.None;
-  //
-  //     return ExtendedPostViewDto.mapExtendedToView(post, myStatus, newestLikes);
-  //   });
-  //
-  //   return PaginationViewDto.mapToView({
-  //     items,
-  //     totalCount,
-  //     page: query.pageNumber,
-  //     pageSize: query.pageSize,
-  //   });
-  // }
-
-  // async getByIdOrNotFoundFail(
-  //   id: string,
-  //   userId?: string,
-  // ): Promise<ExtendedPostViewDto> {
-  //   const post = await this.PostModel.findOne({
-  //     _id: id,
-  //     deletedAt: null,
-  //   });
-  //
-  //   if (!post) {
-  //     throw new NotFoundException('Post not found');
-  //   }
-  //
-  //   const userReaction = userId
-  //     ? await this.PostLikeModel.findOne({ post_id: id, user_id: userId })
-  //     : null;
-  //
-  //   const myStatus = userReaction?.status ?? LikeStatus.None;
-  //
-  //   // Получаем последние три реакции со статусом Like.
-  //   const newestLikes = await this.PostLikeModel.find({
-  //     post_id: id,
-  //     status: LikeStatus.Like,
-  //   })
-  //     .sort({ updatedAt: -1 })
-  //     .limit(3);
-  //
-  //   return ExtendedPostViewDto.mapExtendedToView(post, myStatus, newestLikes);
-  // }
 
   async findPostsByBlogId(
     blogId: string,
     query: GetPostsQueryParams,
-    userId?: string, // Позже понадобится для реакции текущего пользователя.
+    userId?: string,
   ): Promise<PostsQueryResult> {
     // Находим неудалённый блог по ID.
     const result = await this.dataSource.query<BlogRow[]>(
@@ -276,17 +252,18 @@ export class PostsSqlQueryRepository {
     }
 
     // Получаем одну страницу неудалённых постов этого блога.
-    const posts = await this.dataSource.query<PostRow[]>(
+    const posts = await this.dataSource.query<PostWithStatusRow[]>(
       `
-      SELECT p.*
+      SELECT p.*, COALESCE(pl.status::text, 'None') AS "myStatus"
       FROM public.posts as p
+      LEFT JOIN public.post_likes AS pl ON pl."postId" = p.id AND pl."userId" = $4
       WHERE p."blogId" = $1
       AND "deletedAt" IS NULL
       ORDER BY "${query.sortBy}" ${query.sortDirection}
       LIMIT $2
       OFFSET $3
       `,
-      [blogId, query.pageSize, query.calculateSkip()],
+      [blogId, query.pageSize, query.calculateSkip(), userId ?? null],
     );
 
     // Считаем ВСЕ неудалённые посты этого блога.
@@ -332,6 +309,33 @@ export class PostsSqlQueryRepository {
     // ANY выбирает реакции на любой ID из переданного массива.
     // GROUP BY считает реакции отдельно для каждого поста.
 
+    const newestLikes = await this.dataSource.query<
+      (NewestLikeRow & { postId: string })[]
+    >(
+      `
+      WITH ranked_likes AS (
+        SELECT pl."postId",
+               pl."updatedAt" AS "addedAt",
+               pl."userId",
+               u.login,
+               ROW_NUMBER() OVER (
+                 PARTITION BY pl."postId"
+                 ORDER BY pl."updatedAt" DESC, pl.id DESC
+               ) AS position
+        FROM public.post_likes AS pl
+        JOIN public.users AS u ON u.id = pl."userId"
+        WHERE pl."postId" = ANY($1::uuid[])
+          AND pl.status = 'Like'
+      )
+      SELECT "postId", "addedAt", "userId", login
+      FROM ranked_likes
+      WHERE position <= 3
+      ORDER BY "postId", position
+      
+  `,
+      [postIds],
+    );
+
     // Добавляем к каждому посту название блога и его счётчики реакций.
     const postsWithLikes = posts.map((post) => {
       // Находим результат подсчёта именно для этого поста.
@@ -343,6 +347,9 @@ export class PostsSqlQueryRepository {
         // Если реакций нет, строки в likesCounts не будет — используем 0.
         likesCount: Number(counts?.likesCount ?? 0),
         dislikesCount: Number(counts?.dislikesCount ?? 0),
+        newestLikes: newestLikes
+          .filter((like) => like.postId === post.id)
+          .map(({ addedAt, userId, login }) => ({ addedAt, userId, login })),
       };
     });
 
@@ -352,61 +359,4 @@ export class PostsSqlQueryRepository {
       totalCount,
     };
   }
-
-  // async findPostsByBlogId(
-  //   blogId: string,
-  //   query: GetPostsQueryParams,
-  //   userId?: string,
-  // ): Promise<PaginationViewDto<ExtendedPostViewDto>> {
-  //   const filter: QueryFilter<Post> = {
-  //     blogId,
-  //     deletedAt: null,
-  //   };
-  //   const posts = await this.PostModel.find(filter)
-  //     .skip(query.calculateSkip())
-  //     .sort({ [query.sortBy]: query.sortDirection })
-  //     .limit(query.pageSize);
-  //
-  //   const totalCount = await this.PostModel.countDocuments(filter);
-  //
-  //   const postsIds = posts.map((post) => post._id.toString());
-  //
-  //   const allLikesForPosts = await this.PostLikeModel.find({
-  //     post_id: { $in: postsIds },
-  //     status: LikeStatus.Like,
-  //   }).sort({
-  //     updatedAt: -1,
-  //     _id: -1,
-  //   });
-  //
-  //   const userReactions = userId
-  //     ? await this.PostLikeModel.find({
-  //         post_id: { $in: postsIds },
-  //         user_id: userId,
-  //       })
-  //     : [];
-  //
-  //   const items = posts.map((post) => {
-  //     const postId = post._id.toString();
-  //
-  //     const newestLikes = allLikesForPosts
-  //       .filter((like) => like.post_id === postId)
-  //       .slice(0, 3);
-  //
-  //     const userReaction = userReactions.find(
-  //       (reaction) => reaction.post_id === postId,
-  //     );
-  //
-  //     const myStatus = userReaction?.status ?? LikeStatus.None;
-  //
-  //     return ExtendedPostViewDto.mapExtendedToView(post, myStatus, newestLikes);
-  //   });
-  //
-  //   return PaginationViewDto.mapToView({
-  //     items,
-  //     totalCount,
-  //     page: query.pageNumber,
-  //     pageSize: query.pageSize,
-  //   });
-  // }
 }

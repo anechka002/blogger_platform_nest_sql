@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common';
-import { BlogsController } from './blogs/controllers/blogs.controller';
+import { BlogsPublicController } from './blogs/controllers/blogs.public.controller';
 import { BlogsRepository } from './blogs/infrastructure/blogs.repository';
 import { BlogsQueryRepository } from './blogs/infrastructure/query/blogs.query-repository';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Blog, BlogSchema } from './blogs/domain/blog.entity';
 import { Post, PostSchema } from './posts/domain/post.entity';
-import { PostsController } from './posts/api/posts.controller';
+import { PostsController } from './posts/api/controllers/posts.controller';
 import { PostsRepository } from './posts/infrastructure/posts.repository';
 import { PostsQueryRepository } from './posts/infrastructure/query/posts.query-repository';
 import { CommentsController } from './comments/api/comments.controller';
@@ -42,6 +42,11 @@ import { AdminBlogsController } from './blogs/controllers/blogs.admin.controller
 import { PostsSqlRepository } from './posts/infrastructure/posts-sql.repository';
 import { UpdatePostForBlogUseCase } from './blogs/application/use-cases/update-post-for-blog.use-case';
 import { DeletePostForBlogUseCase } from './blogs/application/use-cases/delete-post-for-blog.use-case';
+import { CommentsSqlRepository } from './comments/infrastructure/comments-sql.repository';
+import { CommentsSqlQueryRepository } from './comments/infrastructure/query/comments-sql.query-repository';
+import { CommentMapper } from './comments/api/mappers/comment.mapper';
+import { PostLikesSqlRepository } from './posts/infrastructure/post-like-sql.repository';
+import { CommentLikesSqlRepository } from './comments/infrastructure/comment-like-sql.repository';
 
 @Module({
   imports: [
@@ -58,7 +63,7 @@ import { DeletePostForBlogUseCase } from './blogs/application/use-cases/delete-p
     ]),
   ],
   controllers: [
-    BlogsController,
+    BlogsPublicController,
     PostsController,
     CommentsController,
     AdminBlogsController,
@@ -66,11 +71,13 @@ import { DeletePostForBlogUseCase } from './blogs/application/use-cases/delete-p
   providers: [
     BlogsRepository,
     BlogsQueryRepository,
+
     BlogsSqlRepository,
     BlogsSqlQueryRepository,
 
     BlogMapper,
     PostMapper,
+    CommentMapper,
 
     PostsRepository,
     PostsQueryRepository,
@@ -78,10 +85,15 @@ import { DeletePostForBlogUseCase } from './blogs/application/use-cases/delete-p
 
     PostsSqlQueryRepository,
     PostsSqlRepository,
+    PostLikesSqlRepository,
 
     CommentsQueryRepository,
     CommentsRepository,
     CommentLikesRepository,
+
+    CommentsSqlQueryRepository,
+    CommentsSqlRepository,
+    CommentLikesSqlRepository,
 
     CreateBlogUseCase,
     UpdateBlogUseCase,

@@ -1,4 +1,4 @@
-import { UserDocument } from '../../../domain/user.entity';
+import { UserWithConfirmationRow } from '../users.external-query-repository';
 
 export class UserExternalDto {
   id: string;
@@ -7,14 +7,14 @@ export class UserExternalDto {
   createdAt: Date;
   isEmailConfirmed: boolean;
 
-  static mapToView(user: UserDocument): UserExternalDto {
+  static mapToView(user: UserWithConfirmationRow): UserExternalDto {
     const dto = new UserExternalDto();
 
     dto.email = user.email;
     dto.login = user.login;
-    dto.id = user._id.toString();
+    dto.id = user.id;
     dto.createdAt = user.createdAt;
-    dto.isEmailConfirmed = user.emailConfirmation.isConfirmed;
+    dto.isEmailConfirmed = user.isConfirmed;
 
     return dto;
   }

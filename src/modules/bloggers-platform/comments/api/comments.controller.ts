@@ -10,7 +10,6 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { CommentViewDto } from './view-dto/comment.view-dto';
-import { CommentsQueryRepository } from '../infrastructure/query/comments.query-repository';
 import { CommandBus } from '@nestjs/cqrs';
 import { GetCommentByIdSwagger } from './swagger/get-comment-by-id.swagger.decorator';
 import { UpdateCommentCommand } from '../application/use-cases/update-comment.use-case';
@@ -26,15 +25,16 @@ import { UpdateLikeStatusCommand } from '../application/use-cases/update-like-st
 import { LikeStatusForCommentSwagger } from './swagger/like-status-for-comment.swagger.decorator';
 import { JwtOptionalAuthGuard } from '../../../../core/guards/bearer/jwt-optional-auth.guard';
 import { ExtractUserFromRequestOptional } from '../../../../core/decorators/user/param/extract-user-from-request-optional.decorator';
+import { CommentsSqlQueryRepository } from '../infrastructure/query/comments-sql.query-repository';
+import { CommentMapper } from './mappers/comment.mapper';
 
 @Controller('comments')
 export class CommentsController {
   constructor(
-    private commentsQueryRepository: CommentsQueryRepository,
+    private commentsSqlQueryRepository: CommentsSqlQueryRepository,
     private readonly commandBus: CommandBus,
-  ) {
-    console.log('CommentsController');
-  }
+    private readonly commentMapper: CommentMapper,
+  ) {}
 
   @GetCommentByIdSwagger()
   @UseGuards(JwtOptionalAuthGuard)
@@ -44,7 +44,12 @@ export class CommentsController {
     @ExtractUserFromRequestOptional() user: UserContextDto | null,
   ): Promise<CommentViewDto> {
     // NestJS будет дожидаться, когда промис зарезолвится и затем NestJS вернёт результат клиенту
-    return this.commentsQueryRepository.getByIdOrNotFoundFail(id, user?.id);
+    const comment = await this.commentsSqlQueryRepository.getByIdOrNotFoundFail(
+      id,
+      user?.id,
+    );
+
+    return this.commentMapper.toCommentViewModel(comment);
   }
 
   @UpdateCommentSwagger()

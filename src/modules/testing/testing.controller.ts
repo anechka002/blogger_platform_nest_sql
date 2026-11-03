@@ -18,6 +18,8 @@ export class TestingController {
   async deleteAll() {
     await this.dataSource.transaction(async (manager) => {
       // Сначала удаляем связанные записи
+      await manager.query('DELETE FROM public.comment_likes');
+      await manager.query('DELETE FROM public.comments');
       await manager.query('DELETE FROM public.post_likes');
       await manager.query('DELETE FROM public.posts');
       await manager.query('DELETE FROM public.blogs');
