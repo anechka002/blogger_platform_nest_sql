@@ -25,9 +25,7 @@ export class SecurityDevicesController {
   constructor(
     private readonly commandBus: CommandBus,
     private sessionSqlQueryRepository: SessionsSqlQueryRepository,
-  ) {
-    console.log('SecurityDevicesController created');
-  }
+  ) {}
 
   @GetDevicesWithActiveSessionsSwagger()
   @Get()

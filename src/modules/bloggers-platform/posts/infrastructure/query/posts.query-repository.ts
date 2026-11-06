@@ -15,9 +15,7 @@ export class PostsQueryRepository {
   constructor(
     @InjectModel(Post.name) private PostModel: PostModelType,
     @InjectModel(PostLike.name) private PostLikeModel: PostLikeModelType,
-  ) {
-    console.log('PostsQueryRepository');
-  }
+  ) {}
   async findAllPosts(
     query: GetPostsQueryParams,
     userId?: string,

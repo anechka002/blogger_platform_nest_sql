@@ -17,9 +17,7 @@ export class CommentsQueryRepository {
     @InjectModel(Comment.name) private CommentModel: CommentModelType,
     @InjectModel(CommentLike.name)
     private CommentLikeModel: CommentLikeModelType,
-  ) {
-    console.log('CommentsQueryRepository');
-  }
+  ) {}
 
   async getByIdOrNotFoundFail(
     id: string,

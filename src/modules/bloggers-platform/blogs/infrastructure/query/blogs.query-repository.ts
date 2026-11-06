@@ -8,9 +8,7 @@ import { GetBlogsQueryParams } from '../../api/input-dto/get-blogs-query-params.
 
 @Injectable()
 export class BlogsQueryRepository {
-  constructor(@InjectModel(Blog.name) private BlogModel: BlogModelType) {
-    console.log('BlogsQueryRepository');
-  }
+  constructor(@InjectModel(Blog.name) private BlogModel: BlogModelType) {}
   async findAllBlogs(
     query: GetBlogsQueryParams,
   ): Promise<PaginationViewDto<BlogViewDto>> {

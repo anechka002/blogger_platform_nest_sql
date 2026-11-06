@@ -10,9 +10,7 @@ export class BlogsRepository {
   //инжектирование модели через DI
   constructor(
     @InjectModel(Blog.name) private readonly BlogModel: BlogModelType,
-  ) {
-    console.log('BlogsRepository');
-  }
+  ) {}
 
   async findOrNotFoundFail(id: string): Promise<BlogDocument> {
     const blog = await this.BlogModel.findById(id);

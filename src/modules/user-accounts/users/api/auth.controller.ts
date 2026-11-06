@@ -24,12 +24,12 @@ import { LocalAuthGuard } from '../../../../core/guards/local/local-auth.guard';
 import { AccessTokenViewDto } from './view-dto/login.view-dto';
 import { LoginInputDto } from './input-dto/login.input-dto';
 import { CommandBus } from '@nestjs/cqrs';
-import { RegisterUserCommand } from '../application/use-cases/register-user.use-case';
-import { ConfirmCodeCommand } from '../application/use-cases/confirm-code.use-case';
-import { RegisterEmailResendingCommand } from '../application/use-cases/register-email-resending.use-case';
-import { PasswordRecoveryCommand } from '../application/use-cases/password-recovery.use-case';
-import { NewPasswordRecoveryCommand } from '../application/use-cases/new-password-recovery.use-case';
-import { LoginUserCommand } from '../application/use-cases/login-user.use-case';
+import { RegisterUserCommand } from '../application/use-cases/public/register-user.use-case';
+import { ConfirmCodeCommand } from '../application/use-cases/public/confirm-code.use-case';
+import { RegisterEmailResendingCommand } from '../application/use-cases/public/register-email-resending.use-case';
+import { PasswordRecoveryCommand } from '../application/use-cases/public/password-recovery.use-case';
+import { NewPasswordRecoveryCommand } from '../application/use-cases/public/new-password-recovery.use-case';
+import { LoginUserCommand } from '../application/use-cases/public/login-user.use-case';
 import { TokensPairType } from '../../../../core/types/tokens-pair.type';
 import { RegisterSwagger } from './swagger/auth/register.swagger.decorator';
 import { ConfirmSwagger } from './swagger/auth/confirm.swagger.decorator';
@@ -39,10 +39,10 @@ import { NewPasswordRecoverySwagger } from './swagger/auth/new-password-recovery
 import { LoginSwagger } from './swagger/auth/login.swagger.decorator';
 import { MeSwagger } from './swagger/auth/me.swagger.decorator';
 import { RefreshTokenAuthGuard } from '../../../../core/guards/bearer/refresh-token.auth.guard';
-import { RefreshTokenCommand } from '../application/use-cases/refresh-token.use-case';
+import { RefreshTokenCommand } from '../application/use-cases/public/refresh-token.use-case';
 import { RefreshTokenInfo } from './decorators/refresh-token-info.decorator';
 import { RefreshTokenDto } from '../guards/dto/refresh-token.dto';
-import { LogoutUserCommand } from '../application/use-cases/logout-user.use-case';
+import { LogoutUserCommand } from '../application/use-cases/public/logout-user.use-case';
 import { RefreshTokenSwagger } from './swagger/auth/refresh-token.swagger.decorator';
 import { LogoutSwagger } from './swagger/auth/logout.swagger.decorator';
 import { AuthSqlQueryRepository } from '../infrastructure/query/auth-sql.query-repository';
@@ -52,9 +52,7 @@ export class AuthController {
   constructor(
     private authSqlQueryRepository: AuthSqlQueryRepository,
     private readonly commandBus: CommandBus,
-  ) {
-    console.log('AuthController created');
-  }
+  ) {}
 
   @RegisterSwagger()
   @HttpCode(HttpStatus.NO_CONTENT)

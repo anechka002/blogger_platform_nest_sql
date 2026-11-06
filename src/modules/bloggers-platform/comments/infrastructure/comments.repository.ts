@@ -7,9 +7,7 @@ import type { CommentModelType } from '../domain/comment.entity';
 export class CommentsRepository {
   constructor(
     @InjectModel(Comment.name) private CommentModel: CommentModelType,
-  ) {
-    console.log('CommentsRepository');
-  }
+  ) {}
 
   async createComment(comment: Comment): Promise<CommentDocument> {
     const commentDocument = new this.CommentModel(comment);

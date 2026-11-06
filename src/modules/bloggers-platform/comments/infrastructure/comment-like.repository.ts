@@ -11,9 +11,7 @@ export class CommentLikesRepository {
   constructor(
     @InjectModel(CommentLike.name)
     private CommentLikeModel: CommentLikeModelType,
-  ) {
-    console.log('CommentLikesRepository');
-  }
+  ) {}
 
   async findReaction({
     commentId,

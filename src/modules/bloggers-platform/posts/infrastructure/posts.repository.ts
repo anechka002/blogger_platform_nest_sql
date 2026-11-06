@@ -8,9 +8,7 @@ import { DomainExceptionCode } from '../../../../core/exceptions/domain-exceptio
 @Injectable()
 export class PostsRepository {
   //инжектирование модели через DI
-  constructor(@InjectModel(Post.name) private PostModel: PostModelType) {
-    console.log('PostsRepository');
-  }
+  constructor(@InjectModel(Post.name) private PostModel: PostModelType) {}
 
   async findOrNotFoundFail(id: string): Promise<PostDocument> {
     const post = await this.PostModel.findById(id);

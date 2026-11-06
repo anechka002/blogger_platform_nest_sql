@@ -13,13 +13,13 @@ import { LocalStrategy } from '../../core/guards/local/local.strategy';
 import { JwtStrategy } from '../../core/guards/bearer/jwt.strategy';
 import { JwtModule } from '@nestjs/jwt';
 import { CreateUserUseCase } from './users/application/use-cases/admin/create-user.use-case';
-import { DeleteUserUseCase } from './users/application/use-cases/delete-user.use-case';
-import { LoginUserUseCase } from './users/application/use-cases/login-user.use-case';
-import { RegisterUserUseCase } from './users/application/use-cases/register-user.use-case';
-import { ConfirmCodeUseCase } from './users/application/use-cases/confirm-code.use-case';
-import { RegisterEmailResendingUseCase } from './users/application/use-cases/register-email-resending.use-case';
-import { NewPasswordRecoveryUseCase } from './users/application/use-cases/new-password-recovery.use-case';
-import { PasswordRecoveryUseCase } from './users/application/use-cases/password-recovery.use-case';
+import { DeleteUserUseCase } from './users/application/use-cases/public/delete-user.use-case';
+import { LoginUserUseCase } from './users/application/use-cases/public/login-user.use-case';
+import { RegisterUserUseCase } from './users/application/use-cases/public/register-user.use-case';
+import { ConfirmCodeUseCase } from './users/application/use-cases/public/confirm-code.use-case';
+import { RegisterEmailResendingUseCase } from './users/application/use-cases/public/register-email-resending.use-case';
+import { NewPasswordRecoveryUseCase } from './users/application/use-cases/public/new-password-recovery.use-case';
+import { PasswordRecoveryUseCase } from './users/application/use-cases/public/password-recovery.use-case';
 import { JwtAdapter } from './users/application/services/jwt/jwt.adapter';
 import { UsersExternalQueryRepository } from './users/infrastructure/external-query/users.external-query-repository';
 import { UserAccountsConfig } from './users/config/user-accounts.config';
@@ -29,11 +29,10 @@ import { DeleteAllDevicesSessionsUseCase } from './users/application/use-cases/d
 import { DeleteDeviceSessionUseCase } from './users/application/use-cases/devices/delete-device-session.use-case';
 import { SessionsQueryRepository } from './users/infrastructure/query/sessions.query-repository';
 import { SecurityDevicesController } from './users/api/security-devices.controller';
-import { RefreshTokenUseCase } from './users/application/use-cases/refresh-token.use-case';
+import { RefreshTokenUseCase } from './users/application/use-cases/public/refresh-token.use-case';
 import { RefreshTokenStrategy } from '../../core/guards/bearer/refresh-token.strategy';
-import { LogoutUserUseCase } from './users/application/use-cases/logout-user.use-case';
+import { LogoutUserUseCase } from './users/application/use-cases/public/logout-user.use-case';
 import { UsersSqlQueryRepository } from './users/infrastructure/query/users-sql.query-repository';
-import { UserMapper } from './users/api/mappers/user.mapper';
 import { UsersSqlRepository } from './users/infrastructure/users-sql.repository';
 import { SessionSqlRepository } from './users/infrastructure/session-sql.repository';
 import { SessionsSqlQueryRepository } from './users/infrastructure/query/sessions-sql.query-repository';
@@ -60,8 +59,6 @@ import { SessionsCleanupJob } from './users/infrastructure/jobs/session-cleanup.
     UsersRepository,
     UsersSqlQueryRepository,
     UsersSqlRepository,
-
-    UserMapper,
 
     SessionRepository,
     SessionsQueryRepository,

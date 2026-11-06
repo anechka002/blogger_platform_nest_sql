@@ -8,9 +8,7 @@ export class PostLikesRepository {
   constructor(
     @InjectModel(PostLike.name)
     private PostLikeModel: PostLikeModelType,
-  ) {
-    console.log('PostLikesRepository');
-  }
+  ) {}
 
   async findReaction({
     postId,

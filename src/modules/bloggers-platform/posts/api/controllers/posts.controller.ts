@@ -83,43 +83,6 @@ export class PostsController {
     });
   }
 
-  // @CreatePostSwagger()
-  // @UseGuards(BasicAuthGuard)
-  // @Post()
-  // async createPost(
-  //   @Body() body: CreatePostInputDto,
-  // ): Promise<ExtendedPostViewDto> {
-  //   const postId = await this.commandBus.execute<CreatePostCommand, string>(
-  //     new CreatePostCommand(body),
-  //   );
-  //   return this.postsQueryRepository.getByIdOrNotFoundFail(postId);
-  // }
-
-  // @UpdatePostSwagger()
-  // @HttpCode(HttpStatus.NO_CONTENT)
-  // @UseGuards(BasicAuthGuard)
-  // @Put(':id')
-  // async updatePost(
-  //   @Param('id') id: string,
-  //   @Body() body: UpdatePostInputDto,
-  // ): Promise<ExtendedPostViewDto> {
-  //   const postId = await this.commandBus.execute<UpdatePostCommand, string>(
-  //     new UpdatePostCommand(id, body),
-  //   );
-  //
-  //   return this.postsQueryRepository.getByIdOrNotFoundFail(postId);
-  // }
-
-  // @DeletePostSwagger()
-  // @HttpCode(HttpStatus.NO_CONTENT)
-  // @UseGuards(BasicAuthGuard)
-  // @Delete(':id')
-  // async deletePost(@Param('id') id: string): Promise<void> {
-  //   return this.commandBus.execute<DeletePostCommand, void>(
-  //     new DeletePostCommand(id),
-  //   );
-  // }
-
   @GetCommentsForPostSwagger()
   @UseGuards(JwtOptionalAuthGuard)
   @Get(':postId/comments')
