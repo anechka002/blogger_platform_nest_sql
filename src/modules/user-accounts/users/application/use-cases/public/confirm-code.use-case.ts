@@ -1,7 +1,7 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { DomainException } from '../../../../../core/exceptions/domain-exceptions';
-import { DomainExceptionCode } from '../../../../../core/exceptions/domain-exception-codes';
-import { UsersSqlRepository } from '../../infrastructure/users-sql.repository';
+import { DomainException } from '../../../../../../core/exceptions/domain-exceptions';
+import { DomainExceptionCode } from '../../../../../../core/exceptions/domain-exception-codes';
+import { UsersSqlRepository } from '../../../infrastructure/users-sql.repository';
 
 export class ConfirmCodeCommand {
   constructor(public code: string) {}

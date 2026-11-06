@@ -1,8 +1,8 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { JwtAdapter } from '../services/jwt/jwt.adapter';
+import { JwtAdapter } from '../../services/jwt/jwt.adapter';
 import { randomUUID } from 'node:crypto';
-import { TokensPairType } from '../../../../../core/types/tokens-pair.type';
-import { SessionSqlRepository } from '../../infrastructure/session-sql.repository';
+import { TokensPairType } from '../../../../../../core/types/tokens-pair.type';
+import { SessionSqlRepository } from '../../../infrastructure/session-sql.repository';
 
 type LoginUserCommandParams = {
   userId: string;

@@ -1,10 +1,10 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { EmailService } from '../../../../notifications/email.service';
+import { EmailService } from '../../../../../notifications/email.service';
 import { randomUUID } from 'node:crypto';
 import { addHours } from 'date-fns';
-import { UsersSqlRepository } from '../../infrastructure/users-sql.repository';
-import { DomainException } from '../../../../../core/exceptions/domain-exceptions';
-import { DomainExceptionCode } from '../../../../../core/exceptions/domain-exception-codes';
+import { UsersSqlRepository } from '../../../infrastructure/users-sql.repository';
+import { DomainException } from '../../../../../../core/exceptions/domain-exceptions';
+import { DomainExceptionCode } from '../../../../../../core/exceptions/domain-exception-codes';
 
 export class PasswordRecoveryCommand {
   constructor(public email: string) {}

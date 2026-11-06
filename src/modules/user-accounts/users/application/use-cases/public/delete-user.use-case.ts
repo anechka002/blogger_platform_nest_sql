@@ -1,7 +1,7 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { UsersSqlRepository } from '../../infrastructure/users-sql.repository';
-import { DomainException } from '../../../../../core/exceptions/domain-exceptions';
-import { DomainExceptionCode } from '../../../../../core/exceptions/domain-exception-codes';
+import { UsersSqlRepository } from '../../../infrastructure/users-sql.repository';
+import { DomainException } from '../../../../../../core/exceptions/domain-exceptions';
+import { DomainExceptionCode } from '../../../../../../core/exceptions/domain-exception-codes';
 
 export class DeleteUserCommand {
   constructor(public id: string) {}

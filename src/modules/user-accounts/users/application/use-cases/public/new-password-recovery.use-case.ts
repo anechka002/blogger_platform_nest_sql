@@ -1,9 +1,9 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { NewPasswordRecoveryDto } from '../../dto/new-password-recovery.dto';
-import { DomainException } from '../../../../../core/exceptions/domain-exceptions';
-import { DomainExceptionCode } from '../../../../../core/exceptions/domain-exception-codes';
-import { PasswordService } from '../services/password.service';
-import { UsersSqlRepository } from '../../infrastructure/users-sql.repository';
+import { NewPasswordRecoveryDto } from '../../../dto/new-password-recovery.dto';
+import { DomainException } from '../../../../../../core/exceptions/domain-exceptions';
+import { DomainExceptionCode } from '../../../../../../core/exceptions/domain-exception-codes';
+import { PasswordService } from '../../services/password.service';
+import { UsersSqlRepository } from '../../../infrastructure/users-sql.repository';
 
 export class NewPasswordRecoveryCommand {
   constructor(public dto: NewPasswordRecoveryDto) {}

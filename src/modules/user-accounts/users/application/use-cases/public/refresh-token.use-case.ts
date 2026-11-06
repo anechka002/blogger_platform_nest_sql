@@ -1,9 +1,9 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { JwtAdapter } from '../services/jwt/jwt.adapter';
-import { TokensPairType } from '../../../../../core/types/tokens-pair.type';
-import { DomainException } from '../../../../../core/exceptions/domain-exceptions';
-import { DomainExceptionCode } from '../../../../../core/exceptions/domain-exception-codes';
-import { SessionSqlRepository } from '../../infrastructure/session-sql.repository';
+import { JwtAdapter } from '../../services/jwt/jwt.adapter';
+import { TokensPairType } from '../../../../../../core/types/tokens-pair.type';
+import { DomainException } from '../../../../../../core/exceptions/domain-exceptions';
+import { DomainExceptionCode } from '../../../../../../core/exceptions/domain-exception-codes';
+import { SessionSqlRepository } from '../../../infrastructure/session-sql.repository';
 
 export class RefreshTokenCommand {
   constructor(public dto: { userId: string; deviceId: string; iat: number }) {}

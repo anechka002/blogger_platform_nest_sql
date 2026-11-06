@@ -1,7 +1,7 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { DomainException } from '../../../../../core/exceptions/domain-exceptions';
-import { DomainExceptionCode } from '../../../../../core/exceptions/domain-exception-codes';
-import { SessionSqlRepository } from '../../infrastructure/session-sql.repository';
+import { DomainException } from '../../../../../../core/exceptions/domain-exceptions';
+import { DomainExceptionCode } from '../../../../../../core/exceptions/domain-exception-codes';
+import { SessionSqlRepository } from '../../../infrastructure/session-sql.repository';
 
 export class LogoutUserCommand {
   constructor(

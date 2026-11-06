@@ -1,10 +1,10 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { EmailService } from '../../../../notifications/email.service';
-import { DomainException } from '../../../../../core/exceptions/domain-exceptions';
-import { DomainExceptionCode } from '../../../../../core/exceptions/domain-exception-codes';
+import { EmailService } from '../../../../../notifications/email.service';
+import { DomainException } from '../../../../../../core/exceptions/domain-exceptions';
+import { DomainExceptionCode } from '../../../../../../core/exceptions/domain-exception-codes';
 import { randomUUID } from 'node:crypto';
 import { addHours } from 'date-fns';
-import { UsersSqlRepository } from '../../infrastructure/users-sql.repository';
+import { UsersSqlRepository } from '../../../infrastructure/users-sql.repository';
 
 export class RegisterEmailResendingCommand {
   constructor(public email: string) {}

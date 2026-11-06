@@ -1,10 +1,10 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { CreateUserDto } from '../../dto/create-user.dto';
-import { DomainException } from '../../../../../core/exceptions/domain-exceptions';
-import { DomainExceptionCode } from '../../../../../core/exceptions/domain-exception-codes';
-import { PasswordService } from '../services/password.service';
-import { EmailService } from '../../../../notifications/email.service';
-import { UsersSqlRepository } from '../../infrastructure/users-sql.repository';
+import { CreateUserDto } from '../../../dto/create-user.dto';
+import { DomainException } from '../../../../../../core/exceptions/domain-exceptions';
+import { DomainExceptionCode } from '../../../../../../core/exceptions/domain-exception-codes';
+import { PasswordService } from '../../services/password.service';
+import { EmailService } from '../../../../../notifications/email.service';
+import { UsersSqlRepository } from '../../../infrastructure/users-sql.repository';
 import { randomUUID } from 'node:crypto';
 import { addHours } from 'date-fns';
 
