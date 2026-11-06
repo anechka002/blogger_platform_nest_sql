@@ -6,6 +6,8 @@ export enum DomainExceptionCode {
   InternalServerError = 3,
   Forbidden = 4,
   ValidationError = 5,
+  // Сервис временно недоступен, например нет соединения с БД.
+  ServiceUnavailable = 6,
   //auth
   Unauthorized = 11,
   EmailNotConfirmed = 12,

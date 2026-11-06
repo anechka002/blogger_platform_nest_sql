@@ -67,6 +67,10 @@ export class DomainHttpExceptionsFilter implements ExceptionFilter {
       case DomainExceptionCode.InternalServerError:
         return HttpStatus.INTERNAL_SERVER_ERROR;
 
+      // Сервис недоступен
+      case DomainExceptionCode.ServiceUnavailable:
+        return HttpStatus.SERVICE_UNAVAILABLE; // HTTP 503
+
       // Неизвестный domain code
       default:
         return HttpStatus.I_AM_A_TEAPOT;
@@ -77,6 +81,7 @@ export class DomainHttpExceptionsFilter implements ExceptionFilter {
     exception: DomainException,
     // requestUrl: string,
   ): APIErrorResult {
+    console.log(exception.message);
     // Приводим extensions к формату API
     return {
       errorsMessages: exception.extensions.map((e) => {
