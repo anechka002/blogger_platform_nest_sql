@@ -16,11 +16,18 @@ describe('AppController (e2e)', () => {
     await app.init();
   });
 
-  it('/ (GET)', () => {
+  it('/live (GET): возвращает 200, приложение отвечает на HTTP-запросы', async () => {
     return request(app.getHttpServer())
-      .get('/')
+      .get('/live')
       .expect(200)
-      .expect('Hello World!');
+      .expect({ status: 'ok' });
+  });
+
+  it('/ready (GET): возвращает 200, если база доступна', async () => {
+    return request(app.getHttpServer())
+      .get('/ready')
+      .expect(200)
+      .expect({ status: 'ok', database: 'database up' });
   });
 
   afterEach(async () => {

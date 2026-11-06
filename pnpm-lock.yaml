@@ -108,6 +108,9 @@ importers:
       '@eslint/js':
         specifier: ^9.18.0
         version: 9.39.5
+      '@jest/globals':
+        specifier: 29.7.0
+        version: 29.7.0
       '@nestjs/cli':
         specifier: ^11.0.0
         version: 11.0.24(@types/node@24.13.3)(cssnano@7.1.9(postcss@8.5.28))(postcss@8.5.28)(prettier@3.9.6)
