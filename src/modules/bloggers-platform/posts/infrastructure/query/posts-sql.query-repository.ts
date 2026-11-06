@@ -309,29 +309,42 @@ export class PostsSqlQueryRepository {
     // ANY выбирает реакции на любой ID из переданного массива.
     // GROUP BY считает реакции отдельно для каждого поста.
 
+    // Этот запрос возвращает до трёх самых свежих лайков для каждого поста из массива postIds
     const newestLikes = await this.dataSource.query<
       (NewestLikeRow & { postId: string })[]
     >(
       `
+      -- Даём промежуточной выборке имя, чтобы потом отфильтровать её по position.
       WITH ranked_likes AS (
         SELECT pl."postId",
                pl."updatedAt" AS "addedAt",
                pl."userId",
                u.login,
+               
+               -- Для каждого поста нумерация начинается с 1.
+               -- Самый свежий лайк получает номер 1.
                ROW_NUMBER() OVER (
                  PARTITION BY pl."postId"
                  ORDER BY pl."updatedAt" DESC, pl.id DESC
                ) AS position
+               
         FROM public.post_likes AS pl
+        
+        -- По ID пользователя, поставившего лайк, находим его логин.
         JOIN public.users AS u ON u.id = pl."userId"
+        
+        -- $1 — массив ID постов текущей страницы.
         WHERE pl."postId" = ANY($1::uuid[])
           AND pl.status = 'Like'
       )
+      
+      -- Оставляем до трёх лайков на каждый пост.
       SELECT "postId", "addedAt", "userId", login
       FROM ranked_likes
       WHERE position <= 3
-      ORDER BY "postId", position
       
+      -- Выдаём лайки каждого поста подряд, от свежего к старому.
+      ORDER BY "postId", position
   `,
       [postIds],
     );
