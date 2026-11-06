@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { User } from '../../domain/user.entity';
 import type { UserModelType } from '../../domain/user.entity';
-import { UserViewDto } from '../../api/view-dto/user.view-dto';
+import { UserViewModel } from '../../api/view-dto/user.view-model';
 import type { QueryFilter } from 'mongoose';
 import { GetUsersQueryParams } from '../../api/input-dto/get-users-query-params.input-dto';
 import { PaginationViewDto } from '../../../../../core/dto/base.paginated.view-dto';
@@ -12,7 +12,7 @@ export class UsersQueryRepository {
   constructor(@InjectModel(User.name) private UserModel: UserModelType) {}
 
   // Найти user по id
-  async getByIdOrNotFoundFail(id: string): Promise<UserViewDto> {
+  async getByIdOrNotFoundFail(id: string): Promise<UserViewModel> {
     const user = await this.UserModel.findOne({
       _id: id,
       deletedAt: null,
@@ -22,13 +22,13 @@ export class UsersQueryRepository {
       throw new NotFoundException('User not found');
     }
 
-    return UserViewDto.mapToView(user);
+    return UserViewModel.mapToView(user);
   }
 
   // Найти список пользователей согласно переданным параметрам.
   async findAllUsers(
     query: GetUsersQueryParams,
-  ): Promise<PaginationViewDto<UserViewDto>> {
+  ): Promise<PaginationViewDto<UserViewModel>> {
     // мы хотим найти только пользователей, которые не удалены.
     const filter: QueryFilter<User> = { deletedAt: null };
 
@@ -55,7 +55,7 @@ export class UsersQueryRepository {
     const totalCount = await this.UserModel.countDocuments(filter);
 
     const items = users.map((user) => {
-      return UserViewDto.mapToView(user);
+      return UserViewModel.mapToView(user);
     });
 
     // Мы передаём данные, из которых можно посчитать количество страниц, а сам расчёт прячем внутри mapToView.

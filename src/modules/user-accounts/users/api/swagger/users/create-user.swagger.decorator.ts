@@ -10,7 +10,7 @@ import {
 
 import { APIErrorResult } from '../../../../../../core/exceptions/filters/api-error-result';
 import { CreateUserInputDto } from '../../input-dto/users.input-dto';
-import { UserViewDto } from '../../view-dto/user.view-dto';
+import { UserViewModel } from '../../view-dto/user.view-model';
 
 export function CreateUserSwagger() {
   return applyDecorators(
@@ -25,7 +25,7 @@ export function CreateUserSwagger() {
 
     ApiCreatedResponse({
       description: 'Returns the newly created user',
-      type: UserViewDto,
+      type: UserViewModel,
     }),
 
     ApiBasicAuth('basicAuth'),

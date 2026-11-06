@@ -1,10 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { PaginationViewDto } from '../../../../../core/dto/base.paginated.view-dto';
-import { UserViewDto } from './user.view-dto';
+import { UserViewModel } from './user.view-model';
 
-export class UsersPaginationViewDto extends PaginationViewDto<UserViewDto> {
+export class UsersPaginationViewDto extends PaginationViewDto<UserViewModel> {
   @ApiProperty({
-    type: [UserViewDto],
+    type: [UserViewModel],
   })
-  items: UserViewDto[];
+  items: UserViewModel[];
 }

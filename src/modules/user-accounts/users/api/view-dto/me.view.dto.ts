@@ -1,8 +1,8 @@
 import { ApiProperty, OmitType } from '@nestjs/swagger';
 import { UserDocument } from '../../domain/user.entity';
-import { UserViewDto } from './user.view-dto';
+import { UserViewModel } from './user.view-model';
 
-export class MeViewDto extends OmitType(UserViewDto, [
+export class MeViewDto extends OmitType(UserViewModel, [
   'id',
   'createdAt',
 ] as const) {

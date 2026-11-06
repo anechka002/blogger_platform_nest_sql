@@ -7,7 +7,7 @@ import {
   ApiParam,
 } from '@nestjs/swagger';
 
-import { UserViewDto } from '../../view-dto/user.view-dto';
+import { UserViewModel } from '../../view-dto/user.view-model';
 
 export function GetUserByIdSwagger() {
   return applyDecorators(
@@ -25,7 +25,7 @@ export function GetUserByIdSwagger() {
 
     ApiOkResponse({
       description: 'Success',
-      type: UserViewDto,
+      type: UserViewModel,
     }),
 
     ApiNotFoundResponse({
