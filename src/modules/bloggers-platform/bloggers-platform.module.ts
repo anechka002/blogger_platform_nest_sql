@@ -20,7 +20,7 @@ import { CreatePostForBlogUseCase } from './blogs/application/use-cases/create-p
 import { CreatePostUseCase } from './posts/application/use-cases/create-post.use-case';
 import { UpdatePostUseCase } from './posts/application/use-cases/update-post.use-case';
 import { DeletePostUseCase } from './posts/application/use-cases/delete-post.use-case';
-import { CreateCommentForPostUseCase } from './comments/application/use-cases/create-comment-for-post.use-case';
+import { CreateCommentForPostUseCase } from './posts/application/use-cases/create-comment-for-post.use-case';
 import { UserAccountsModule } from '../user-accounts/user-accounts.module';
 import { CommentsRepository } from './comments/infrastructure/comments.repository';
 import { UpdateCommentUseCase } from './comments/application/use-cases/update-comment.use-case';

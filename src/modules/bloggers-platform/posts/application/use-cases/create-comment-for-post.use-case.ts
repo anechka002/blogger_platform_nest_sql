@@ -1,8 +1,8 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { UsersExternalQueryRepository } from '../../../../user-accounts/users/infrastructure/external-query/users.external-query-repository';
-import { CommentDto } from '../../dto/comment.dto';
-import { PostsSqlQueryRepository } from '../../../posts/infrastructure/query/posts-sql.query-repository';
-import { CommentsSqlRepository } from '../../infrastructure/comments-sql.repository';
+import { CommentDto } from '../../../comments/dto/comment.dto';
+import { PostsSqlQueryRepository } from '../../infrastructure/query/posts-sql.query-repository';
+import { CommentsSqlRepository } from '../../../comments/infrastructure/comments-sql.repository';
 
 export class CreateCommentForPostCommand {
   constructor(

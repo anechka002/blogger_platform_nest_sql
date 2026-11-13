@@ -20,7 +20,7 @@ import { GetPostByIdSwagger } from '../swagger/get-post-by-id.swagger.decorator'
 import { GetCommentsForPostSwagger } from '../swagger/get-comments-for-post.swagger.decorator';
 import { CommentForPostInputDto } from '../../../comments/api/input-dto/comment-for-post.input-dto';
 import { ExtractUserFromRequest } from '../../../../../core/decorators/user/param/extract-user-from-request.decorator';
-import { CreateCommentForPostCommand } from '../../../comments/application/use-cases/create-comment-for-post.use-case';
+import { CreateCommentForPostCommand } from '../../application/use-cases/create-comment-for-post.use-case';
 import { UserContextDto } from '../../../../user-accounts/users/guards/dto/user-context.dto';
 import { JwtAuthGuard } from '../../../../../core/guards/bearer/jwt-auth.guard';
 import { CreateCommentForPostSwagger } from '../../../comments/api/swagger/create-comment-for-blog.swagger.decorator';

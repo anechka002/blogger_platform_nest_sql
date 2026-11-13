@@ -13,7 +13,7 @@ import { LocalStrategy } from '../../core/guards/local/local.strategy';
 import { JwtStrategy } from '../../core/guards/bearer/jwt.strategy';
 import { JwtModule } from '@nestjs/jwt';
 import { CreateUserUseCase } from './users/application/use-cases/admin/create-user.use-case';
-import { DeleteUserUseCase } from './users/application/use-cases/public/delete-user.use-case';
+import { DeleteUserUseCase } from './users/application/use-cases/admin/delete-user.use-case';
 import { LoginUserUseCase } from './users/application/use-cases/public/login-user.use-case';
 import { RegisterUserUseCase } from './users/application/use-cases/public/register-user.use-case';
 import { ConfirmCodeUseCase } from './users/application/use-cases/public/confirm-code.use-case';

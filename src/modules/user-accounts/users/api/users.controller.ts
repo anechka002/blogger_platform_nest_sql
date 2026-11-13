@@ -18,7 +18,7 @@ import { CreateUserInputDto } from './input-dto/users.input-dto';
 import { BasicAuthGuard } from '../../../../core/guards/basic/basic-auth.guard';
 import { CommandBus } from '@nestjs/cqrs';
 import { CreateUserCommand } from '../application/use-cases/admin/create-user.use-case';
-import { DeleteUserCommand } from '../application/use-cases/public/delete-user.use-case';
+import { DeleteUserCommand } from '../application/use-cases/admin/delete-user.use-case';
 import { CreateUserSwagger } from './swagger/users/create-user.swagger.decorator';
 import { DeleteUserSwagger } from './swagger/users/delete-user.swagger.decorator';
 import { GetUserByIdSwagger } from './swagger/users/get-user-by-id.swagger.decorator';
