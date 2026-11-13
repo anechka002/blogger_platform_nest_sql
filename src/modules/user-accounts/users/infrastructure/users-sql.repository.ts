@@ -7,24 +7,24 @@ import { CreateUserDomainDto } from '../domain/dto/create-user.domain.dto';
 type EmailConfirmationRow = {
   userId: string;
   confirmationCode: string;
-  confirmationExpirationDate: Date;
+  confirmationExpirationDate: Date | null;
   isConfirmed: boolean;
 };
 
 type UserWithEmailConfirmationRow = UserRow & {
-  confirmationCode: string;
-  confirmationExpirationDate: Date;
+  confirmationCode: string | null;
+  confirmationExpirationDate: Date | null;
   isConfirmed: boolean;
 };
 
 type UserAccountStateRow = {
   id: string;
   userId: string;
-  confirmationCode: string;
-  confirmationExpirationDate: Date;
+  confirmationCode: string | null;
+  confirmationExpirationDate: Date | null;
   isConfirmed: boolean;
   recoveryCode: string;
-  recoveryExpirationDate: Date;
+  recoveryExpirationDate: Date | null;
 };
 
 @Injectable()
