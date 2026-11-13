@@ -7,9 +7,6 @@ import { DataSource } from 'typeorm';
 @Injectable()
 export class AppService {
   constructor(@InjectDataSource() protected dataSource: DataSource) {}
-  live(): { status: string } {
-    return { status: 'ok' };
-  }
 
   async ready(): Promise<{ status: string; database: string }> {
     try {
